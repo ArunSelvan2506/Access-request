@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { ALLOWED_DOMAIN, OWNER_EMAIL, isCompanyEmail } from '../auth/session'
+import { ALLOWED_DOMAIN, OWNER_EMAIL, SITE_PASSWORD, isCompanyEmail } from '../auth/session'
 
-// Lightweight demo sign-in: identify yourself by work email. Role is derived
-// from the email (owner / admin / user). No password — this is a project demo,
-// not real authentication (that arrives with the Firebase backend).
+// Demo sign-in: company email + a shared site password. Role is derived from
+// the email (owner / admin / user). The password is a deterrent gate, not real
+// authentication (the site is static) — swap in Firebase Auth for real security.
 export default function SignIn({ session }) {
   const [value, setValue] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
 
   const submit = (e) => {
@@ -13,6 +14,10 @@ export default function SignIn({ session }) {
     const email = value.trim().toLowerCase()
     if (!isCompanyEmail(email)) {
       setError(`Please use your @${ALLOWED_DOMAIN} email address.`)
+      return
+    }
+    if (password !== SITE_PASSWORD) {
+      setError('Incorrect site password.')
       return
     }
     session.signIn(email)
@@ -50,6 +55,18 @@ export default function SignIn({ session }) {
             value={value}
             onChange={(e) => {
               setValue(e.target.value)
+              setError(null)
+            }}
+          />
+        </div>
+        <div className="field">
+          <label>Site password</label>
+          <input
+            type="password"
+            placeholder="Shared access password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value)
               setError(null)
             }}
           />

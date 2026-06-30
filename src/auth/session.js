@@ -11,6 +11,12 @@
 export const OWNER_EMAIL = 'arun@fuseenergy.com' // primary owner — cannot be removed
 export const ALLOWED_DOMAIN = 'fuseenergy.com'
 
+// Temporary shared site password (demo gate). NOTE: because this is a static
+// site, the password ships in the built JS — it's a deterrent, not real
+// security. Change it by setting VITE_SITE_PASSWORD at build time, or edit the
+// default below. Replace with Firebase Auth for genuine security.
+export const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD || 'fuse-access-2026'
+
 const ADMINS_KEY = 'acc_sd_admins_v1'
 const USER_KEY = 'acc_sd_current_user_v1'
 
