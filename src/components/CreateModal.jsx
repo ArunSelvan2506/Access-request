@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { CATALOG, findApp } from '../data/catalog'
 import { RULES } from '../data/rules'
+import { URGENCY_OPTIONS, DEFAULT_URGENCY } from '../data/jira'
 import { validateRequest } from '../utils/validation'
 import { useToast } from './common/Toast'
 
@@ -15,6 +16,7 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
   const [appName, setAppName] = useState(presetApp || '')
   const [summary, setSummary] = useState('')
   const [values, setValues] = useState({})
+  const [urgency, setUrgency] = useState(DEFAULT_URGENCY)
   const [fieldErrors, setFieldErrors] = useState({})
   const [validation, setValidation] = useState(null) // { reject, errors } or null
   const toast = useToast()
@@ -28,6 +30,7 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
       setAppName(presetApp || '')
       setSummary('')
       setValues(initialValues(a))
+      setUrgency(DEFAULT_URGENCY)
       setFieldErrors({})
       setValidation(null)
     }
@@ -66,7 +69,7 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
     }
     setSubmitting(true)
     try {
-      const ticket = await onCreate(app, summary.trim(), data)
+      const ticket = await onCreate(app, summary.trim(), data, { urgency })
       toast('Created ' + ticket.key, 'good')
       onClose()
     } catch (e) {
@@ -148,6 +151,14 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                 />
+              </div>
+              <div className="field">
+                <label>Urgency</label>
+                <select value={urgency} onChange={(e) => setUrgency(e.target.value)}>
+                  {URGENCY_OPTIONS.map((u) => (
+                    <option key={u}>{u}</option>
+                  ))}
+                </select>
               </div>
               {app.fields.map((f) => (
                 <Field

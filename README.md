@@ -81,9 +81,29 @@ in *Settings → Pages* and committing a matching `public/CNAME` file.
 
 ## Current build: standalone web tool
 
-The app ships as a **self-contained static web tool** — no backend, no login, no
-setup. Tickets persist in the browser's `localStorage`. This is what builds and
+The app ships as a **self-contained static web tool** — no server, just a sign-in
+by email. Tickets persist in the browser's `localStorage`. This is what builds and
 deploys to GitHub Pages today.
+
+### Roles (Jira-style)
+
+Sign in with a `@fuseenergy.com` email; your role is derived from it:
+
+| Role | Who | Can |
+| --- | --- | --- |
+| **Primary owner** | `arun@fuseenergy.com` (fixed, in `src/auth/session.js`) | Everything + add/remove administrators (Admin settings) |
+| **Administrator** | emails the owner adds | See all requests, change ticket status (transitions), pending reasons |
+| **Requester** | everyone else | Submit requests and track only their own |
+
+> ⚠️ Roles are enforced **in the browser** for this demo — fine for a project
+> outcome, not real security. Server-enforced roles (real Google sign-in +
+> Firestore rules) come with the parked Firebase backend.
+
+### Jira logic mirrored from the real IAM service desk
+- **GeminiAI** added to the application catalog
+- **Urgency** field on requests (Critical/High/Medium/Low)
+- **Pending reason** captured when an admin moves a ticket to *Waiting*
+  (More info required / Awaiting approval / Waiting on vendor / Pending on change request)
 
 The Firebase backend below (shared tickets, Google SSO, auto-grounded AI) is
 **parked**: the code lives in the repo (`functions/`, `firestore.rules`, the

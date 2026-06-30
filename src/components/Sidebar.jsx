@@ -1,39 +1,60 @@
-// Sidebar navigation. Each item identifies a view, and queue items can carry a
-// queue filter `q` ("open" | "breach"). `active` is the current selection.
-const ITEMS = [
-  { view: 'dashboard', label: '📊 Dashboard' },
-  { view: 'queue', label: '🎫 All requests', countKey: 'all' },
-  { view: 'queue', q: 'open', label: '📥 Open', countKey: 'open' },
-  { view: 'queue', q: 'breach', label: '⏰ SLA at risk', countKey: 'breach' },
-  { view: 'board', label: '🗂️ Board' },
-]
+// Role-aware sidebar.
+//  - users see only their own requests + the catalog reference
+//  - admins see the full operational set (dashboard, queues, board)
+//  - the owner additionally sees Admin settings
+function NavLink({ item, active, counts, onSelect }) {
+  const isActive = active.view === item.view && (active.q || null) === (item.q || null)
+  return (
+    <a
+      className={'nav-item' + (isActive ? ' active' : '')}
+      onClick={() => onSelect(item.view, item.q || null)}
+    >
+      {item.label}
+      {item.countKey != null && <span className="count">{counts[item.countKey]}</span>}
+    </a>
+  )
+}
 
-const CONFIG_ITEMS = [
-  { view: 'autos', label: '⚡ Automations' },
-  { view: 'catalog', label: '📚 Catalog & rules' },
-]
-
-export default function Sidebar({ active, counts, onSelect }) {
-  const renderItem = (item, i) => {
-    const isActive = active.view === item.view && (active.q || null) === (item.q || null)
+export default function Sidebar({ active, counts, onSelect, isAdmin, isOwner }) {
+  if (!isAdmin) {
+    // Regular user: minimal portal view.
+    const items = [
+      { view: 'queue', label: '🎫 My requests', countKey: 'mine' },
+      { view: 'catalog', label: '📚 Service catalog' },
+    ]
     return (
-      <a
-        key={item.view + (item.q || '') + i}
-        className={'nav-item' + (isActive ? ' active' : '')}
-        onClick={() => onSelect(item.view, item.q || null)}
-      >
-        {item.label}
-        {item.countKey != null && <span className="count">{counts[item.countKey]}</span>}
-      </a>
+      <aside className="sidebar">
+        <h3>Requests</h3>
+        {items.map((it, i) => (
+          <NavLink key={i} item={it} active={active} counts={counts} onSelect={onSelect} />
+        ))}
+      </aside>
     )
   }
+
+  const queues = [
+    { view: 'dashboard', label: '📊 Dashboard' },
+    { view: 'queue', label: '🎫 All requests', countKey: 'all' },
+    { view: 'queue', q: 'open', label: '📥 Open', countKey: 'open' },
+    { view: 'queue', q: 'breach', label: '⏰ SLA at risk', countKey: 'breach' },
+    { view: 'board', label: '🗂️ Board' },
+  ]
+  const configure = [
+    { view: 'autos', label: '⚡ Automations' },
+    { view: 'catalog', label: '📚 Catalog & rules' },
+  ]
+  if (isOwner) configure.push({ view: 'admins', label: '🔑 Admin settings' })
 
   return (
     <aside className="sidebar">
       <h3>Queues</h3>
-      {ITEMS.map(renderItem)}
+      {queues.map((it, i) => (
+        <NavLink key={i} item={it} active={active} counts={counts} onSelect={onSelect} />
+      ))}
       <h3>Configure</h3>
-      {CONFIG_ITEMS.map(renderItem)}
+      {configure.map((it, i) => (
+        <NavLink key={i} item={it} active={active} counts={counts} onSelect={onSelect} />
+      ))}
     </aside>
   )
 }

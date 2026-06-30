@@ -1,14 +1,23 @@
+import { useState, useEffect } from 'react'
 import { findApp } from '../data/catalog'
 import { slaState } from '../utils/sla'
 import { timeAgo, TRANSITIONS } from '../utils/format'
+import { PENDING_REASONS } from '../data/jira'
 import { StatusPill } from './common/Badges'
 
-export default function TicketDrawer({ ticket, now, onClose, onTransition }) {
+export default function TicketDrawer({ ticket, now, canTransition, onClose, onTransition }) {
   const open = !!ticket
   const a = ticket ? findApp(ticket.app) : null
   const s = ticket ? slaState(ticket, now) : null
 
-  // Map a field key back to its catalog label for display.
+  // Local state for the "Waiting" pending-reason picker.
+  const [waitingPick, setWaitingPick] = useState(false)
+  const [reason, setReason] = useState(PENDING_REASONS[0])
+  useEffect(() => {
+    setWaitingPick(false)
+    setReason(PENDING_REASONS[0])
+  }, [ticket?.key])
+
   const labelFor = (k) => {
     const f = a && a.fields && a.fields.find((x) => x.k === k)
     return f ? f.label : k
@@ -16,6 +25,14 @@ export default function TicketDrawer({ ticket, now, onClose, onTransition }) {
 
   const transitions = ticket ? TRANSITIONS[ticket.status] || [] : []
   const activity = ticket ? (ticket.activity || []).slice().reverse() : []
+
+  const go = (to) => {
+    if (to === 'Waiting') {
+      setWaitingPick(true)
+      return
+    }
+    onTransition(ticket.key, to)
+  }
 
   return (
     <div className={'drawer' + (open ? ' show' : '')}>
@@ -39,6 +56,7 @@ export default function TicketDrawer({ ticket, now, onClose, onTransition }) {
                 {s.txt}
               </span>
               <span className="tag grey">SLA target {ticket.sla}h</span>
+              {ticket.urgency && <span className="tag blue">Urgency: {ticket.urgency}</span>}
             </div>
 
             {ticket.rejectReason && (
@@ -49,19 +67,51 @@ export default function TicketDrawer({ ticket, now, onClose, onTransition }) {
                 </div>
               </div>
             )}
+            {ticket.status === 'Waiting' && ticket.pendingReason && (
+              <div className="callout warn">
+                ⏳{' '}
+                <div>
+                  <b>Waiting:</b> {ticket.pendingReason}
+                </div>
+              </div>
+            )}
 
-            <div className="sec">Transition</div>
-            <div className="wf">
-              {transitions.length ? (
-                transitions.map((to) => (
-                  <button key={to} onClick={() => onTransition(ticket.key, to)}>
-                    → {to}
-                  </button>
-                ))
-              ) : (
-                <span style={{ color: 'var(--faint)', fontSize: 13 }}>No further transitions.</span>
-              )}
-            </div>
+            {/* Transitions — admins only. */}
+            {canTransition ? (
+              <>
+                <div className="sec">Transition</div>
+                <div className="wf">
+                  {transitions.length ? (
+                    transitions.map((to) => (
+                      <button key={to} onClick={() => go(to)}>
+                        → {to}
+                      </button>
+                    ))
+                  ) : (
+                    <span style={{ color: 'var(--faint)', fontSize: 13 }}>No further transitions.</span>
+                  )}
+                </div>
+                {waitingPick && (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '0 0 20px', flexWrap: 'wrap' }}>
+                    <select value={reason} onChange={(e) => setReason(e.target.value)} style={{ height: 32, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '0 10px', fontSize: 13 }}>
+                      {PENDING_REASONS.map((r) => (
+                        <option key={r}>{r}</option>
+                      ))}
+                    </select>
+                    <button className="btn primary" onClick={() => { onTransition(ticket.key, 'Waiting', { pendingReason: reason }); setWaitingPick(false) }}>
+                      Confirm wait
+                    </button>
+                    <button className="btn" onClick={() => setWaitingPick(false)}>
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="callout warn" style={{ marginBottom: 20 }}>
+                You can track this request here. Only administrators can change its status.
+              </div>
+            )}
 
             <div className="sec">Request details</div>
             <dl className="field-grid">

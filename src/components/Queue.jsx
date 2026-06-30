@@ -8,7 +8,7 @@ const APP_OPTIONS = CATALOG.filter((a) => a.group === 'green').map((a) => a.name
 
 const TITLES = { open: 'Open requests', breach: 'SLA at risk' }
 
-export default function Queue({ tickets, queueFilter, now, onOpen }) {
+export default function Queue({ tickets, queueFilter, now, onOpen, title: titleProp, subtitle }) {
   const [search, setSearch] = useState('')
   const [fStatus, setFStatus] = useState('')
   const [fApp, setFApp] = useState('')
@@ -27,12 +27,12 @@ export default function Queue({ tickets, queueFilter, now, onOpen }) {
     )
   }, [tickets, queueFilter, search, fStatus, fApp])
 
-  const title = TITLES[queueFilter] || 'All requests'
+  const title = titleProp || TITLES[queueFilter] || 'All requests'
 
   return (
     <section className="view">
       <h1 className="title">{title}</h1>
-      <p className="sub">Every access request, with live SLA timers. Click a row to open the ticket.</p>
+      <p className="sub">{subtitle || 'Every access request, with live SLA timers. Click a row to open the ticket.'}</p>
       <div className="toolbar">
         <input
           type="text"

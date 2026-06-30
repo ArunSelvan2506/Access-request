@@ -29,7 +29,8 @@ export function useLocalTickets() {
   }, [tickets])
 
   // Create a new ticket from a validated catalog app + form data.
-  const createTicket = useCallback((app, summary, data, requester = 'Sarah Chen') => {
+  // `user` is { email, name } of the requester; `meta` may carry { urgency }.
+  const createTicket = useCallback((app, summary, data, user = {}, meta = {}) => {
     const num = Math.max(seqRef.current, 105) + 1
     seqRef.current = num
     const ticket = {
@@ -37,7 +38,9 @@ export function useLocalTickets() {
       key: 'ACC-' + num,
       app: app.name,
       summary,
-      requester,
+      requester: user.name || user.email || 'Unknown',
+      requesterEmail: user.email || null,
+      urgency: meta.urgency || 'Medium',
       status: 'Open',
       created: Date.now(),
       sla: app.sla,
@@ -55,15 +58,22 @@ export function useLocalTickets() {
   }, [])
 
   // Move a ticket to a new status and log the activity.
-  const transitionTicket = useCallback((key, to, actor = 'Sarah Chen') => {
+  // `opts` may carry { actor, pendingReason } (pendingReason used for Waiting).
+  const transitionTicket = useCallback((key, to, opts = {}) => {
+    const actor = opts.actor || 'Unknown'
     setTickets((prev) =>
       prev.map((t) => {
         if (t.key !== key) return t
-        const activity = [...(t.activity || []), { who: actor, tm: Date.now(), tx: 'Status changed to ' + to + '.' }]
+        const note =
+          to === 'Waiting' && opts.pendingReason
+            ? 'Status changed to Waiting — ' + opts.pendingReason + '.'
+            : 'Status changed to ' + to + '.'
+        const activity = [...(t.activity || []), { who: actor, tm: Date.now(), tx: note }]
         let rejectReason = t.rejectReason
         if (to === 'Rejected' && !rejectReason) rejectReason = 'Manually rejected'
         if (to !== 'Rejected') rejectReason = null
-        return { ...t, status: to, activity, rejectReason }
+        const pendingReason = to === 'Waiting' ? opts.pendingReason || t.pendingReason || null : null
+        return { ...t, status: to, activity, rejectReason, pendingReason }
       })
     )
   }, [])

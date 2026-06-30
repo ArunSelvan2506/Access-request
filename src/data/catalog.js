@@ -63,6 +63,15 @@ export const CATALOG = [
     ],
   },
   {
+    // Mirrored from the Jira "Application name" list (not in the Notion page).
+    name: 'GeminiAI', group: 'green', ic: ic('GM', '#f3f0ff', '#5e4db2'), sla: 8,
+    callout: { t: 'warn', x: '⚠️ Per-request access. Provide a clear business justification for Gemini AI.' },
+    reject: 'Missing justification',
+    fields: [
+      { k: 'just', label: 'Business justification', req: true, type: 'textarea', hint: 'Why Gemini AI is required for your work' },
+    ],
+  },
+  {
     name: 'ChatGPT', group: 'green', ic: ic('GP', '#dcfff1', '#216e4e'), sla: 8,
     callout: { t: 'warn', x: '⚠️ Automatic via Google SSO. Known fix: type your email as username/password first, then SSO completes. Only raise a ticket for a genuine login issue.' },
     reject: 'Raised without a real issue',

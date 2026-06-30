@@ -1,12 +1,15 @@
-// Derive up-to-two-letter initials from a display name or email.
-function initials(user) {
-  if (!user) return 'SC'
-  const name = user.displayName || user.email || ''
-  const parts = name.replace(/@.*/, '').split(/[.\s-]+/).filter(Boolean)
+import { displayName } from '../auth/session'
+
+const ROLE_LABEL = { owner: 'Primary owner', admin: 'Administrator', user: 'Requester' }
+const ROLE_TAG = { owner: 'purple', admin: 'green', user: 'grey' }
+
+function initials(email) {
+  const name = displayName(email)
+  const parts = name.split(' ').filter(Boolean)
   return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || 'U'
 }
 
-export default function TopNav({ onCreate, user, onSignOut }) {
+export default function TopNav({ onCreate, email, role, onSignOut }) {
   return (
     <nav className="topnav">
       <div className="logo">
@@ -19,18 +22,15 @@ export default function TopNav({ onCreate, user, onSignOut }) {
         <button className="btn primary" onClick={onCreate}>
           + Create
         </button>
-        {onSignOut ? (
-          <button
-            className="avatar"
-            title={`${user?.displayName || user?.email || ''} — sign out`}
-            onClick={onSignOut}
-            style={{ border: 'none', cursor: 'pointer' }}
-          >
-            {initials(user)}
-          </button>
-        ) : (
-          <div className="avatar">{initials(user)}</div>
-        )}
+        {role && <span className={'tag ' + (ROLE_TAG[role] || 'grey')}>{ROLE_LABEL[role]}</span>}
+        <button
+          className="avatar"
+          title={`${email} — sign out`}
+          onClick={onSignOut}
+          style={{ border: 'none', cursor: 'pointer' }}
+        >
+          {initials(email)}
+        </button>
       </div>
     </nav>
   )
