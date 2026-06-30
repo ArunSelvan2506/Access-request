@@ -42,6 +42,24 @@ In the GitHub repo **Actions → Variables**:
 
 Redeploy and the site reads/writes shared tickets from SQLite.
 
+## Deploy
+
+**Fly.io (via GitHub Actions)** — files included: `Dockerfile`, `fly.toml`,
+`.github/workflows/deploy-server.yml`.
+1. `cd server && flyctl launch --no-deploy` (creates the app; keep/edit the name in `fly.toml`).
+2. `flyctl secrets set TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… API_KEY=… CORS_ORIGIN=https://arunselvan2506.github.io`
+3. Create a deploy token: `flyctl tokens create deploy` → add it as the repo
+   secret **FLY_API_TOKEN**.
+4. Run the **Deploy API server (Fly.io)** workflow (Actions tab → Run), or push
+   a change under `server/` to `main`.
+
+**Render (no Actions)** — `render.yaml` included. In Render: New → Blueprint →
+connect this repo; set the Turso/API_KEY env vars in the dashboard. Auto-deploys
+on push.
+
+> Use Turso (not the local file) in production — Fly/Render container disks are
+> ephemeral, so a `file:` DB resets on redeploy.
+
 ## Endpoints
 - `GET /health`
 - `GET /api/tickets` → all tickets (newest first)
