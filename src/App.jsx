@@ -18,7 +18,7 @@ import Reports from './components/Reports'
 import GlobalSearch from './components/GlobalSearch'
 import HelpPanel from './components/HelpPanel'
 import { ToastProvider } from './components/common/Toast'
-import { useLocalTickets } from './hooks/useTickets'
+import { useTicketStore } from './hooks/useTicketStore'
 import { useNow } from './hooks/useNow'
 import { useSession } from './hooks/useSession'
 import { displayName } from './auth/session'
@@ -29,7 +29,7 @@ const isPendingApproval = (t) => t.status === 'Pending Approval'
 function AppInner({ session }) {
   const { email, role, isAdmin, isOwner } = session
   const { tickets, createTicket, transitionTicket, decideApproval, assignTicket, addComment } =
-    useLocalTickets()
+    useTicketStore()
   const now = useNow() // ticks every 30s to refresh SLA timers
 
   const [nav, setNav] = useState({ view: isAdmin ? 'dashboard' : 'queue', q: null })

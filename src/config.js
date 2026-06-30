@@ -7,7 +7,14 @@
 //
 // Flipping to Firebase is a matter of setting VITE_BACKEND=firebase plus the
 // VITE_FIREBASE_* values below (see .env.example). Until then nothing changes.
-export const BACKEND = import.meta.env.VITE_BACKEND === 'firebase' ? 'firebase' : 'local'
+// "local" (default) | "api" (Node + libSQL/Turso server) | "firebase"
+const _b = import.meta.env.VITE_BACKEND
+export const BACKEND = _b === 'firebase' ? 'firebase' : _b === 'api' ? 'api' : 'local'
+
+// Base URL of the SQLite-backed API server (api mode). e.g. https://acc-api.example.com
+export const API_BASE = import.meta.env.VITE_API_BASE || ''
+// Optional shared key the API expects (sent as x-api-key).
+export const API_KEY = import.meta.env.VITE_API_KEY || ''
 
 // Only emails on this domain may sign in (enforced again server-side).
 export const ALLOWED_EMAIL_DOMAIN = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN || 'fuseenergy.com'
@@ -25,3 +32,4 @@ export const FIREBASE_CONFIG = {
 export const FUNCTIONS_REGION = import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'us-central1'
 
 export const isFirebase = BACKEND === 'firebase'
+export const isApi = BACKEND === 'api'
