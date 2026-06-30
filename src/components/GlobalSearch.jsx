@@ -41,13 +41,13 @@ export default function GlobalSearch({ tickets, onOpen }) {
         onFocus={() => setFocused(true)}
         onBlur={() => setTimeout(() => setFocused(false), 150)}
         placeholder="Search tickets…  ( / )"
-        style={{ height: 32, width: 230, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '0 10px', fontSize: 13, background: '#fff' }}
+        style={{ height: 32, width: 230, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '0 10px', fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}
       />
       {focused && q.trim() && (
         <div
           style={{
             position: 'absolute', top: 36, left: 0, width: 340, maxHeight: 360, overflowY: 'auto',
-            background: '#fff', border: '1px solid var(--border)', borderRadius: 8, boxShadow: 'var(--sh)', zIndex: 60,
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, boxShadow: 'var(--sh)', zIndex: 60,
           }}
         >
           {results.length === 0 ? (
@@ -57,7 +57,7 @@ export default function GlobalSearch({ tickets, onOpen }) {
               <div
                 key={t.key}
                 onMouseDown={() => { onOpen(t.key); setQ('') }}
-                style={{ padding: '9px 12px', borderBottom: '1px solid #f1f2f4', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+                style={{ padding: '9px 12px', borderBottom: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
               >
                 <span className="keycell" style={{ fontSize: 12 }}>{t.key}</span>
                 <span style={{ flex: 1, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.summary}</span>

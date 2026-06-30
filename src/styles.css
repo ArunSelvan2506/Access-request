@@ -33,6 +33,12 @@
 [data-theme="dark"] .toolbar input,[data-theme="dark"] .toolbar select,
 [data-theme="dark"] .cfoot input{background:var(--th);color:var(--ink);border-color:var(--border)}
 [data-theme="dark"] .msg.bot{background:var(--surface-2)}
+/* Form controls: catch every input/select/textarea (incl. inline-styled ones
+   that omit a background) so none render as glaring white boxes in dark mode. */
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:var(--th);color:var(--ink);border-color:var(--border)}
+[data-theme="dark"] input::placeholder,[data-theme="dark"] textarea::placeholder{color:var(--faint)}
+[data-theme="dark"] .wf button{background:var(--surface-2);color:var(--ink)}
+[data-theme="dark"] .wf button:hover{background:var(--bg);border-color:var(--nav)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--f);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button{font-family:inherit}

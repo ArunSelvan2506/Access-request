@@ -186,6 +186,11 @@ function AppInner({ session }) {
 
 export default function App() {
   const session = useSession()
+  // Apply the saved theme on mount so the sign-in screen matches it too
+  // (the toggle itself lives in the post-login top nav).
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', loadTheme())
+  }, [])
   return (
     <ToastProvider>
       {session.email ? <AppInner session={session} /> : <SignIn session={session} />}

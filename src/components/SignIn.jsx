@@ -28,7 +28,7 @@ export default function SignIn({ session }) {
       <form
         onSubmit={submit}
         style={{
-          background: '#fff',
+          background: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: 12,
           padding: '36px 40px',
