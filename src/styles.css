@@ -6,6 +6,7 @@
   --yellow-bg:#fff7d6;--yellow-tx:#7f5f01;--yellow-bd:#f5cd47;
   --blue-bg:#e9f2ff;--blue-tx:#0055cc;--blue-bd:#cce0ff;
   --purple-bg:#f3f0ff;--purple-tx:#5e4db2;--purple-bd:#dfd8fd;
+  --amber-bg:#fff4e5;--amber-tx:#974f0c;
   --surface:#fff;--surface-2:#fafbfc;--th:#f7f8f9;
   --r:3px;--sh:0 1px 1px rgba(9,30,66,.25),0 0 1px rgba(9,30,66,.13);
   --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -20,6 +21,7 @@
   --yellow-bg:#2c2710;--yellow-tx:#f5cd47;--yellow-bd:#6b5a1a;
   --blue-bg:#16243b;--blue-tx:#9cc6ff;--blue-bd:#27406a;
   --purple-bg:#211d35;--purple-tx:#cdbcff;--purple-bd:#3c3566;
+  --amber-bg:#3a2912;--amber-tx:#f3b073;
 }
 [data-theme="dark"] .topnav,[data-theme="dark"] .sidebar,[data-theme="dark"] .stat,
 [data-theme="dark"] table.q,[data-theme="dark"] .modal,[data-theme="dark"] .drawer,
@@ -115,7 +117,7 @@ table.q tbody tr:hover{background:#fafbfc}
 
 /* status pills */
 .status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:3px;text-transform:uppercase;letter-spacing:.03em}
-.s-appr{background:#fff4e5;color:#974f0c}
+.s-appr{background:var(--amber-bg);color:var(--amber-tx)}
 .s-open{background:var(--blue-bg);color:var(--blue-tx)}
 .s-prog{background:var(--yellow-bg);color:var(--yellow-tx)}
 .s-wait{background:var(--purple-bg);color:var(--purple-tx)}
