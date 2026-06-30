@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { AppCell, StatusPill, SlaCell } from './common/Badges'
 import { CATALOG } from '../data/catalog'
 import { isOpen, isBreaching } from '../utils/sla'
+import { formatUK, formatUKShort } from '../utils/format'
 import { exportTicketsCsv } from '../utils/csv'
 
 const STATUS_OPTIONS = ['Pending Approval', 'Open', 'In Progress', 'Waiting', 'Done', 'Rejected', 'Cancelled']
@@ -73,13 +74,14 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
             <th>Summary</th>
             <th>Requester</th>
             <th>Status</th>
+            <th>Submitted</th>
             <th>SLA</th>
           </tr>
         </thead>
         <tbody>
           {list.length === 0 ? (
             <tr>
-              <td colSpan={6} style={{ textAlign: 'center', padding: 30, color: 'var(--faint)' }}>
+              <td colSpan={7} style={{ textAlign: 'center', padding: 30, color: 'var(--faint)' }}>
                 No requests found.
               </td>
             </tr>
@@ -95,6 +97,7 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
                 <td>
                   <StatusPill status={t.status} />
                 </td>
+                <td title={formatUK(t.created)} style={{ whiteSpace: 'nowrap' }}>{formatUKShort(t.created)}</td>
                 <td>
                   <SlaCell ticket={t} now={now} />
                 </td>

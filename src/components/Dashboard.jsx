@@ -50,7 +50,7 @@ export default function Dashboard({ tickets, now, onOpen }) {
             <th>Summary</th>
             <th>Status</th>
             <th>SLA</th>
-            <th>Created</th>
+            <th>Submitted</th>
           </tr>
         </thead>
         <tbody>

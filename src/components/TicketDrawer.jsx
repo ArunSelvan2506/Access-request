@@ -93,7 +93,7 @@ export default function TicketDrawer({
             </div>
 
             <div style={{ fontSize: 12, color: 'var(--faint)', marginBottom: 18 }}>
-              Created {formatUK(ticket.created)} · SLA due {formatUK(ticket.created + ticket.sla * 36e5)}{' '}
+              Submitted {formatUK(ticket.created)} · SLA due {formatUK(ticket.created + ticket.sla * 36e5)}{' '}
               <span style={{ fontWeight: 600 }}>(UK time)</span>
             </div>
 
