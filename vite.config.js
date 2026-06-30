@@ -2,11 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-// base must match the GitHub Pages project sub-path so asset URLs resolve
-// regardless of trailing slash: the site is served at
-// https://arunselvan2506.github.io/access-request/ . If a custom domain at the
-// root is added later, change this back to '/'.
+// Relative base ('./') so assets resolve no matter what path/case the site is
+// served at — the GitHub Pages project URL is /Access-request/ (capitalised to
+// match the repo name). Requires Pages "Source" = GitHub Actions so the built
+// dist/ is served (not the raw repo via Jekyll).
 export default defineConfig({
-  base: '/access-request/',
+  base: './',
   plugins: [react()],
 })
