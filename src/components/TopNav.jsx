@@ -9,17 +9,27 @@ function initials(email) {
   return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || 'U'
 }
 
-export default function TopNav({ onCreate, email, role, onSignOut, onHelp, search }) {
+export default function TopNav({ onCreate, email, role, onSignOut, onHelp, search, onToggleSidebar, theme, onToggleTheme }) {
   return (
     <nav className="topnav">
+      {onToggleSidebar && (
+        <button className="iconbtn" onClick={onToggleSidebar} title="Show/hide menu" aria-label="Toggle menu">
+          ☰
+        </button>
+      )}
       <div className="logo">
         <span className="mark">A</span> Access Service Desk
       </div>
       <span className="crumb">
-        Projects / <b>Access Requests (ACC)</b>
+        <b>Fuse Energy</b>
       </span>
       <div className="nav-r">
         {search}
+        {onToggleTheme && (
+          <button className="iconbtn" onClick={onToggleTheme} title="Toggle dark / light mode" aria-label="Toggle theme">
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        )}
         {onHelp && (
           <button className="btn" onClick={onHelp} title="Help & knowledge base">
             ? Help

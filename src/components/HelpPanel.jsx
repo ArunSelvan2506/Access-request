@@ -42,8 +42,7 @@ export default function HelpPanel({ open, onClose }) {
                 <span style={{ marginRight: 6 }}>{APP_EMOJI[a.name] || ''}</span>{a.name}
                 <span className="tag grey" style={{ marginLeft: 8 }}>SLA {a.sla}h</span>
               </div>
-              {a.callout && <div style={{ fontSize: 12.5, color: 'var(--soft)', marginBottom: 3 }}>{a.callout.x}</div>}
-              <div style={{ fontSize: 12, color: 'var(--red-tx)' }}>Auto-reject if: {a.reject}</div>
+              {a.callout && <div style={{ fontSize: 12.5, color: 'var(--soft)' }}>{a.callout.x}</div>}
             </div>
           ))}
 

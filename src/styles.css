@@ -6,9 +6,33 @@
   --yellow-bg:#fff7d6;--yellow-tx:#7f5f01;--yellow-bd:#f5cd47;
   --blue-bg:#e9f2ff;--blue-tx:#0055cc;--blue-bd:#cce0ff;
   --purple-bg:#f3f0ff;--purple-tx:#5e4db2;--purple-bd:#dfd8fd;
+  --surface:#fff;--surface-2:#fafbfc;--th:#f7f8f9;
   --r:3px;--sh:0 1px 1px rgba(9,30,66,.25),0 0 1px rgba(9,30,66,.13);
   --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
+
+/* ===== Dark theme ===== */
+[data-theme="dark"]{
+  --nav:#4c8dff;--nav-d:#3d7df0;--bg:#0f141c;--surface:#1b2230;--surface-2:#222b3a;--th:#161d28;--border:#2b3444;
+  --ink:#e6e9ef;--soft:#aeb6c2;--faint:#8a93a2;
+  --green-bg:#11271d;--green-tx:#7ee2b8;--green-bd:#1f5e44;
+  --red-bg:#321a1b;--red-tx:#ff9b91;--red-bd:#7a352e;
+  --yellow-bg:#2c2710;--yellow-tx:#f5cd47;--yellow-bd:#6b5a1a;
+  --blue-bg:#16243b;--blue-tx:#9cc6ff;--blue-bd:#27406a;
+  --purple-bg:#211d35;--purple-tx:#cdbcff;--purple-bd:#3c3566;
+}
+[data-theme="dark"] .topnav,[data-theme="dark"] .sidebar,[data-theme="dark"] .stat,
+[data-theme="dark"] table.q,[data-theme="dark"] .modal,[data-theme="dark"] .drawer,
+[data-theme="dark"] .bcard,[data-theme="dark"] .mf,[data-theme="dark"] .cfoot,
+[data-theme="dark"] .chat,[data-theme="dark"] .rule,[data-theme="dark"] .btn{background:var(--surface);color:var(--ink)}
+[data-theme="dark"] table.q th{background:var(--th);color:var(--faint)}
+[data-theme="dark"] table.q td{border-bottom-color:var(--surface-2)}
+[data-theme="dark"] table.q tbody tr:hover{background:var(--surface-2)}
+[data-theme="dark"] .bcol{background:var(--th)}
+[data-theme="dark"] .field input,[data-theme="dark"] .field select,[data-theme="dark"] .field textarea,
+[data-theme="dark"] .toolbar input,[data-theme="dark"] .toolbar select,
+[data-theme="dark"] .cfoot input{background:var(--th);color:var(--ink);border-color:var(--border)}
+[data-theme="dark"] .msg.bot{background:var(--surface-2)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--f);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button{font-family:inherit}
@@ -22,6 +46,8 @@ button{font-family:inherit}
 .btn{height:32px;border:1px solid var(--border);background:#fff;border-radius:var(--r);padding:0 12px;font-size:13px;font-weight:600;color:var(--soft);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{background:var(--bg)}
 .btn.primary{background:var(--nav);border-color:var(--nav);color:#fff}.btn.primary:hover{background:var(--nav-d)}
+.iconbtn{height:32px;min-width:32px;border:1px solid var(--border);background:var(--surface);border-radius:var(--r);font-size:15px;cursor:pointer;color:var(--soft);display:inline-flex;align-items:center;justify-content:center;padding:0 8px}
+.iconbtn:hover{background:var(--bg)}
 .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1868db,#5e4db2);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
 
 .shell{display:flex;min-height:calc(100vh - 56px)}

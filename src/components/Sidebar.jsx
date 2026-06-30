@@ -42,8 +42,7 @@ export default function Sidebar({ active, counts, onSelect, isAdmin, isOwner }) 
     { view: 'reports', label: '📈 Reports' },
   ]
   const configure = [
-    { view: 'autos', label: '⚡ Automations' },
-    { view: 'catalog', label: '📚 Catalog & rules' },
+    { view: 'catalog', label: '📚 Service catalog' },
   ]
   if (isOwner) configure.push({ view: 'admins', label: '🔑 Admin settings' })
 

@@ -1,10 +1,14 @@
 import { useState, useCallback, useEffect } from 'react'
+
+const THEME_KEY = 'acc_theme'
+function loadTheme() {
+  try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light' } catch (e) { return 'light' }
+}
 import TopNav from './components/TopNav'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Queue from './components/Queue'
 import Board from './components/Board'
-import Automations from './components/Automations'
 import Catalog from './components/Catalog'
 import CreateModal from './components/CreateModal'
 import TicketDrawer from './components/TicketDrawer'
@@ -32,6 +36,14 @@ function AppInner({ session }) {
   const [createOpen, setCreateOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [openKey, setOpenKey] = useState(null)
+  const [navOpen, setNavOpen] = useState(true)
+  const [theme, setTheme] = useState(loadTheme)
+
+  // Apply + persist theme on <html data-theme>.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    try { localStorage.setItem(THEME_KEY, theme) } catch (e) { /* ignore */ }
+  }, [theme])
 
   // Admins see everything; everyone else sees their own requests AND requests
   // where they are the line manager (so they can approve).
@@ -47,7 +59,7 @@ function AppInner({ session }) {
 
   // Keep people out of views they shouldn't see (e.g. after a role change).
   const allowedViews = isAdmin
-    ? ['dashboard', 'queue', 'board', 'approvals', 'reports', 'autos', 'catalog', ...(isOwner ? ['admins'] : [])]
+    ? ['dashboard', 'queue', 'board', 'approvals', 'reports', 'catalog', ...(isOwner ? ['admins'] : [])]
     : ['queue', 'catalog', ...(approvalsList.length ? ['approvals'] : [])]
   useEffect(() => {
     if (!allowedViews.includes(nav.view)) {
@@ -83,8 +95,8 @@ function AppInner({ session }) {
     transitionTicket(key, to, { actor: displayName(email), ...opts })
   }
 
-  const handleApprove = (key, decision, note) => {
-    decideApproval(key, decision, displayName(email), note)
+  const handleApprove = (key, decision, note, channel) => {
+    decideApproval(key, decision, displayName(email), note, channel)
   }
   const handleAssign = (key, assignee) => {
     if (!isAdmin) return
@@ -103,9 +115,14 @@ function AppInner({ session }) {
         onSignOut={session.signOut}
         onHelp={() => setHelpOpen(true)}
         search={<GlobalSearch tickets={visibleTickets} onOpen={openTicket} />}
+        onToggleSidebar={() => setNavOpen((v) => !v)}
+        theme={theme}
+        onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
       />
       <div className="shell">
-        <Sidebar active={nav} counts={counts} onSelect={selectNav} isAdmin={isAdmin} isOwner={isOwner} />
+        {navOpen && (
+          <Sidebar active={nav} counts={counts} onSelect={selectNav} isAdmin={isAdmin} isOwner={isOwner} />
+        )}
         <main className="main">
           {nav.view === 'dashboard' && isAdmin && (
             <Dashboard tickets={tickets} now={now} onOpen={openTicket} />
@@ -132,7 +149,6 @@ function AppInner({ session }) {
           )}
           {nav.view === 'board' && isAdmin && <Board tickets={tickets} onOpen={openTicket} />}
           {nav.view === 'reports' && isAdmin && <Reports tickets={tickets} now={now} />}
-          {nav.view === 'autos' && isAdmin && <Automations />}
           {nav.view === 'catalog' && <Catalog />}
           {nav.view === 'admins' && isOwner && <AdminSettings session={session} />}
         </main>

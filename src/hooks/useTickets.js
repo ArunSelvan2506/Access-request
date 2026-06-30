@@ -98,20 +98,22 @@ export function useLocalTickets() {
   }, [patch])
 
   // Line-manager (or admin) approval decision: 'Approved' | 'Rejected'.
-  const decideApproval = useCallback((key, decision, by, note) => {
+  // `channel` records how it was approved (Portal / Slack / Email).
+  const decideApproval = useCallback((key, decision, by, note, channel) => {
     patch(key, (t) => {
       const at = Date.now()
-      const approval = { state: decision, by, at, note: note || null }
+      const via = channel && channel !== 'Portal' ? ' via ' + channel : ''
+      const approval = { state: decision, by, at, note: note || null, channel: channel || 'Portal' }
       const activity = [...(t.activity || [])]
       let status = t.status
       let rejectReason = t.rejectReason
       if (decision === 'Approved') {
         status = 'Open'
-        activity.push({ who: by, tm: at, tx: 'Approved by line manager' + (note ? ' — ' + note : '') + '. Moved to Open.' })
+        activity.push({ who: by, tm: at, tx: 'Approved by line manager' + via + (note ? ' — ' + note : '') + '. Moved to Open.' })
       } else {
         status = 'Rejected'
         rejectReason = 'Declined by line manager' + (note ? ': ' + note : '')
-        activity.push({ who: by, tm: at, tx: 'Declined by line manager' + (note ? ' — ' + note : '') + '.' })
+        activity.push({ who: by, tm: at, tx: 'Declined by line manager' + via + (note ? ' — ' + note : '') + '.' })
       }
       return { ...t, approval, status, rejectReason, activity }
     })

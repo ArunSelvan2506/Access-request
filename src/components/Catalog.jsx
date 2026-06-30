@@ -1,26 +1,20 @@
 import { AppCell } from './common/Badges'
-import { CATALOG, NOTION_SOURCE } from '../data/catalog'
+import { CATALOG } from '../data/catalog'
 
 export default function Catalog() {
   return (
     <section className="view">
-      <h1 className="title">Service catalog & validation rules</h1>
+      <h1 className="title">Service catalog</h1>
       <p className="sub">
-        The applications IT manages, their required fields, and SLA targets. The validation engine
-        and AI assistant both read from this catalog, which is kept in sync with the{' '}
-        <a href={NOTION_SOURCE} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--nav)', fontWeight: 600 }}>
-          Field Validation Requirements
-        </a>{' '}
-        page in Notion.
+        The applications you can request, what information to have ready, and the target turnaround.
       </p>
       <table className="q">
         <thead>
           <tr>
             <th>Application</th>
-            <th>Routing</th>
-            <th>Required fields</th>
-            <th>SLA target</th>
-            <th>Auto-reject trigger</th>
+            <th>How to request</th>
+            <th>Information needed</th>
+            <th>Target SLA</th>
           </tr>
         </thead>
         <tbody>
@@ -32,9 +26,9 @@ export default function Catalog() {
                     <AppCell name={a.name} />
                   </td>
                   <td>
-                    <span className="tag red">Don't raise ticket</span>
+                    <span className="tag red">Not via this desk</span>
                   </td>
-                  <td colSpan={3} style={{ color: 'var(--soft)' }}>
+                  <td colSpan={2} style={{ color: 'var(--soft)' }}>
                     {a.route}
                   </td>
                 </tr>
@@ -50,11 +44,10 @@ export default function Catalog() {
                   <AppCell name={a.name} />
                 </td>
                 <td>
-                  <span className="tag green">Jira</span>
+                  <span className="tag green">Raise a request</span>
                 </td>
                 <td style={{ color: 'var(--soft)' }}>{required}</td>
                 <td>{a.sla}h</td>
-                <td style={{ color: 'var(--red-tx)' }}>{a.reject}</td>
               </tr>
             )
           })}

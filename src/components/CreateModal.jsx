@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
 import { CATALOG, findApp, needsApproval, isTimed } from '../data/catalog'
-import { RULES } from '../data/rules'
 import { URGENCY_OPTIONS, DEFAULT_URGENCY, DURATION_OPTIONS, DEFAULT_DURATION, DEPARTMENTS } from '../data/jira'
 import { validateRequest } from '../utils/validation'
 import { isOpen } from '../utils/sla'
@@ -103,11 +102,9 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
       if (!mgrValid) allErrors.push('Line manager email (@fuseenergy.com) is required — this application needs approval')
     }
     if (allErrors.length) {
-      // AUTOMATION: auto-reject incomplete (rule index 0)
-      const auto = RULES[0].on
       setFieldErrors(fe)
-      setValidation({ auto, reject: app.reject, errors: allErrors })
-      toast('Validation failed — ' + allErrors.length + ' issue' + (allErrors.length > 1 ? 's' : ''), 'bad')
+      setValidation({ errors: allErrors })
+      toast('Please complete the required fields', 'bad')
       return
     }
     setSubmitting(true)
@@ -175,11 +172,7 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
           {/* Validation summary */}
           {validation && (
             <div className="validation">
-              <b>
-                {(validation.auto
-                  ? '⚡ Automation: ticket would be auto-rejected'
-                  : 'Validation failed') + ' — ' + validation.reject}
-              </b>
+              <b>Please complete the following before submitting:</b>
               <ul>
                 {validation.errors.map((e, i) => (
                   <li key={i}>{e}</li>

@@ -27,11 +27,13 @@ export default function TicketDrawer({
   const [waitingPick, setWaitingPick] = useState(false)
   const [reason, setReason] = useState(PENDING_REASONS[0])
   const [note, setNote] = useState('')
+  const [channel, setChannel] = useState('Portal')
   const [comment, setComment] = useState('')
   useEffect(() => {
     setWaitingPick(false)
     setReason(PENDING_REASONS[0])
     setNote('')
+    setChannel('Portal')
     setComment('')
   }, [ticket?.key])
 
@@ -106,17 +108,29 @@ export default function TicketDrawer({
                     <div>⏳ Awaiting approval from <b>{ticket.manager}</b>.</div>
                     {canApprove && (
                       <div style={{ marginTop: 10 }}>
-                        <textarea
-                          placeholder="Optional note to the requester…"
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--soft)' }}>Approved via</label>
+                          <select
+                            value={channel}
+                            onChange={(e) => setChannel(e.target.value)}
+                            style={{ height: 30, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '0 8px', fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}
+                          >
+                            <option>Portal</option>
+                            <option>Slack</option>
+                            <option>Email</option>
+                          </select>
+                        </div>
+                        <input
+                          placeholder="Short note — e.g. 'Manager confirmed on Slack'"
                           value={note}
                           onChange={(e) => setNote(e.target.value)}
-                          style={{ width: '100%', minHeight: 54, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', marginBottom: 8 }}
+                          style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', marginBottom: 8 }}
                         />
                         <div style={{ display: 'flex', gap: 8 }}>
-                          <button className="btn primary" onClick={() => onApprove(ticket.key, 'Approved', note)}>
+                          <button className="btn primary" onClick={() => onApprove(ticket.key, 'Approved', note, channel)}>
                             Approve
                           </button>
-                          <button className="btn" onClick={() => onApprove(ticket.key, 'Rejected', note)}>
+                          <button className="btn" onClick={() => onApprove(ticket.key, 'Rejected', note, channel)}>
                             Decline
                           </button>
                         </div>
@@ -127,6 +141,7 @@ export default function TicketDrawer({
                   <div className="db" style={{ padding: 0, marginBottom: 18, fontSize: 13, color: 'var(--soft)' }}>
                     {ticket.approval.state === 'Approved' ? '✅ Approved' : '🔴 Declined'} by{' '}
                     {ticket.approval.by || ticket.manager}
+                    {ticket.approval.channel && ticket.approval.channel !== 'Portal' ? ' via ' + ticket.approval.channel : ''}
                     {ticket.approval.at ? ' · ' + formatUK(ticket.approval.at) : ''}
                     {ticket.approval.note ? ' — ' + ticket.approval.note : ''}
                   </div>
