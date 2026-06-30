@@ -269,17 +269,25 @@ export default function TicketDrawer({
                 <div className="tm">{formatUK(ticket.created)} · {timeAgo(ticket.created, now)} · created request</div>
               </div>
               {activity.map((e, i) => (
-                <div
-                  className="ev"
-                  key={i}
-                  style={e.internal ? { background: 'var(--yellow-bg)', borderRadius: 'var(--r)', padding: '6px 10px', marginLeft: -10 } : undefined}
-                >
-                  <div className="who">
-                    {e.who}
-                    {e.internal ? <span className="tag yellow" style={{ marginLeft: 6 }}>🔒 Internal</span> : e.comment ? ' 💬' : ''}
+                <div className="ev" key={i}>
+                  <div
+                    style={
+                      e.internal
+                        ? { background: 'var(--yellow-bg)', borderRadius: 'var(--r)', margin: '-2px -10px', padding: '2px 10px' }
+                        : undefined
+                    }
+                  >
+                    <div className="who">
+                      {e.who}
+                      {e.internal ? (
+                        <span className="tag yellow" style={{ marginLeft: 6 }}>🔒 Internal</span>
+                      ) : e.comment ? (
+                        <span style={{ marginLeft: 4 }}>💬</span>
+                      ) : null}
+                    </div>
+                    <div className="tm">{formatUK(e.tm)} · {timeAgo(e.tm, now)}</div>
+                    <div className="tx">{e.tx}</div>
                   </div>
-                  <div className="tm">{formatUK(e.tm)} · {timeAgo(e.tm, now)}</div>
-                  <div className="tx">{e.tx}</div>
                 </div>
               ))}
             </div>
