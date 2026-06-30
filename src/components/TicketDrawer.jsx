@@ -12,6 +12,7 @@ export default function TicketDrawer({
   canTransition,
   canApprove,
   canAssign,
+  isAdmin,
   currentEmail,
   onClose,
   onTransition,
@@ -40,7 +41,10 @@ export default function TicketDrawer({
   }
 
   const transitions = ticket ? TRANSITIONS[ticket.status] || [] : []
-  const activity = ticket ? (ticket.activity || []).slice().reverse() : []
+  // Requesters never see internal (admin-only) notes.
+  const activity = ticket
+    ? (ticket.activity || []).filter((e) => isAdmin || !e.internal).slice().reverse()
+    : []
   const pendingApproval = ticket && ticket.status === 'Pending Approval'
 
   const go = (to) => {
@@ -208,29 +212,44 @@ export default function TicketDrawer({
 
             {/* ---- Comments / activity ---- */}
             <div className="sec">Activity & comments</div>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <div style={{ marginBottom: 16 }}>
               <input
                 placeholder="Add a comment…"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && comment.trim()) {
-                    onComment(ticket.key, comment)
+                    onComment(ticket.key, comment, false)
                     setComment('')
                   }
                 }}
-                style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '8px 10px', fontSize: 13 }}
+                style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '8px 10px', fontSize: 13, marginBottom: 8 }}
               />
-              <button
-                className="btn primary"
-                disabled={!comment.trim()}
-                onClick={() => {
-                  onComment(ticket.key, comment)
-                  setComment('')
-                }}
-              >
-                Comment
-              </button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  className="btn primary"
+                  disabled={!comment.trim()}
+                  onClick={() => {
+                    onComment(ticket.key, comment, false)
+                    setComment('')
+                  }}
+                >
+                  Comment
+                </button>
+                {isAdmin && (
+                  <button
+                    className="btn"
+                    disabled={!comment.trim()}
+                    title="Visible to administrators only — hidden from the requester"
+                    onClick={() => {
+                      onComment(ticket.key, comment, true)
+                      setComment('')
+                    }}
+                  >
+                    🔒 Add internal note
+                  </button>
+                )}
+              </div>
             </div>
             <div className="activity">
               <div className="ev">
@@ -238,8 +257,15 @@ export default function TicketDrawer({
                 <div className="tm">{formatUK(ticket.created)} · {timeAgo(ticket.created, now)} · created request</div>
               </div>
               {activity.map((e, i) => (
-                <div className="ev" key={i}>
-                  <div className="who">{e.who}{e.comment ? ' 💬' : ''}</div>
+                <div
+                  className="ev"
+                  key={i}
+                  style={e.internal ? { background: 'var(--yellow-bg)', borderRadius: 'var(--r)', padding: '6px 10px', marginLeft: -10 } : undefined}
+                >
+                  <div className="who">
+                    {e.who}
+                    {e.internal ? <span className="tag yellow" style={{ marginLeft: 6 }}>🔒 Internal</span> : e.comment ? ' 💬' : ''}
+                  </div>
                   <div className="tm">{formatUK(e.tm)} · {timeAgo(e.tm, now)}</div>
                   <div className="tx">{e.tx}</div>
                 </div>

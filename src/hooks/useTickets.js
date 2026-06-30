@@ -119,13 +119,14 @@ export function useLocalTickets() {
     }))
   }, [patch])
 
-  // Add a comment / work note to a ticket.
-  const addComment = useCallback((key, who, text) => {
+  // Add a comment to a ticket. `internal: true` makes it an admin-only note
+  // (hidden from the requester); otherwise it's a public comment.
+  const addComment = useCallback((key, who, text, internal = false) => {
     const body = (text || '').trim()
     if (!body) return
     patch(key, (t) => ({
       ...t,
-      activity: [...(t.activity || []), { who, tm: Date.now(), tx: body, comment: true }],
+      activity: [...(t.activity || []), { who, tm: Date.now(), tx: body, comment: true, internal: !!internal }],
     }))
   }, [patch])
 

@@ -86,8 +86,8 @@ function AppInner({ session }) {
     if (!isAdmin) return
     assignTicket(key, assignee, displayName(email))
   }
-  const handleComment = (key, text) => {
-    addComment(key, displayName(email), text)
+  const handleComment = (key, text, internal) => {
+    addComment(key, displayName(email), text, internal)
   }
 
   return (
@@ -141,6 +141,7 @@ function AppInner({ session }) {
         canTransition={isAdmin}
         canApprove={canApprove}
         canAssign={isAdmin}
+        isAdmin={isAdmin}
         currentEmail={email}
         onClose={() => setOpenKey(null)}
         onTransition={handleTransition}
