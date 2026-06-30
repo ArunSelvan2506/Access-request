@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { CATALOG, findApp, needsApproval, isTimed } from '../data/catalog'
 import { RULES } from '../data/rules'
-import { URGENCY_OPTIONS, DEFAULT_URGENCY, DURATION_OPTIONS, DEFAULT_DURATION } from '../data/jira'
+import { URGENCY_OPTIONS, DEFAULT_URGENCY, DURATION_OPTIONS, DEFAULT_DURATION, DEPARTMENTS } from '../data/jira'
 import { validateRequest } from '../utils/validation'
 import { isOpen } from '../utils/sla'
 import { useToast } from './common/Toast'
@@ -19,6 +19,9 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
   const [values, setValues] = useState({})
   const [urgency, setUrgency] = useState(DEFAULT_URGENCY)
   const [duration, setDuration] = useState(DEFAULT_DURATION)
+  const [department, setDepartment] = useState('')
+  const [role, setRole] = useState('')
+  const [reqBad, setReqBad] = useState(false)
   const [manager, setManager] = useState('')
   const [managerBad, setManagerBad] = useState(false)
   const [dupeAck, setDupeAck] = useState(false)
@@ -51,6 +54,9 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
       setValues(initialValues(a))
       setUrgency(DEFAULT_URGENCY)
       setDuration(DEFAULT_DURATION)
+      setDepartment('')
+      setRole('')
+      setReqBad(false)
       setManager('')
       setManagerBad(false)
       setDupeAck(false)
@@ -89,6 +95,9 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
     const mgr = manager.trim().toLowerCase()
     const mgrValid = /^[^@\s]+@fuseenergy\.com$/.test(mgr)
     const allErrors = [...errors]
+    const reqOk = !!department && !!role.trim()
+    setReqBad(!reqOk)
+    if (!reqOk) allErrors.push('Department and role are required')
     if (requireApproval) {
       setManagerBad(!mgrValid)
       if (!mgrValid) allErrors.push('Line manager email (@fuseenergy.com) is required — this application needs approval')
@@ -107,6 +116,8 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
         urgency,
         manager: requireApproval ? mgr : null,
         duration: timed ? duration : null,
+        department,
+        role: role.trim(),
       })
       toast('Created ' + ticket.key, 'good')
       onClose()
@@ -202,6 +213,30 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                 />
+              </div>
+              <div className={'field' + (reqBad && !department ? ' bad' : '')}>
+                <label>
+                  Your department <span className="req">*</span>
+                </label>
+                <select value={department} onChange={(e) => { setDepartment(e.target.value); setReqBad(false) }}>
+                  <option value="">Select your department…</option>
+                  {DEPARTMENTS.map((dpt) => (
+                    <option key={dpt}>{dpt}</option>
+                  ))}
+                </select>
+                <div className="err">Department is required.</div>
+              </div>
+              <div className={'field' + (reqBad && !role.trim() ? ' bad' : '')}>
+                <label>
+                  Your role / job title <span className="req">*</span>
+                </label>
+                <input
+                  placeholder="e.g. Senior Backend Engineer"
+                  value={role}
+                  onChange={(e) => { setRole(e.target.value); setReqBad(false) }}
+                />
+                <div className="hint">Helps the reviewer confirm the access is appropriate for your role.</div>
+                <div className="err">Role is required.</div>
               </div>
               <div className="field">
                 <label>Urgency</label>

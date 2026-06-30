@@ -5,12 +5,14 @@ const esc = (v) => {
 
 // Export a list of tickets to a CSV file download (pure client-side).
 export function exportTicketsCsv(tickets, filename = 'access-requests.csv') {
-  const cols = ['Key', 'Application', 'Summary', 'Requester', 'Status', 'Urgency', 'Assignee', 'SLA (h)', 'Created']
+  const cols = ['Key', 'Application', 'Summary', 'Requester', 'Department', 'Role', 'Status', 'Urgency', 'Assignee', 'SLA (h)', 'Submitted']
   const rows = tickets.map((t) => [
     t.key,
     t.app,
     t.summary,
     t.requester,
+    t.department || '',
+    t.role || '',
     t.status,
     t.urgency || '',
     t.assignee || '',

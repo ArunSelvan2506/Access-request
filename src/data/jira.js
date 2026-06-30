@@ -13,6 +13,13 @@ export const PENDING_REASONS = [
 export const URGENCY_OPTIONS = ['Critical', 'High', 'Medium', 'Low']
 export const DEFAULT_URGENCY = 'Medium'
 
+// Requester context captured on every request so reviewers can see who's
+// asking and judge appropriateness before acting.
+export const DEPARTMENTS = [
+  'Engineering', 'Data', 'Trading', 'Operations', 'Finance', 'People (HR)',
+  'Design', 'Support', 'Compliance / Legal', 'Marketing', 'Other',
+]
+
 // Time-bound (expiring) access options.
 export const DURATION_OPTIONS = ['Permanent', '30 days', '60 days', '90 days', '6 months', '1 year']
 export const DEFAULT_DURATION = 'Permanent'

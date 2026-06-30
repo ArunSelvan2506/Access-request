@@ -4,14 +4,14 @@ import { findApp } from './catalog'
 // names — role-based requesters). Generated from a compact table so it stays
 // readable. Timestamps are relative to load time so SLA timers look live.
 const ROLES = [
-  ['Platform Engineer', 'eng1@fuseenergy.com'],
-  ['Data Analyst', 'analyst2@fuseenergy.com'],
-  ['Quant Researcher', 'quant3@fuseenergy.com'],
-  ['Ops Engineer', 'ops4@fuseenergy.com'],
-  ['Support Agent', 'support5@fuseenergy.com'],
-  ['New Starter', 'new.starter@fuseenergy.com'],
-  ['Trading Analyst', 'trading6@fuseenergy.com'],
-  ['Backend Engineer', 'eng7@fuseenergy.com'],
+  ['Platform Engineer', 'eng1@fuseenergy.com', 'Engineering'],
+  ['Data Analyst', 'analyst2@fuseenergy.com', 'Data'],
+  ['Quant Researcher', 'quant3@fuseenergy.com', 'Trading'],
+  ['Ops Engineer', 'ops4@fuseenergy.com', 'Operations'],
+  ['Support Agent', 'support5@fuseenergy.com', 'Support'],
+  ['New Starter', 'new.starter@fuseenergy.com', 'Engineering'],
+  ['Trading Analyst', 'trading6@fuseenergy.com', 'Trading'],
+  ['Backend Engineer', 'eng7@fuseenergy.com', 'Engineering'],
 ]
 
 // Minimal-but-valid fields per app (keys match the catalog so the drawer labels them).
@@ -99,7 +99,7 @@ export function seedTickets() {
   const H = 36e5
   return ROWS.map((r, i) => {
     const [num, app, summary, status, urgency, hoursAgo, extra = {}] = r
-    const [requester, requesterEmail] = ROLES[i % ROLES.length]
+    const [requester, requesterEmail, department] = ROLES[i % ROLES.length]
     const a = findApp(app)
     const created = now - hoursAgo * H
     const ticket = {
@@ -109,6 +109,8 @@ export function seedTickets() {
       summary,
       requester,
       requesterEmail,
+      department,
+      role: requester,
       urgency,
       status,
       created,

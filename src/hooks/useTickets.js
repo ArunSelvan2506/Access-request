@@ -3,7 +3,7 @@ import { seedTickets } from '../data/seed'
 import { needsApproval } from '../data/catalog'
 import { durationDays } from '../data/jira'
 
-const STORE = 'acc_sd_tickets_v2'
+const STORE = 'acc_sd_tickets_v3'
 
 function loadTickets() {
   try {
@@ -54,6 +54,8 @@ export function useLocalTickets() {
       summary,
       requester: user.name || user.email || 'Unknown',
       requesterEmail: user.email || null,
+      department: meta.department || null,
+      role: meta.role || null,
       manager,
       approval: requireApproval ? { state: 'Pending', by: null, at: null, note: null } : null,
       assignee: null,

@@ -208,6 +208,22 @@ export default function TicketDrawer({
             {/* ---- Details ---- */}
             <div className="sec">Request details</div>
             <dl className="field-grid">
+              <div style={{ display: 'contents' }}>
+                <dt>Requested by</dt>
+                <dd>{ticket.requester}{ticket.requesterEmail ? ` (${ticket.requesterEmail})` : ''}</dd>
+              </div>
+              {ticket.department && (
+                <div style={{ display: 'contents' }}>
+                  <dt>Department</dt>
+                  <dd>{ticket.department}</dd>
+                </div>
+              )}
+              {ticket.role && (
+                <div style={{ display: 'contents' }}>
+                  <dt>Role</dt>
+                  <dd>{ticket.role}</dd>
+                </div>
+              )}
               {ticket.manager && (
                 <div style={{ display: 'contents' }}>
                   <dt>Line manager</dt>
