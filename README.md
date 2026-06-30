@@ -59,11 +59,14 @@ src/
 - **Workflow transitions** → `src/utils/format.js` (`TRANSITIONS`).
 - **Automation rules** → `src/data/rules.js`.
 
-## Deployment (GitHub Pages + custom domain)
+## Deployment (GitHub Pages)
 
 The app deploys automatically to GitHub Pages via `.github/workflows/deploy.yml`
-on every push to `main`. The production domain is **accessrequest.fuseenergy.com**
-(set in `public/CNAME`).
+on every push to `main`. It serves from the default Pages URL:
+
+```
+https://arunselvan2506.github.io/access-request/
+```
 
 **One-time setup (repo owner):**
 
@@ -71,21 +74,10 @@ on every push to `main`. The production domain is **accessrequest.fuseenergy.com
    **GitHub Actions***.
 2. **Merge to `main`** — the deploy workflow runs on pushes to `main`. Merge this
    branch in and the first deploy starts (watch it under the *Actions* tab).
-3. **Add the DNS record** at the registrar that manages `fuseenergy.com`:
 
-   | Type  | Host / Name      | Value                       |
-   | ----- | ---------------- | --------------------------- |
-   | CNAME | `accessrequest`  | `arunselvan2506.github.io.` |
-
-   (For an apex/root domain you'd use A records instead; a subdomain like this
-   one uses a single CNAME.)
-4. **Set the custom domain** — repo *Settings → Pages → Custom domain* →
-   `accessrequest.fuseenergy.com` → **Save**, then tick **Enforce HTTPS** once the
-   certificate is issued (can take a few minutes after DNS propagates).
-
-The `CNAME` file is committed so GitHub keeps the custom domain across deploys.
-Asset paths are relative (`base: './'` in `vite.config.js`), so the build also
-works at the default `…/access-request/` Pages URL before DNS is live.
+Asset paths are relative (`base: './'` in `vite.config.js`), so the build works
+at the project sub-path above. A custom domain can be added later by setting one
+in *Settings → Pages* and committing a matching `public/CNAME` file.
 
 ## Current build: standalone web tool
 
@@ -150,7 +142,8 @@ everything else updates itself from ticket activity.
    firebase deploy --only firestore:rules,functions
    ```
 4. **Authorize the domain** — Firebase console → Authentication → Settings →
-   Authorized domains → add `accessrequest.fuseenergy.com`.
+   Authorized domains → add wherever the site is hosted (e.g.
+   `arunselvan2506.github.io`, or a custom domain if one is added later).
 
 Hosting stays on GitHub Pages; only the database, auth and functions live in
 Firebase. Until step 2 is done, the site keeps running in local mode unchanged.
