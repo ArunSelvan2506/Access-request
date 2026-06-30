@@ -94,6 +94,10 @@ table.q tbody tr:hover{background:#fafbfc}
 .sla-chip.p-high{background:var(--yellow-bg);color:var(--yellow-tx);border-color:var(--yellow-bd)}
 .sla-chip.p-medium{background:var(--blue-bg);color:var(--blue-tx);border-color:var(--blue-bd)}
 .sla-chip.p-low{background:var(--green-bg);color:var(--green-tx);border-color:var(--green-bd)}
+.ai-card{border:1px solid var(--purple-bd);background:var(--purple-bg);border-radius:var(--r);padding:12px}
+.ai-checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.ai-checks li{display:flex;gap:7px;font-size:12.5px;color:var(--ink);align-items:flex-start}
+.ai-draft{white-space:pre-wrap;font-size:13px;line-height:1.5;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;color:var(--ink)}
 
 .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:3px;display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;white-space:nowrap}
 .tag.green{background:var(--green-bg);color:var(--green-tx);border-color:var(--green-bd)}

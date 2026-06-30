@@ -4,7 +4,12 @@ import { slaState, expiryInfo } from '../utils/sla'
 import { timeAgo, formatUK, TRANSITIONS } from '../utils/format'
 import { PENDING_REASONS } from '../data/jira'
 import { displayName } from '../auth/session'
+import { isApi } from '../config'
+import { aiStatus, aiTriage } from '../api/ai'
 import { StatusPill } from './common/Badges'
+
+const PRIORITY_TAG = { Critical: 'red', High: 'yellow', Medium: 'blue', Low: 'green' }
+const CHECK_ICON = { ok: '✅', missing: '🔴', unclear: '⚠️' }
 
 export default function TicketDrawer({
   ticket,
@@ -29,13 +34,45 @@ export default function TicketDrawer({
   const [note, setNote] = useState('')
   const [channel, setChannel] = useState('Portal')
   const [comment, setComment] = useState('')
+  const [aiOn, setAiOn] = useState(false)
+  const [aiResult, setAiResult] = useState(null)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiError, setAiError] = useState('')
   useEffect(() => {
     setWaitingPick(false)
     setReason(PENDING_REASONS[0])
     setNote('')
     setChannel('Portal')
     setComment('')
+    setAiResult(null)
+    setAiError('')
+    setAiBusy(false)
   }, [ticket?.key])
+
+  // AI triage is only available when the API backend is in use and the server
+  // has an Anthropic key configured. Check once.
+  useEffect(() => {
+    if (isApi && isAdmin) aiStatus().then((s) => setAiOn(!!s.enabled))
+  }, [isAdmin])
+
+  const runTriage = async () => {
+    if (!ticket || !a) return
+    setAiBusy(true)
+    setAiError('')
+    setAiResult(null)
+    const rule = {
+      requiredFields: (a.fields || []).filter((f) => f.req).map((f) => f.label),
+      policyNote: a.callout ? a.callout.x : null,
+      autoRejectTrigger: a.reject || null,
+    }
+    try {
+      setAiResult(await aiTriage(ticket, rule))
+    } catch (e) {
+      setAiError(e.message || 'AI triage failed.')
+    } finally {
+      setAiBusy(false)
+    }
+  }
 
   const labelFor = (k) => {
     const f = a && a.fields && a.fields.find((x) => x.k === k)
@@ -98,6 +135,72 @@ export default function TicketDrawer({
               Submitted {formatUK(ticket.created)} · SLA due {formatUK(ticket.created + ticket.sla * 36e5)}{' '}
               <span style={{ fontWeight: 600 }}>(UK time)</span>
             </div>
+
+            {/* ---- AI triage (admin-only, advisory) ---- */}
+            {aiOn && isAdmin && (
+              <div className="ai-triage">
+                <div className="sec" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>AI triage</span>
+                  <span className="tag purple">beta</span>
+                </div>
+                {!aiResult && (
+                  <div style={{ marginBottom: 18 }}>
+                    <button className="btn primary" onClick={runTriage} disabled={aiBusy}>
+                      {aiBusy ? 'Analysing…' : '✨ Run AI triage'}
+                    </button>
+                    <div style={{ fontSize: 12, color: 'var(--faint)', marginTop: 6 }}>
+                      A suggested priority, a check of the required fields, and a draft reply. Advisory only —
+                      you decide.
+                    </div>
+                    {aiError && <div className="callout crit" style={{ marginTop: 10 }}>🔴 <div>{aiError}</div></div>}
+                  </div>
+                )}
+                {aiResult && (
+                  <div className="ai-card" style={{ marginBottom: 18 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+                      <span className={'tag ' + (PRIORITY_TAG[aiResult.suggestedPriority] || 'grey')}>
+                        Suggested: {aiResult.suggestedPriority}
+                      </span>
+                      <span className="tag grey">{aiResult.recommendation}</span>
+                    </div>
+                    <div style={{ fontSize: 12.5, color: 'var(--soft)', marginBottom: 10 }}>
+                      {aiResult.recommendationRationale}
+                    </div>
+                    {aiResult.fieldChecks && aiResult.fieldChecks.length > 0 && (
+                      <ul className="ai-checks">
+                        {aiResult.fieldChecks.map((c, i) => (
+                          <li key={i}>
+                            <span>{CHECK_ICON[c.status] || '•'}</span>
+                            <span>
+                              <b>{c.field}</b>
+                              {c.note ? ' — ' + c.note : ''}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--faint)', margin: '12px 0 4px' }}>
+                      Draft reply
+                    </div>
+                    <div className="ai-draft">{aiResult.draftReply}</div>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                      <button className="btn" onClick={() => onComment(ticket.key, aiResult.draftReply, false)}>
+                        Post draft as comment
+                      </button>
+                      <button className="btn" onClick={() => setComment(aiResult.draftReply)}>
+                        Edit before sending
+                      </button>
+                      <button className="btn" onClick={runTriage} disabled={aiBusy}>
+                        {aiBusy ? 'Analysing…' : 'Re-run'}
+                      </button>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--faint)', marginTop: 8 }}>
+                      AI-generated suggestion — review before acting.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ---- Line-manager approval ---- */}
             {ticket.approval && (
