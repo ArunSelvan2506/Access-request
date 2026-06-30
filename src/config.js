@@ -7,7 +7,7 @@
 //
 // Flipping to Firebase is a matter of setting VITE_BACKEND=firebase plus the
 // VITE_FIREBASE_* values below (see .env.example). Until then nothing changes.
-// "local" (default) | "api" (Node + libSQL/Turso server) | "firebase"
+// "local" (default) | "api" (Node + DynamoDB server on AWS) | "firebase"
 const _b = import.meta.env.VITE_BACKEND
 export const BACKEND = _b === 'firebase' ? 'firebase' : _b === 'api' ? 'api' : 'local'
 

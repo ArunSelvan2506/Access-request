@@ -1,14 +1,23 @@
-// Tiny SQLite-backed API for the Access Service Desk.
-// Stores each ticket as a JSON document keyed by its ACC-### key. Works with a
-// local file (file:access.db) for dev, or a Turso/libSQL URL + token in prod.
+// AWS-native API for the Access Service Desk.
+// Stores each ticket as a document in DynamoDB, keyed by its ACC-### key.
+// Credentials come from the runtime IAM role (App Runner / ECS task role) — no
+// AWS keys live in code or env. For local dev, point DDB_ENDPOINT at DynamoDB
+// Local, or use a normal AWS profile.
 import express from 'express'
 import cors from 'cors'
-import { createClient } from '@libsql/client'
 import Anthropic from '@anthropic-ai/sdk'
+import {
+  DynamoDBClient,
+  CreateTableCommand,
+  DescribeTableCommand,
+  waitUntilTableExists,
+} from '@aws-sdk/client-dynamodb'
+import { DynamoDBDocumentClient, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb'
 
 const PORT = process.env.PORT || 8787
 const API_KEY = process.env.API_KEY || '' // optional shared key (x-api-key)
 const ORIGIN = process.env.CORS_ORIGIN || '*'
+const TABLE = process.env.DDB_TABLE || 'access_desk_tickets'
 
 // AI triage (optional). The Anthropic key lives ONLY here, server-side — never
 // in the client bundle or the repo. If it's unset, the AI endpoints report
@@ -17,17 +26,46 @@ const AI_MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8'
 const aiEnabled = !!process.env.ANTHROPIC_API_KEY
 const anthropic = aiEnabled ? new Anthropic() : null // reads ANTHROPIC_API_KEY from env
 
-const db = createClient({
-  url: process.env.TURSO_DATABASE_URL || 'file:access.db',
-  authToken: process.env.TURSO_AUTH_TOKEN, // undefined for local file — fine
+// DynamoDB. Region + credentials resolve from the standard AWS chain (IAM role
+// in AWS, profile/env locally). DDB_ENDPOINT lets you target DynamoDB Local.
+const ddbBase = new DynamoDBClient({
+  ...(process.env.AWS_REGION ? { region: process.env.AWS_REGION } : {}),
+  ...(process.env.DDB_ENDPOINT ? { endpoint: process.env.DDB_ENDPOINT } : {}),
 })
+const ddb = DynamoDBDocumentClient.from(ddbBase, { marshallOptions: { removeUndefinedValues: true } })
 
-await db.execute(`CREATE TABLE IF NOT EXISTS tickets (
-  key TEXT PRIMARY KEY,
-  num INTEGER,
-  data TEXT NOT NULL,
-  updated_at INTEGER
-)`)
+// Best-effort: create the table if it's missing (needs CreateTable IAM perms).
+// Set DDB_AUTOCREATE=false if the table is provisioned by your infra team.
+async function ensureTable() {
+  try {
+    await ddbBase.send(new DescribeTableCommand({ TableName: TABLE }))
+    return
+  } catch (e) {
+    if (e.name !== 'ResourceNotFoundException') {
+      console.warn('DynamoDB describe failed (' + TABLE + '):', e.name || e.message)
+      return
+    }
+  }
+  if (process.env.DDB_AUTOCREATE === 'false') {
+    console.warn('Table ' + TABLE + ' missing and autocreate disabled.')
+    return
+  }
+  try {
+    await ddbBase.send(
+      new CreateTableCommand({
+        TableName: TABLE,
+        BillingMode: 'PAY_PER_REQUEST',
+        AttributeDefinitions: [{ AttributeName: 'key', AttributeType: 'S' }],
+        KeySchema: [{ AttributeName: 'key', KeyType: 'HASH' }],
+      })
+    )
+    await waitUntilTableExists({ client: ddbBase, maxWaitTime: 60 }, { TableName: TABLE })
+    console.log('Created DynamoDB table ' + TABLE)
+  } catch (e) {
+    console.warn('Could not auto-create table ' + TABLE + ':', e.name || e.message)
+  }
+}
+await ensureTable()
 
 const app = express()
 app.use(cors({ origin: ORIGIN }))
@@ -41,30 +79,39 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ ok: true }))
 
-app.get('/api/tickets', async (_req, res) => {
-  const r = await db.execute('SELECT data FROM tickets ORDER BY num DESC')
-  res.json(r.rows.map((row) => JSON.parse(row.data)))
-})
+// Wraps an async handler so a rejected promise (e.g. a DynamoDB throttle or
+// transient error) returns a 500 instead of crashing the process.
+const wrap = (fn) => (req, res) =>
+  fn(req, res).catch((e) => {
+    console.error(req.method, req.path, 'failed:', e?.name || '', e?.message || e)
+    if (!res.headersSent) res.status(500).json({ error: 'server_error' })
+  })
 
-app.post('/api/tickets', async (req, res) => {
+app.get('/api/tickets', wrap(async (_req, res) => {
+  const items = []
+  let ExclusiveStartKey
+  do {
+    const r = await ddb.send(new ScanCommand({ TableName: TABLE, ExclusiveStartKey }))
+    for (const it of r.Items || []) if (it.data) items.push(it.data)
+    ExclusiveStartKey = r.LastEvaluatedKey
+  } while (ExclusiveStartKey)
+  items.sort((a, b) => (b?.num || 0) - (a?.num || 0))
+  res.json(items)
+}))
+
+app.post('/api/tickets', wrap(async (req, res) => {
   const t = req.body
   if (!t || !t.key) return res.status(400).json({ error: 'ticket.key required' })
-  await db.execute({
-    sql: 'INSERT OR REPLACE INTO tickets (key, num, data, updated_at) VALUES (?, ?, ?, ?)',
-    args: [t.key, t.num || 0, JSON.stringify(t), Date.now()],
-  })
+  await ddb.send(new PutCommand({ TableName: TABLE, Item: { key: t.key, num: t.num || 0, updated_at: Date.now(), data: t } }))
   res.status(201).json(t)
-})
+}))
 
-app.put('/api/tickets/:key', async (req, res) => {
+app.put('/api/tickets/:key', wrap(async (req, res) => {
   const t = req.body
   if (!t) return res.status(400).json({ error: 'ticket body required' })
-  await db.execute({
-    sql: 'INSERT OR REPLACE INTO tickets (key, num, data, updated_at) VALUES (?, ?, ?, ?)',
-    args: [req.params.key, t.num || 0, JSON.stringify(t), Date.now()],
-  })
+  await ddb.send(new PutCommand({ TableName: TABLE, Item: { key: req.params.key, num: t.num || 0, updated_at: Date.now(), data: t } }))
   res.json(t)
-})
+}))
 
 // ---- AI triage assistant (admin-facing, advisory) ----
 
@@ -150,4 +197,10 @@ app.post('/api/ai/triage', async (req, res) => {
   }
 })
 
-app.listen(PORT, () => console.log('Access Service Desk API on :' + PORT + (aiEnabled ? ' (AI triage on, ' + AI_MODEL + ')' : ' (AI triage off — set ANTHROPIC_API_KEY)')))
+app.listen(PORT, () =>
+  console.log(
+    'Access Service Desk API on :' + PORT +
+      ' | DynamoDB table ' + TABLE +
+      (aiEnabled ? ' | AI triage on (' + AI_MODEL + ')' : ' | AI triage off — set ANTHROPIC_API_KEY')
+  )
+)

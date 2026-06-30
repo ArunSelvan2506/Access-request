@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.107.0",
-    "@libsql/client": "^0.14.0",
+    "@aws-sdk/client-dynamodb": "^3.1076.0",
+    "@aws-sdk/lib-dynamodb": "^3.1076.0",
     "cors": "^2.8.5",
     "express": "^4.21.2"
   }
