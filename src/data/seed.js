@@ -77,6 +77,21 @@ const ROWS = [
   [138, 'Metabase', 'Self-serve analytics access', 'Done', 'Low', 390],
   [139, 'Microsoft', 'Power BI desktop', 'Rejected', 'Low', 55, { rejectReason: 'Weak/missing justification' }],
   [140, 'Claude', 'Claude Code — platform', 'Done', 'High', 410],
+  [141, 'GitHub', 'Access to data-pipeline repo', 'Done', 'Medium', 420],
+  [142, 'AWS', 'Redshift cluster access', 'In Progress', 'High', 9],
+  [143, 'Google Shared Drive', 'Legal shared drive access', 'Done', 'Low', 430, { expiresIn: 9, duration: '90 days' }],
+  [144, 'Bitwarden', 'SRE secrets collection', 'Done', 'Medium', 450, { expiresIn: -3, duration: '90 days' }],
+  [145, 'Microsoft', 'Power Automate licence', 'Waiting', 'Low', 14, { pendingReason: 'Waiting on vendor' }],
+  [146, 'Claude', 'Claude Code — data team', 'Pending Approval', 'High', 5, { manager: 'eng-lead@fuseenergy.com' }],
+  [147, 'Cursor', 'Cursor for new backend hire', 'Done', 'Medium', 470],
+  [148, 'Hardware / Device', 'External monitor request', 'Open', 'Low', 2],
+  [149, 'Account Onboarding / Offboarding', 'Offboard leaver — last day Friday', 'In Progress', 'Critical', 6],
+  [150, 'Datadog', 'Logs access for new service', 'Done', 'Medium', 490],
+  [151, 'Software Installation', 'IntelliJ IDEA install', 'Done', 'Low', 38],
+  [152, 'Email / Distribution List', 'sre-oncall alias', 'Done', 'Low', 41],
+  [153, 'Phone / Mobile / SIM', 'New work SIM', 'Cancelled', 'Low', 60],
+  [154, 'Metabase', 'Marketing dashboard access', 'Done', 'Low', 510, { expiresIn: 25, duration: '90 days' }],
+  [155, 'AWS', 'Athena workgroup access', 'Pending Approval', 'High', 7, { manager: 'arun@fuseenergy.com' }],
 ]
 
 export function seedTickets() {
@@ -105,6 +120,11 @@ export function seedTickets() {
     }
     if (status === 'Pending Approval' && extra.manager) {
       ticket.approval = { state: 'Pending', by: null, at: null, note: null }
+    }
+    if (extra.expiresIn != null) {
+      ticket.expiresAt = now + extra.expiresIn * 864e5
+      ticket.duration = extra.duration || '90 days'
+      delete ticket.expiresIn
     }
     return ticket
   })

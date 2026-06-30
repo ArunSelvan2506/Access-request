@@ -3,7 +3,7 @@ import { seedTickets } from '../data/seed'
 import { needsApproval } from '../data/catalog'
 import { durationDays } from '../data/jira'
 
-const STORE = 'acc_sd_tickets_v1'
+const STORE = 'acc_sd_tickets_v2'
 
 function loadTickets() {
   try {
