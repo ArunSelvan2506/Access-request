@@ -2,8 +2,9 @@ import { useState, useMemo } from 'react'
 import { AppCell, StatusPill, SlaCell } from './common/Badges'
 import { CATALOG } from '../data/catalog'
 import { isOpen, isBreaching } from '../utils/sla'
+import { exportTicketsCsv } from '../utils/csv'
 
-const STATUS_OPTIONS = ['Open', 'In Progress', 'Waiting', 'Done', 'Rejected']
+const STATUS_OPTIONS = ['Pending Approval', 'Open', 'In Progress', 'Waiting', 'Done', 'Rejected', 'Cancelled']
 const APP_OPTIONS = CATALOG.filter((a) => a.group === 'green').map((a) => a.name)
 
 const TITLES = { open: 'Open requests', breach: 'SLA at risk' }
@@ -52,6 +53,14 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
             <option key={a}>{a}</option>
           ))}
         </select>
+        <button
+          className="btn"
+          onClick={() => exportTicketsCsv(list, (title || 'requests').toLowerCase().replace(/\s+/g, '-') + '.csv')}
+          disabled={list.length === 0}
+          title="Export this list to CSV"
+        >
+          ⬇ Export CSV
+        </button>
         <span className="spacer">
           {list.length} request{list.length === 1 ? '' : 's'}
         </span>

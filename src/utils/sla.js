@@ -19,3 +19,12 @@ export const isBreaching = (t) =>
   slaState(t).cls === 'breach' && !['Done', 'Rejected'].includes(t.status)
 
 export const isOpen = (t) => ['Open', 'In Progress', 'Waiting'].includes(t.status)
+
+// Access-expiry state for time-bound grants. Returns null if the ticket has no
+// expiry. Otherwise { days, expired, soon } where soon = within 14 days.
+export function expiryInfo(t, now = Date.now()) {
+  if (!t || !t.expiresAt) return null
+  const ms = t.expiresAt - now
+  const days = Math.ceil(ms / 864e5)
+  return { days, expired: ms < 0, soon: ms >= 0 && days <= 14 }
+}

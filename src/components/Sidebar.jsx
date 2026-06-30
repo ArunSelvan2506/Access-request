@@ -39,6 +39,7 @@ export default function Sidebar({ active, counts, onSelect, isAdmin, isOwner }) 
     { view: 'queue', q: 'open', label: '📥 Open', countKey: 'open' },
     { view: 'queue', q: 'breach', label: '⏰ SLA at risk', countKey: 'breach' },
     { view: 'board', label: '🗂️ Board' },
+    { view: 'reports', label: '📈 Reports' },
   ]
   const configure = [
     { view: 'autos', label: '⚡ Automations' },

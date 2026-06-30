@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { findApp } from '../data/catalog'
-import { slaState } from '../utils/sla'
+import { slaState, expiryInfo } from '../utils/sla'
 import { timeAgo, formatUK, TRANSITIONS } from '../utils/format'
 import { PENDING_REASONS } from '../data/jira'
 import { displayName } from '../auth/session'
@@ -78,6 +78,18 @@ export default function TicketDrawer({
               </span>
               <span className="tag grey">SLA target {ticket.sla}h</span>
               {ticket.urgency && <span className="tag blue">Urgency: {ticket.urgency}</span>}
+              {ticket.duration && ticket.duration !== 'Permanent' && (
+                <span className="tag purple">Access: {ticket.duration}</span>
+              )}
+              {(() => {
+                const e = expiryInfo(ticket, now)
+                if (!e) return null
+                return (
+                  <span className={'tag ' + (e.expired ? 'red' : e.soon ? 'yellow' : 'grey')}>
+                    {e.expired ? `Expired ${-e.days}d ago` : `Expires in ${e.days}d`}
+                  </span>
+                )
+              })()}
             </div>
 
             <div style={{ fontSize: 12, color: 'var(--faint)', marginBottom: 18 }}>

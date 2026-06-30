@@ -240,6 +240,21 @@ export const CATALOG = [
 
 export const findApp = (n) => CATALOG.find((a) => a.name === n)
 
+// Which applications require line-manager approval before IT actions them
+// (sensitive / paid / elevated access — ~the subset that needs sign-off).
+export const APP_APPROVAL = new Set([
+  'AWS', 'Datadog', 'Claude', 'Cursor', 'Microsoft', 'Bitwarden', 'JetBrains',
+  'Social Media', 'Account Onboarding / Offboarding',
+])
+export const needsApproval = (name) => APP_APPROVAL.has(name)
+
+// Applications that grant standing access — eligible for time-bound (expiring) access.
+export const APP_TIMED = new Set([
+  'AWS', 'Datadog', 'Metabase', 'GitHub', 'Bitwarden', 'Google Shared Drive',
+  'Google Groups', 'Claude', 'Cursor', 'JetBrains', 'Microsoft',
+])
+export const isTimed = (name) => APP_TIMED.has(name)
+
 // Self-contained per-application icons (emoji, so no external assets / offline-safe).
 // Rendered inside the coloured app tile; falls back to the 2-letter code if missing.
 export const APP_EMOJI = {

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
+import { needsApproval } from '../data/catalog'
+import { durationDays } from '../data/jira'
 
 const STORE = 'acc_sd_tickets_v1'
 
@@ -36,11 +38,15 @@ export function useLocalTickets() {
   // { urgency, manager }. If a line manager is given, the ticket starts in
   // "Pending Approval" awaiting that manager's decision.
   const createTicket = useCallback((app, summary, data, user = {}, meta = {}) => {
-    const num = Math.max(seqRef.current, 105) + 1
+    const num = Math.max(seqRef.current, 140) + 1
     seqRef.current = num
     const now = Date.now()
-    const manager = (meta.manager || '').trim().toLowerCase() || null
-    const needsApproval = !!manager
+    const requireApproval = needsApproval(app.name)
+    const manager = requireApproval ? (meta.manager || '').trim().toLowerCase() || null : null
+    // Time-bound access: compute an expiry date if a finite duration was chosen.
+    const duration = meta.duration || null
+    const days = durationDays(duration)
+    const expiresAt = days ? now + days * 864e5 : null
     const ticket = {
       num,
       key: 'ACC-' + num,
@@ -49,10 +55,12 @@ export function useLocalTickets() {
       requester: user.name || user.email || 'Unknown',
       requesterEmail: user.email || null,
       manager,
-      approval: needsApproval ? { state: 'Pending', by: null, at: null, note: null } : null,
+      approval: requireApproval ? { state: 'Pending', by: null, at: null, note: null } : null,
       assignee: null,
       urgency: meta.urgency || 'Medium',
-      status: needsApproval ? 'Pending Approval' : 'Open',
+      duration,
+      expiresAt,
+      status: requireApproval ? 'Pending Approval' : 'Open',
       created: now,
       sla: app.sla,
       fields: data,
@@ -60,7 +68,7 @@ export function useLocalTickets() {
         {
           who: 'Automation',
           tm: now,
-          tx: needsApproval
+          tx: requireApproval
             ? 'Passed validation. Awaiting line-manager approval from ' + manager + '.'
             : 'Passed validation — all required fields present. Ticket opened and SLA timer started (' + app.sla + 'h target).',
         },

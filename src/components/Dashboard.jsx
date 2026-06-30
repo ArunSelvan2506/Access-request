@@ -1,5 +1,5 @@
 import { AppCell, StatusPill, SlaCell } from './common/Badges'
-import { slaState, isOpen, isBreaching } from '../utils/sla'
+import { slaState, isOpen, isBreaching, expiryInfo } from '../utils/sla'
 import { formatUK, formatUKShort } from '../utils/format'
 
 function Stat({ n, label }) {
@@ -17,6 +17,10 @@ export default function Dashboard({ tickets, now, onOpen }) {
   const breach = tickets.filter(isBreaching).length
   const rej = tickets.filter((t) => t.status === 'Rejected').length
   const done = tickets.filter((t) => t.status === 'Done').length
+  const expiring = tickets.filter((t) => {
+    const e = expiryInfo(t, now)
+    return e && (e.soon || e.expired)
+  }).length
 
   const recent = [...tickets].sort((a, b) => b.created - a.created).slice(0, 6)
 
@@ -31,6 +35,7 @@ export default function Dashboard({ tickets, now, onOpen }) {
         <Stat n={appr} label="Awaiting approval" />
         <Stat n={open} label="Open requests" />
         <Stat n={breach} label="SLA at risk" />
+        <Stat n={expiring} label="Access expiring" />
         <Stat n={rej} label="Auto-rejected" />
         <Stat n={done} label="Resolved" />
       </div>

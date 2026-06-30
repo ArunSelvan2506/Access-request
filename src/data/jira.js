@@ -12,3 +12,10 @@ export const PENDING_REASONS = [
 // Jira "Urgency" select — optional triage field on a request.
 export const URGENCY_OPTIONS = ['Critical', 'High', 'Medium', 'Low']
 export const DEFAULT_URGENCY = 'Medium'
+
+// Time-bound (expiring) access options.
+export const DURATION_OPTIONS = ['Permanent', '30 days', '60 days', '90 days', '6 months', '1 year']
+export const DEFAULT_DURATION = 'Permanent'
+const DURATION_DAYS = { '30 days': 30, '60 days': 60, '90 days': 90, '6 months': 182, '1 year': 365 }
+export const durationDays = (d) => DURATION_DAYS[d] || null
+

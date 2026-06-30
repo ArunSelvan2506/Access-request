@@ -10,6 +10,9 @@ import CreateModal from './components/CreateModal'
 import TicketDrawer from './components/TicketDrawer'
 import SignIn from './components/SignIn'
 import AdminSettings from './components/AdminSettings'
+import Reports from './components/Reports'
+import GlobalSearch from './components/GlobalSearch'
+import HelpPanel from './components/HelpPanel'
 import { ToastProvider } from './components/common/Toast'
 import { useLocalTickets } from './hooks/useTickets'
 import { useNow } from './hooks/useNow'
@@ -27,6 +30,7 @@ function AppInner({ session }) {
 
   const [nav, setNav] = useState({ view: isAdmin ? 'dashboard' : 'queue', q: null })
   const [createOpen, setCreateOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [openKey, setOpenKey] = useState(null)
 
   // Admins see everything; everyone else sees their own requests AND requests
@@ -43,7 +47,7 @@ function AppInner({ session }) {
 
   // Keep people out of views they shouldn't see (e.g. after a role change).
   const allowedViews = isAdmin
-    ? ['dashboard', 'queue', 'board', 'approvals', 'autos', 'catalog', ...(isOwner ? ['admins'] : [])]
+    ? ['dashboard', 'queue', 'board', 'approvals', 'reports', 'autos', 'catalog', ...(isOwner ? ['admins'] : [])]
     : ['queue', 'catalog', ...(approvalsList.length ? ['approvals'] : [])]
   useEffect(() => {
     if (!allowedViews.includes(nav.view)) {
@@ -92,7 +96,14 @@ function AppInner({ session }) {
 
   return (
     <>
-      <TopNav onCreate={() => setCreateOpen(true)} email={email} role={role} onSignOut={session.signOut} />
+      <TopNav
+        onCreate={() => setCreateOpen(true)}
+        email={email}
+        role={role}
+        onSignOut={session.signOut}
+        onHelp={() => setHelpOpen(true)}
+        search={<GlobalSearch tickets={visibleTickets} onOpen={openTicket} />}
+      />
       <div className="shell">
         <Sidebar active={nav} counts={counts} onSelect={selectNav} isAdmin={isAdmin} isOwner={isOwner} />
         <main className="main">
@@ -120,6 +131,7 @@ function AppInner({ session }) {
             />
           )}
           {nav.view === 'board' && isAdmin && <Board tickets={tickets} onOpen={openTicket} />}
+          {nav.view === 'reports' && isAdmin && <Reports tickets={tickets} now={now} />}
           {nav.view === 'autos' && isAdmin && <Automations />}
           {nav.view === 'catalog' && <Catalog />}
           {nav.view === 'admins' && isOwner && <AdminSettings session={session} />}
@@ -129,9 +141,12 @@ function AppInner({ session }) {
       <CreateModal
         open={createOpen}
         presetApp={null}
+        existing={tickets.filter((t) => t.requesterEmail === email)}
         onClose={() => setCreateOpen(false)}
         onCreate={handleCreate}
       />
+
+      <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
 
       {/* Scrim behind the drawer (the modal renders its own scrim). */}
       {activeTicket && <div className="scrim show" onClick={() => setOpenKey(null)} />}

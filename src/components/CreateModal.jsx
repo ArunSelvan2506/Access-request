@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
-import { CATALOG, findApp } from '../data/catalog'
+import { CATALOG, findApp, needsApproval, isTimed } from '../data/catalog'
 import { RULES } from '../data/rules'
-import { URGENCY_OPTIONS, DEFAULT_URGENCY } from '../data/jira'
+import { URGENCY_OPTIONS, DEFAULT_URGENCY, DURATION_OPTIONS, DEFAULT_DURATION } from '../data/jira'
 import { validateRequest } from '../utils/validation'
+import { isOpen } from '../utils/sla'
 import { useToast } from './common/Toast'
 
 // Build the initial form values for an app (applies any field defaults).
@@ -12,18 +13,34 @@ function initialValues(app) {
   return v
 }
 
-export default function CreateModal({ open, presetApp, onClose, onCreate }) {
+export default function CreateModal({ open, presetApp, onClose, onCreate, existing = [] }) {
   const [appName, setAppName] = useState(presetApp || '')
   const [summary, setSummary] = useState('')
   const [values, setValues] = useState({})
   const [urgency, setUrgency] = useState(DEFAULT_URGENCY)
+  const [duration, setDuration] = useState(DEFAULT_DURATION)
   const [manager, setManager] = useState('')
   const [managerBad, setManagerBad] = useState(false)
+  const [dupeAck, setDupeAck] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
   const [validation, setValidation] = useState(null) // { reject, errors } or null
   const toast = useToast()
 
   const app = useMemo(() => findApp(appName), [appName])
+  const requireApproval = !!app && app.group === 'green' && needsApproval(app.name)
+  const timed = !!app && app.group === 'green' && isTimed(app.name)
+
+  // Duplicate / existing-access detection: same app already open or resolved
+  // in the last 90 days for this requester.
+  const dupe = useMemo(() => {
+    if (!app || app.group !== 'green') return null
+    const now = Date.now()
+    return (
+      existing.find(
+        (t) => t.app === app.name && (isOpen(t) || (t.status === 'Done' && now - t.created < 90 * 864e5))
+      ) || null
+    )
+  }, [app, existing])
 
   // Reset the form whenever the modal opens (and apply any preset application).
   useEffect(() => {
@@ -33,8 +50,10 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
       setSummary('')
       setValues(initialValues(a))
       setUrgency(DEFAULT_URGENCY)
+      setDuration(DEFAULT_DURATION)
       setManager('')
       setManagerBad(false)
+      setDupeAck(false)
       setFieldErrors({})
       setValidation(null)
     }
@@ -44,6 +63,10 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
     setAppName(name)
     setValues(initialValues(findApp(name)))
     setSummary('')
+    setDuration(DEFAULT_DURATION)
+    setManager('')
+    setManagerBad(false)
+    setDupeAck(false)
     setFieldErrors({})
     setValidation(null)
   }
@@ -65,9 +88,11 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
     const { data, errors, fieldErrors: fe } = validateRequest(app, summary, values)
     const mgr = manager.trim().toLowerCase()
     const mgrValid = /^[^@\s]+@fuseenergy\.com$/.test(mgr)
-    setManagerBad(!mgrValid)
     const allErrors = [...errors]
-    if (!mgrValid) allErrors.push('Line manager email (@fuseenergy.com) is required for approval')
+    if (requireApproval) {
+      setManagerBad(!mgrValid)
+      if (!mgrValid) allErrors.push('Line manager email (@fuseenergy.com) is required — this application needs approval')
+    }
     if (allErrors.length) {
       // AUTOMATION: auto-reject incomplete (rule index 0)
       const auto = RULES[0].on
@@ -78,7 +103,11 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
     }
     setSubmitting(true)
     try {
-      const ticket = await onCreate(app, summary.trim(), data, { urgency, manager: mgr })
+      const ticket = await onCreate(app, summary.trim(), data, {
+        urgency,
+        manager: requireApproval ? mgr : null,
+        duration: timed ? duration : null,
+      })
       toast('Created ' + ticket.key, 'good')
       onClose()
     } catch (e) {
@@ -148,6 +177,19 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
             </div>
           )}
 
+          {/* Duplicate / existing-access detection */}
+          {app && app.group === 'green' && dupe && !dupeAck && (
+            <div className="callout warn" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+              <div>
+                ♻️ You already have a {dupe.status === 'Done' ? 'recent' : 'live'} request for <b>{app.name}</b>
+                {' '}({dupe.key}, {dupe.status}). Check that before raising a duplicate.
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <button className="btn" onClick={() => setDupeAck(true)}>Request anyway</button>
+              </div>
+            </div>
+          )}
+
           {/* Dynamic fields */}
           {app && app.group === 'green' && (
             <div>
@@ -169,22 +211,35 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
                   ))}
                 </select>
               </div>
-              <div className={'field' + (managerBad ? ' bad' : '')}>
-                <label>
-                  Line manager email <span className="req">*</span>
-                </label>
-                <input
-                  type="email"
-                  placeholder="manager@fuseenergy.com"
-                  value={manager}
-                  onChange={(e) => {
-                    setManager(e.target.value)
-                    setManagerBad(false)
-                  }}
-                />
-                <div className="hint">Your request goes to this manager for approval before IT actions it.</div>
-                <div className="err">A valid @fuseenergy.com manager email is required.</div>
-              </div>
+              {timed && (
+                <div className="field">
+                  <label>Access duration</label>
+                  <select value={duration} onChange={(e) => setDuration(e.target.value)}>
+                    {DURATION_OPTIONS.map((d) => (
+                      <option key={d}>{d}</option>
+                    ))}
+                  </select>
+                  <div className="hint">Time-bound access auto-flags for review when it nears expiry.</div>
+                </div>
+              )}
+              {requireApproval && (
+                <div className={'field' + (managerBad ? ' bad' : '')}>
+                  <label>
+                    Line manager email <span className="req">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="manager@fuseenergy.com"
+                    value={manager}
+                    onChange={(e) => {
+                      setManager(e.target.value)
+                      setManagerBad(false)
+                    }}
+                  />
+                  <div className="hint">{app.name} needs approval — your request goes to this manager before IT actions it.</div>
+                  <div className="err">A valid @fuseenergy.com manager email is required.</div>
+                </div>
+              )}
               {app.fields.map((f) => (
                 <Field
                   key={f.k}

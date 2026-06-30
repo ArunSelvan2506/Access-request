@@ -9,7 +9,7 @@ function initials(email) {
   return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || 'U'
 }
 
-export default function TopNav({ onCreate, email, role, onSignOut }) {
+export default function TopNav({ onCreate, email, role, onSignOut, onHelp, search }) {
   return (
     <nav className="topnav">
       <div className="logo">
@@ -19,6 +19,12 @@ export default function TopNav({ onCreate, email, role, onSignOut }) {
         Projects / <b>Access Requests (ACC)</b>
       </span>
       <div className="nav-r">
+        {search}
+        {onHelp && (
+          <button className="btn" onClick={onHelp} title="Help & knowledge base">
+            ? Help
+          </button>
+        )}
         <button className="btn primary" onClick={onCreate}>
           + Create
         </button>
