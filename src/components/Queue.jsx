@@ -48,7 +48,8 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
   const [search, setSearch] = useState('')
   const [fStatus, setFStatus] = useState('')
   const [fApp, setFApp] = useState('')
-  const [sort, setSort] = useState({ key: 'created', dir: 'desc' })
+  // Default to oldest-first so the longest-waiting requests sit at the top.
+  const [sort, setSort] = useState({ key: 'created', dir: 'asc' })
 
   const toggleSort = (key) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: DEFAULT_DIR[key] || 'asc' }))
