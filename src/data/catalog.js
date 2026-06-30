@@ -166,6 +166,65 @@ export const CATALOG = [
       { k: 'approval', label: 'Line manager approval', req: true, hint: 'Name of approving manager + confirmation' },
     ],
   },
+  // ----- General IT requests (added from the real IT/Security Service Desk mix) -----
+  {
+    name: 'Hardware / Device', group: 'green', ic: ic('HW', '#e9f2ff', '#0055cc'), sla: 24,
+    callout: { t: 'warn', x: '⚠️ Laptops, monitors and peripherals. Standard kit ships from stock; non-standard items may need manager approval.' },
+    reject: 'Missing device detail or justification',
+    fields: [
+      { k: 'device', label: 'Device / item needed', req: true, hint: 'e.g. MacBook Pro 14", external monitor, headset' },
+      { k: 'reason', label: 'Business justification', req: true, type: 'textarea' },
+      { k: 'location', label: 'Delivery / office location', req: true, hint: 'Office or delivery address' },
+    ],
+  },
+  {
+    name: 'Account Onboarding / Offboarding', group: 'green', ic: ic('ON', '#dcfff1', '#216e4e'), sla: 16,
+    callout: { t: 'crit', x: '🔴 Offboarding is time-sensitive — submit on or before the leaver’s last working day.' },
+    reject: 'Missing start/leave date',
+    fields: [
+      { k: 'type', label: 'Request type', req: true, type: 'select', opts: ['Onboarding (new starter)', 'Offboarding (leaver)'] },
+      { k: 'role', label: 'Role & team', req: true, hint: 'Role/team of the starter or leaver' },
+      { k: 'date', label: 'Start / last working date', req: true, hint: 'e.g. 2026-07-15' },
+    ],
+  },
+  {
+    name: 'Password / MFA Reset', group: 'green', ic: ic('PW', '#fff7d6', '#7f5f01'), sla: 4,
+    callout: { t: 'warn', x: '⚠️ Account lockouts, password and MFA/2FA issues. Try the self-service reset first where available.' },
+    reject: 'Missing account / system detail',
+    fields: [
+      { k: 'system', label: 'Affected account or system', req: true, hint: 'e.g. Google, VPN, Windows login' },
+      { k: 'issue', label: 'Issue type', req: true, type: 'select', opts: ['Password reset', 'Account locked', 'MFA / 2FA reset', 'Other'] },
+    ],
+  },
+  {
+    name: 'Software Installation', group: 'green', ic: ic('SW', '#f3f0ff', '#5e4db2'), sla: 16,
+    callout: { t: 'warn', x: '⚠️ Approved software only. Licensed/paid software may need Finance or manager approval.' },
+    reject: 'Missing software name or justification',
+    fields: [
+      { k: 'software', label: 'Software name & version', req: true },
+      { k: 'device', label: 'Device to install on', req: true, hint: 'Asset tag or device name' },
+      { k: 'just', label: 'Business justification', req: true, type: 'textarea' },
+    ],
+  },
+  {
+    name: 'Email / Distribution List', group: 'green', ic: ic('EM', '#e9f2ff', '#0055cc'), sla: 8,
+    callout: { t: 'warn', x: '⚠️ Shared mailboxes, distribution lists and aliases.' },
+    reject: 'Missing mailbox / list name',
+    fields: [
+      { k: 'type', label: 'Type', req: true, type: 'select', opts: ['Shared mailbox', 'Distribution list', 'Email alias'] },
+      { k: 'name', label: 'Exact mailbox / list name', req: true },
+      { k: 'just', label: 'Business justification', req: true, type: 'textarea' },
+    ],
+  },
+  {
+    name: 'Phone / Mobile / SIM', group: 'green', ic: ic('PH', '#dcfff1', '#216e4e'), sla: 24,
+    callout: { t: 'warn', x: '⚠️ Work mobiles, SIMs and number changes. May require manager approval.' },
+    reject: 'Missing justification',
+    fields: [
+      { k: 'type', label: 'Request type', req: true, type: 'select', opts: ['New work phone', 'New SIM', 'Number port / change', 'Repair'] },
+      { k: 'just', label: 'Business justification', req: true, type: 'textarea' },
+    ],
+  },
   // not IT-managed
   { name: 'Backoffice', group: 'red', ic: ic('BO', '#ffeceb', '#ae2a19'), route: 'Post in #access-request and tag @ops-permission-managers.' },
   { name: 'Navan', group: 'red', ic: ic('NV', '#ffeceb', '#ae2a19'), route: 'Contact Hongyi or Manuel (Finance) directly.' },
@@ -200,6 +259,12 @@ export const APP_EMOJI = {
   'Google Account Reset / 2FA': '🔑',
   JetBrains: '🛠️',
   'Social Media': '📣',
+  'Hardware / Device': '💻',
+  'Account Onboarding / Offboarding': '🧑‍💼',
+  'Password / MFA Reset': '🔑',
+  'Software Installation': '📦',
+  'Email / Distribution List': '📧',
+  'Phone / Mobile / SIM': '📱',
   Backoffice: '🏢',
   Navan: '✈️',
   'GES / ECOES': '⚡',
