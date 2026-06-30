@@ -4,7 +4,7 @@ name: Deploy to GitHub Pages
 # Deploys on every push to the default branch, and can be run manually.
 on:
   push:
-    branches: [main]
+    branches: [main, claude/access-request-repo-5ufe8n]
   workflow_dispatch:
 
 # Permissions required for the Pages deployment.
