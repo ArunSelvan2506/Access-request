@@ -1,3 +1,29 @@
+// Absolute date/time in UK time zone (Europe/London — handles GMT/BST).
+// e.g. "30 Jun 2026, 14:32"
+export function formatUK(ts) {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date(ts))
+}
+
+// Shorter UK date/time without the year, e.g. "30 Jun, 14:32".
+export function formatUKShort(ts) {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date(ts))
+}
+
 // Human-friendly "time ago" for a timestamp.
 export function timeAgo(ts, now = Date.now()) {
   const d = now - ts

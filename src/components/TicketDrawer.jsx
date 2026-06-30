@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { findApp } from '../data/catalog'
 import { slaState } from '../utils/sla'
-import { timeAgo, TRANSITIONS } from '../utils/format'
+import { timeAgo, formatUK, TRANSITIONS } from '../utils/format'
 import { PENDING_REASONS } from '../data/jira'
 import { StatusPill } from './common/Badges'
 
@@ -57,6 +57,11 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
               </span>
               <span className="tag grey">SLA target {ticket.sla}h</span>
               {ticket.urgency && <span className="tag blue">Urgency: {ticket.urgency}</span>}
+            </div>
+
+            <div style={{ fontSize: 12, color: 'var(--faint)', marginBottom: 18 }}>
+              Created {formatUK(ticket.created)} · SLA due {formatUK(ticket.created + ticket.sla * 36e5)}{' '}
+              <span style={{ fontWeight: 600 }}>(UK time)</span>
             </div>
 
             {ticket.rejectReason && (
@@ -127,12 +132,12 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
             <div className="activity">
               <div className="ev">
                 <div className="who">{ticket.requester}</div>
-                <div className="tm">{timeAgo(ticket.created, now)} · created request</div>
+                <div className="tm">{formatUK(ticket.created)} · {timeAgo(ticket.created, now)} · created request</div>
               </div>
               {activity.map((e, i) => (
                 <div className="ev" key={i}>
                   <div className="who">{e.who}</div>
-                  <div className="tm">{timeAgo(e.tm, now)}</div>
+                  <div className="tm">{formatUK(e.tm)} · {timeAgo(e.tm, now)}</div>
                   <div className="tx">{e.tx}</div>
                 </div>
               ))}

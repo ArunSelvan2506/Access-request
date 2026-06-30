@@ -1,6 +1,6 @@
 import { AppCell, StatusPill, SlaCell } from './common/Badges'
 import { slaState, isOpen, isBreaching } from '../utils/sla'
-import { timeAgo } from '../utils/format'
+import { formatUK, formatUKShort } from '../utils/format'
 
 function Stat({ n, label }) {
   return (
@@ -67,7 +67,7 @@ export default function Dashboard({ tickets, now, onOpen }) {
                 <td>
                   <SlaCell ticket={t} now={now} />
                 </td>
-                <td>{timeAgo(t.created, now)}</td>
+                <td title={formatUK(t.created)} style={{ whiteSpace: 'nowrap' }}>{formatUKShort(t.created)}</td>
               </tr>
             ))
           )}

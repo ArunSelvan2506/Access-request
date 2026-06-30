@@ -180,3 +180,34 @@ export const CATALOG = [
 ]
 
 export const findApp = (n) => CATALOG.find((a) => a.name === n)
+
+// Self-contained per-application icons (emoji, so no external assets / offline-safe).
+// Rendered inside the coloured app tile; falls back to the 2-letter code if missing.
+export const APP_EMOJI = {
+  AWS: '☁️',
+  Datadog: '🐕',
+  Metabase: '📊',
+  GitHub: '🐙',
+  GeminiAI: '✨',
+  ChatGPT: '💬',
+  Cursor: '⌨️',
+  Claude: '✴️',
+  Microsoft: '🪟',
+  Bitwarden: '🔐',
+  'Google Shared Drive': '📁',
+  'Google Voice': '☎️',
+  'Google Groups': '👥',
+  'Google Account Reset / 2FA': '🔑',
+  JetBrains: '🛠️',
+  'Social Media': '📣',
+  Backoffice: '🏢',
+  Navan: '✈️',
+  'GES / ECOES': '⚡',
+  TMA: '🔧',
+  Figma: '🎨',
+  Adobe: '🖌️',
+  Docusign: '✍️',
+  'LinkedIn Premium': '💼',
+  Deliveroo: '🛵',
+  Devbox: '📦',
+}
