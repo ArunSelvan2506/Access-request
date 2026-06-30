@@ -84,6 +84,16 @@ table.q tbody tr{cursor:pointer}
 table.q tbody tr:hover{background:#fafbfc}
 .keycell{font-weight:600;color:var(--nav);white-space:nowrap}
 .app-ic{width:22px;height:22px;border-radius:5px;display:inline-grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;vertical-align:middle;margin-right:7px}
+.app-ic.logo{background:#fff;border:1px solid var(--border)}
+.app-ic.logo svg{display:block}
+.sla-legend{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.sla-legend-l{font-size:12px;font-weight:600;color:var(--faint);margin-right:4px}
+.sla-chip{font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--border);background:var(--surface-2);color:var(--soft)}
+.sla-chip strong{font-weight:700}
+.sla-chip.p-critical{background:var(--red-bg);color:var(--red-tx);border-color:var(--red-bd)}
+.sla-chip.p-high{background:var(--yellow-bg);color:var(--yellow-tx);border-color:var(--yellow-bd)}
+.sla-chip.p-medium{background:var(--blue-bg);color:var(--blue-tx);border-color:var(--blue-bd)}
+.sla-chip.p-low{background:var(--green-bg);color:var(--green-tx);border-color:var(--green-bd)}
 
 .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:3px;display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;white-space:nowrap}
 .tag.green{background:var(--green-bg);color:var(--green-tx);border-color:var(--green-bd)}

@@ -10,8 +10,9 @@ export const NOTION_SOURCE =
 // The applications IT manages (group "green") plus the ones that are NOT
 // IT-managed (group "red"). The validation engine and the AI assistant both
 // read from this catalog, so adding/editing an entry here is all that's needed
-// to change required fields, SLA targets and routing. (SLA targets come from the
-// service-desk policy, not the Notion validation page.)
+// to change required fields and routing. (SLA is no longer per-app — turnaround
+// is driven by the request priority; see PRIORITY_SLA in jira.js. The legacy
+// per-app `sla` value is retained only as a rough default hint.)
 //
 // Field shape:
 //   { k, label, req, type?, hint?, def?, opts?, validate? }

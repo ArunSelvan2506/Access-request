@@ -40,7 +40,6 @@ export default function HelpPanel({ open, onClose }) {
             <div key={a.name} style={{ marginBottom: 14 }}>
               <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>
                 <span style={{ marginRight: 6 }}>{APP_EMOJI[a.name] || ''}</span>{a.name}
-                <span className="tag grey" style={{ marginLeft: 8 }}>SLA {a.sla}h</span>
               </div>
               {a.callout && <div style={{ fontSize: 12.5, color: 'var(--soft)' }}>{a.callout.x}</div>}
             </div>

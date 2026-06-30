@@ -1,4 +1,4 @@
-import { findApp } from './catalog'
+import { slaForUrgency } from './jira'
 
 // Realistic demo dataset reflecting the real IT/Security desk mix (no personal
 // names — role-based requesters). Generated from a compact table so it stays
@@ -33,6 +33,7 @@ const FIELDS = {
   'Password / MFA Reset': { system: 'Google Workspace', issue: 'MFA / 2FA reset' },
   'Software Installation': { software: 'Docker Desktop', device: 'LAP-204', just: 'Local development' },
   'Email / Distribution List': { type: 'Distribution list', name: 'trading-alerts@fuseenergy.com', just: 'Team alerting' },
+  'Phone / Mobile / SIM': { type: 'New SIM', just: 'Replacement SIM for work mobile' },
 }
 
 // [num, app, summary, status, urgency, hoursAgo, extra?]
@@ -100,7 +101,6 @@ export function seedTickets() {
   return ROWS.map((r, i) => {
     const [num, app, summary, status, urgency, hoursAgo, extra = {}] = r
     const [requester, requesterEmail, department] = ROLES[i % ROLES.length]
-    const a = findApp(app)
     const created = now - hoursAgo * H
     const ticket = {
       num,
@@ -114,7 +114,7 @@ export function seedTickets() {
       urgency,
       status,
       created,
-      sla: a ? a.sla : 8,
+      sla: slaForUrgency(urgency),
       fields: FIELDS[app] || { just: 'Business need' },
       assignee: null,
       activity: [],

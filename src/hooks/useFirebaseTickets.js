@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from './useAuth'
+import { buildTicket } from '../data/ticketOps'
 
 // Firestore-backed ticket store. Tickets live in the `tickets` collection and
 // are shared across the whole company in real time. New ticket numbers are
@@ -30,43 +31,24 @@ export function useFirebaseTickets() {
   }, [])
 
   const createTicket = useCallback(
-    async (app, summary, data) => {
-      const requester = user?.displayName || user?.email || 'Unknown'
-      const created = Date.now()
+    async (app, summary, data, sessionUser = {}, meta = {}) => {
+      const u = {
+        name: sessionUser.name || user?.displayName || user?.email || 'Unknown',
+        email: sessionUser.email || user?.email || null,
+      }
 
       const ticket = await runTransaction(db(), async (tx) => {
         const counterRef = doc(db(), 'meta', 'counter')
         const counterSnap = await tx.get(counterRef)
-        const last = counterSnap.exists() ? counterSnap.data().seq || 105 : 105
-        const num = Math.max(last, 105) + 1
-        const key = 'ACC-' + num
+        const last = counterSnap.exists() ? counterSnap.data().seq || 140 : 140
+        const num = Math.max(last, 140) + 1
 
-        const t = {
-          num,
-          key,
-          app: app.name,
-          summary,
-          requester,
-          requesterEmail: user?.email || null,
-          status: 'Open',
-          created,
-          sla: app.sla,
-          fields: data,
-          activity: [
-            {
-              who: 'Automation',
-              tm: created,
-              tx:
-                'Passed validation — all required fields present. Ticket opened and SLA timer started (' +
-                app.sla +
-                'h target).',
-            },
-          ],
-          rejectReason: null,
-        }
+        // Same pure builder every backend uses — priority-driven SLA, approvals,
+        // department/role and validation activity stay identical everywhere.
+        const t = { ...buildTicket({ num, app, summary, data, user: u, meta }), rejectReason: null }
 
         tx.set(counterRef, { seq: num }, { merge: true })
-        tx.set(doc(db(), 'tickets', key), t)
+        tx.set(doc(db(), 'tickets', t.key), t)
         return t
       })
 

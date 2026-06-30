@@ -2,15 +2,17 @@
 // Firebase). Keeping the business logic here means a ticket behaves identically
 // no matter where it's stored.
 import { needsApproval } from './catalog'
-import { durationDays } from './jira'
+import { durationDays, slaForUrgency } from './jira'
 
-// Build a brand-new ticket. `app` is a catalog entry (needs .name and .sla).
+// Build a brand-new ticket. `app` is a catalog entry (needs .name).
+// SLA is driven by priority (urgency), not the application.
 export function buildTicket({ num, app, summary, data, user = {}, meta = {} }) {
   const now = Date.now()
   const requireApproval = needsApproval(app.name)
   const manager = requireApproval ? (meta.manager || '').trim().toLowerCase() || null : null
   const days = durationDays(meta.duration)
   const expiresAt = days ? now + days * 864e5 : null
+  const urgency = meta.urgency || 'Medium'
   return {
     num,
     key: 'ACC-' + num,
@@ -23,12 +25,12 @@ export function buildTicket({ num, app, summary, data, user = {}, meta = {} }) {
     manager,
     approval: requireApproval ? { state: 'Pending', by: null, at: null, note: null } : null,
     assignee: null,
-    urgency: meta.urgency || 'Medium',
+    urgency,
     duration: meta.duration || null,
     expiresAt,
     status: requireApproval ? 'Pending Approval' : 'Open',
     created: now,
-    sla: app.sla,
+    sla: slaForUrgency(urgency),
     fields: data,
     activity: [
       {
@@ -36,7 +38,7 @@ export function buildTicket({ num, app, summary, data, user = {}, meta = {} }) {
         tm: now,
         tx: requireApproval
           ? 'Passed validation. Awaiting line-manager approval from ' + manager + '.'
-          : 'Passed validation — all required fields present. Ticket opened and SLA timer started (' + app.sla + 'h target).',
+          : 'Passed validation — all required fields present. Ticket opened and SLA timer started (' + slaForUrgency(urgency) + 'h target).',
       },
     ],
   }
