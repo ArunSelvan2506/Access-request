@@ -8,7 +8,6 @@ import Automations from './components/Automations'
 import Catalog from './components/Catalog'
 import CreateModal from './components/CreateModal'
 import TicketDrawer from './components/TicketDrawer'
-import Chatbot from './components/Chatbot'
 import SignIn from './components/SignIn'
 import AdminSettings from './components/AdminSettings'
 import { ToastProvider } from './components/common/Toast'
@@ -107,8 +106,6 @@ function AppInner({ session }) {
         onClose={() => setOpenKey(null)}
         onTransition={handleTransition}
       />
-
-      <Chatbot />
     </>
   )
 }
