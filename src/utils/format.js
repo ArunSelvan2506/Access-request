@@ -37,10 +37,19 @@ export function timeAgo(ts, now = Date.now()) {
 
 // CSS class for a status pill.
 export const statusClass = (s) =>
-  ({ Open: 's-open', 'In Progress': 's-prog', Waiting: 's-wait', Done: 's-done', Rejected: 's-rej' }[s])
+  ({
+    'Pending Approval': 's-appr',
+    Open: 's-open',
+    'In Progress': 's-prog',
+    Waiting: 's-wait',
+    Done: 's-done',
+    Rejected: 's-rej',
+  }[s])
 
-// Allowed workflow transitions out of each status.
+// Allowed workflow transitions out of each status. "Pending Approval" has no
+// manual transitions — it's resolved by the line-manager Approve/Decline action.
 export const TRANSITIONS = {
+  'Pending Approval': [],
   Open: ['In Progress', 'Rejected'],
   'In Progress': ['Waiting', 'Done', 'Rejected'],
   Waiting: ['In Progress', 'Done'],

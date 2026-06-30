@@ -17,6 +17,8 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
   const [summary, setSummary] = useState('')
   const [values, setValues] = useState({})
   const [urgency, setUrgency] = useState(DEFAULT_URGENCY)
+  const [manager, setManager] = useState('')
+  const [managerBad, setManagerBad] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
   const [validation, setValidation] = useState(null) // { reject, errors } or null
   const toast = useToast()
@@ -31,6 +33,8 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
       setSummary('')
       setValues(initialValues(a))
       setUrgency(DEFAULT_URGENCY)
+      setManager('')
+      setManagerBad(false)
       setFieldErrors({})
       setValidation(null)
     }
@@ -59,17 +63,22 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
       return
     }
     const { data, errors, fieldErrors: fe } = validateRequest(app, summary, values)
-    if (errors.length) {
+    const mgr = manager.trim().toLowerCase()
+    const mgrValid = /^[^@\s]+@fuseenergy\.com$/.test(mgr)
+    setManagerBad(!mgrValid)
+    const allErrors = [...errors]
+    if (!mgrValid) allErrors.push('Line manager email (@fuseenergy.com) is required for approval')
+    if (allErrors.length) {
       // AUTOMATION: auto-reject incomplete (rule index 0)
       const auto = RULES[0].on
       setFieldErrors(fe)
-      setValidation({ auto, reject: app.reject, errors })
-      toast('Validation failed — ' + errors.length + ' issue' + (errors.length > 1 ? 's' : ''), 'bad')
+      setValidation({ auto, reject: app.reject, errors: allErrors })
+      toast('Validation failed — ' + allErrors.length + ' issue' + (allErrors.length > 1 ? 's' : ''), 'bad')
       return
     }
     setSubmitting(true)
     try {
-      const ticket = await onCreate(app, summary.trim(), data, { urgency })
+      const ticket = await onCreate(app, summary.trim(), data, { urgency, manager: mgr })
       toast('Created ' + ticket.key, 'good')
       onClose()
     } catch (e) {
@@ -159,6 +168,22 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
                     <option key={u}>{u}</option>
                   ))}
                 </select>
+              </div>
+              <div className={'field' + (managerBad ? ' bad' : '')}>
+                <label>
+                  Line manager email <span className="req">*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="manager@fuseenergy.com"
+                  value={manager}
+                  onChange={(e) => {
+                    setManager(e.target.value)
+                    setManagerBad(false)
+                  }}
+                />
+                <div className="hint">Your request goes to this manager for approval before IT actions it.</div>
+                <div className="err">A valid @fuseenergy.com manager email is required.</div>
               </div>
               {app.fields.map((f) => (
                 <Field

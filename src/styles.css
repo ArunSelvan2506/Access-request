@@ -38,7 +38,7 @@ h1.title{font-size:22px;font-weight:600;margin-bottom:2px}
 .sub{color:var(--soft);margin-bottom:18px;max-width:760px}
 
 /* stat cards */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
 .stat{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px 18px}
 .stat .n{font-size:28px;font-weight:700}
 .stat .l{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:2px}
@@ -69,6 +69,7 @@ table.q tbody tr:hover{background:#fafbfc}
 
 /* status pills */
 .status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:3px;text-transform:uppercase;letter-spacing:.03em}
+.s-appr{background:#fff4e5;color:#974f0c}
 .s-open{background:var(--blue-bg);color:var(--blue-tx)}
 .s-prog{background:var(--yellow-bg);color:var(--yellow-tx)}
 .s-wait{background:var(--purple-bg);color:var(--purple-tx)}
@@ -82,7 +83,7 @@ table.q tbody tr:hover{background:#fafbfc}
 .sla.ok{color:#216e4e}.sla.warn{color:#7f5f01}.sla.breach{color:#ae2a19}
 
 /* board */
-.board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start}
+.board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:start}
 .bcol{background:var(--bg);border-radius:8px;padding:8px;min-height:120px}
 .bcol h4{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);font-weight:700;padding:6px 6px 10px;display:flex;justify-content:space-between}
 .bcard{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:10px;margin-bottom:8px;cursor:pointer}

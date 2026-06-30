@@ -17,40 +17,55 @@ import { useSession } from './hooks/useSession'
 import { displayName } from './auth/session'
 import { isOpen, isBreaching } from './utils/sla'
 
+const isPendingApproval = (t) => t.status === 'Pending Approval'
+
 function AppInner({ session }) {
   const { email, role, isAdmin, isOwner } = session
-  const { tickets, createTicket, transitionTicket } = useLocalTickets()
+  const { tickets, createTicket, transitionTicket, decideApproval, assignTicket, addComment } =
+    useLocalTickets()
   const now = useNow() // ticks every 30s to refresh SLA timers
 
   const [nav, setNav] = useState({ view: isAdmin ? 'dashboard' : 'queue', q: null })
   const [createOpen, setCreateOpen] = useState(false)
   const [openKey, setOpenKey] = useState(null)
 
-  // Admins see everything; users see only their own requests.
-  const visibleTickets = isAdmin ? tickets : tickets.filter((t) => t.requesterEmail === email)
+  // Admins see everything; everyone else sees their own requests AND requests
+  // where they are the line manager (so they can approve).
+  const visibleTickets = isAdmin
+    ? tickets
+    : tickets.filter((t) => t.requesterEmail === email || t.manager === email)
 
-  // Keep the user out of admin-only views (e.g. after a role change).
+  // Approvals queue: admins see all pending approvals; a manager sees the ones
+  // awaiting their decision.
+  const approvalsList = isAdmin
+    ? tickets.filter(isPendingApproval)
+    : tickets.filter((t) => t.manager === email && isPendingApproval(t))
+
+  // Keep people out of views they shouldn't see (e.g. after a role change).
   const allowedViews = isAdmin
-    ? ['dashboard', 'queue', 'board', 'autos', 'catalog', ...(isOwner ? ['admins'] : [])]
-    : ['queue', 'catalog']
+    ? ['dashboard', 'queue', 'board', 'approvals', 'autos', 'catalog', ...(isOwner ? ['admins'] : [])]
+    : ['queue', 'catalog', ...(approvalsList.length ? ['approvals'] : [])]
   useEffect(() => {
     if (!allowedViews.includes(nav.view)) {
       setNav({ view: isAdmin ? 'dashboard' : 'queue', q: null })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin, isOwner])
+  }, [isAdmin, isOwner, approvalsList.length])
 
   const counts = {
     all: tickets.length,
     open: tickets.filter(isOpen).length,
     breach: tickets.filter(isBreaching).length,
     mine: visibleTickets.length,
+    approvals: approvalsList.length,
   }
 
   const selectNav = useCallback((view, q) => setNav({ view, q: q || null }), [])
   const openTicket = useCallback((key) => setOpenKey(key), [])
 
   const activeTicket = openKey ? visibleTickets.find((t) => t.key === openKey) : null
+  // Who can approve the open ticket: an admin, or its named line manager.
+  const canApprove = !!activeTicket && (isAdmin || activeTicket.manager === email)
 
   const handleCreate = (app, summary, data, meta) => {
     const ticket = createTicket(app, summary, data, { email, name: displayName(email) }, meta)
@@ -62,6 +77,17 @@ function AppInner({ session }) {
   const handleTransition = (key, to, opts) => {
     if (!isAdmin) return // only admins/owner can change status
     transitionTicket(key, to, { actor: displayName(email), ...opts })
+  }
+
+  const handleApprove = (key, decision, note) => {
+    decideApproval(key, decision, displayName(email), note)
+  }
+  const handleAssign = (key, assignee) => {
+    if (!isAdmin) return
+    assignTicket(key, assignee, displayName(email))
+  }
+  const handleComment = (key, text) => {
+    addComment(key, displayName(email), text)
   }
 
   return (
@@ -79,6 +105,16 @@ function AppInner({ session }) {
               queueFilter={isAdmin ? nav.q : null}
               title={isAdmin ? undefined : 'My requests'}
               subtitle={isAdmin ? undefined : 'The access requests you have submitted, with live SLA timers.'}
+              now={now}
+              onOpen={openTicket}
+            />
+          )}
+          {nav.view === 'approvals' && (
+            <Queue
+              tickets={approvalsList}
+              queueFilter={null}
+              title="Approvals"
+              subtitle="Requests awaiting a line-manager decision. Open one to approve or decline."
               now={now}
               onOpen={openTicket}
             />
@@ -103,8 +139,14 @@ function AppInner({ session }) {
         ticket={activeTicket}
         now={now}
         canTransition={isAdmin}
+        canApprove={canApprove}
+        canAssign={isAdmin}
+        currentEmail={email}
         onClose={() => setOpenKey(null)}
         onTransition={handleTransition}
+        onApprove={handleApprove}
+        onAssign={handleAssign}
+        onComment={handleComment}
       />
     </>
   )

@@ -1,6 +1,6 @@
 import { AppCell } from './common/Badges'
 
-const COLUMNS = ['Open', 'In Progress', 'Waiting', 'Done', 'Rejected']
+const COLUMNS = ['Pending Approval', 'Open', 'In Progress', 'Waiting', 'Done', 'Rejected']
 
 export default function Board({ tickets, onOpen }) {
   return (

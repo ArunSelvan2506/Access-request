@@ -12,6 +12,7 @@ function Stat({ n, label }) {
 }
 
 export default function Dashboard({ tickets, now, onOpen }) {
+  const appr = tickets.filter((t) => t.status === 'Pending Approval').length
   const open = tickets.filter(isOpen).length
   const breach = tickets.filter(isBreaching).length
   const rej = tickets.filter((t) => t.status === 'Rejected').length
@@ -27,6 +28,7 @@ export default function Dashboard({ tickets, now, onOpen }) {
         against the catalog rules and tracked against SLA targets.
       </p>
       <div className="stats">
+        <Stat n={appr} label="Awaiting approval" />
         <Stat n={open} label="Open requests" />
         <Stat n={breach} label="SLA at risk" />
         <Stat n={rej} label="Auto-rejected" />

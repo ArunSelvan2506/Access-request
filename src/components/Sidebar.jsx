@@ -17,11 +17,11 @@ function NavLink({ item, active, counts, onSelect }) {
 
 export default function Sidebar({ active, counts, onSelect, isAdmin, isOwner }) {
   if (!isAdmin) {
-    // Regular user: minimal portal view.
-    const items = [
-      { view: 'queue', label: '🎫 My requests', countKey: 'mine' },
-      { view: 'catalog', label: '📚 Service catalog' },
-    ]
+    // Regular user: minimal portal view. Show Approvals only if they have any
+    // requests awaiting their decision as a line manager.
+    const items = [{ view: 'queue', label: '🎫 My requests', countKey: 'mine' }]
+    if (counts.approvals > 0) items.push({ view: 'approvals', label: '✅ My approvals', countKey: 'approvals' })
+    items.push({ view: 'catalog', label: '📚 Service catalog' })
     return (
       <aside className="sidebar">
         <h3>Requests</h3>
@@ -35,6 +35,7 @@ export default function Sidebar({ active, counts, onSelect, isAdmin, isOwner }) 
   const queues = [
     { view: 'dashboard', label: '📊 Dashboard' },
     { view: 'queue', label: '🎫 All requests', countKey: 'all' },
+    { view: 'approvals', label: '✅ Approvals', countKey: 'approvals' },
     { view: 'queue', q: 'open', label: '📥 Open', countKey: 'open' },
     { view: 'queue', q: 'breach', label: '⏰ SLA at risk', countKey: 'breach' },
     { view: 'board', label: '🗂️ Board' },

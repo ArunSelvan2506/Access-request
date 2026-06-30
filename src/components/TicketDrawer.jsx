@@ -3,19 +3,35 @@ import { findApp } from '../data/catalog'
 import { slaState } from '../utils/sla'
 import { timeAgo, formatUK, TRANSITIONS } from '../utils/format'
 import { PENDING_REASONS } from '../data/jira'
+import { displayName } from '../auth/session'
 import { StatusPill } from './common/Badges'
 
-export default function TicketDrawer({ ticket, now, canTransition, onClose, onTransition }) {
+export default function TicketDrawer({
+  ticket,
+  now,
+  canTransition,
+  canApprove,
+  canAssign,
+  currentEmail,
+  onClose,
+  onTransition,
+  onApprove,
+  onAssign,
+  onComment,
+}) {
   const open = !!ticket
   const a = ticket ? findApp(ticket.app) : null
   const s = ticket ? slaState(ticket, now) : null
 
-  // Local state for the "Waiting" pending-reason picker.
   const [waitingPick, setWaitingPick] = useState(false)
   const [reason, setReason] = useState(PENDING_REASONS[0])
+  const [note, setNote] = useState('')
+  const [comment, setComment] = useState('')
   useEffect(() => {
     setWaitingPick(false)
     setReason(PENDING_REASONS[0])
+    setNote('')
+    setComment('')
   }, [ticket?.key])
 
   const labelFor = (k) => {
@@ -25,6 +41,7 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
 
   const transitions = ticket ? TRANSITIONS[ticket.status] || [] : []
   const activity = ticket ? (ticket.activity || []).slice().reverse() : []
+  const pendingApproval = ticket && ticket.status === 'Pending Approval'
 
   const go = (to) => {
     if (to === 'Waiting') {
@@ -64,11 +81,48 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
               <span style={{ fontWeight: 600 }}>(UK time)</span>
             </div>
 
+            {/* ---- Line-manager approval ---- */}
+            {ticket.approval && (
+              <>
+                <div className="sec">Line-manager approval</div>
+                {pendingApproval ? (
+                  <div className="callout warn" style={{ marginBottom: 14, flexDirection: 'column', alignItems: 'stretch' }}>
+                    <div>⏳ Awaiting approval from <b>{ticket.manager}</b>.</div>
+                    {canApprove && (
+                      <div style={{ marginTop: 10 }}>
+                        <textarea
+                          placeholder="Optional note to the requester…"
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          style={{ width: '100%', minHeight: 54, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', marginBottom: 8 }}
+                        />
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button className="btn primary" onClick={() => onApprove(ticket.key, 'Approved', note)}>
+                            Approve
+                          </button>
+                          <button className="btn" onClick={() => onApprove(ticket.key, 'Rejected', note)}>
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="db" style={{ padding: 0, marginBottom: 18, fontSize: 13, color: 'var(--soft)' }}>
+                    {ticket.approval.state === 'Approved' ? '✅ Approved' : '🔴 Declined'} by{' '}
+                    {ticket.approval.by || ticket.manager}
+                    {ticket.approval.at ? ' · ' + formatUK(ticket.approval.at) : ''}
+                    {ticket.approval.note ? ' — ' + ticket.approval.note : ''}
+                  </div>
+                )}
+              </>
+            )}
+
             {ticket.rejectReason && (
               <div className="callout crit">
                 🔴{' '}
                 <div>
-                  <b>Auto-rejected:</b> {ticket.rejectReason}
+                  <b>Rejected:</b> {ticket.rejectReason}
                 </div>
               </div>
             )}
@@ -81,8 +135,24 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
               </div>
             )}
 
-            {/* Transitions — admins only. */}
-            {canTransition ? (
+            {/* ---- Assignment ---- */}
+            <div className="sec">Assignee</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 13 }}>{ticket.assignee ? displayName(ticket.assignee) + ' (' + ticket.assignee + ')' : 'Unassigned'}</span>
+              {canAssign && ticket.assignee !== currentEmail && (
+                <button className="btn" onClick={() => onAssign(ticket.key, currentEmail)}>
+                  Assign to me
+                </button>
+              )}
+              {canAssign && ticket.assignee && (
+                <button className="btn" onClick={() => onAssign(ticket.key, null)}>
+                  Unassign
+                </button>
+              )}
+            </div>
+
+            {/* ---- Workflow transitions (admins, once approved) ---- */}
+            {canTransition && !pendingApproval && (
               <>
                 <div className="sec">Transition</div>
                 <div className="wf">
@@ -112,14 +182,22 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
                   </div>
                 )}
               </>
-            ) : (
+            )}
+            {!canTransition && !pendingApproval && (
               <div className="callout warn" style={{ marginBottom: 20 }}>
-                You can track this request here. Only administrators can change its status.
+                You can track this request and comment here. Only administrators can change its status.
               </div>
             )}
 
+            {/* ---- Details ---- */}
             <div className="sec">Request details</div>
             <dl className="field-grid">
+              {ticket.manager && (
+                <div style={{ display: 'contents' }}>
+                  <dt>Line manager</dt>
+                  <dd>{ticket.manager}</dd>
+                </div>
+              )}
               {Object.entries(ticket.fields).map(([k, v]) => (
                 <div key={k} style={{ display: 'contents' }}>
                   <dt>{labelFor(k)}</dt>
@@ -128,7 +206,32 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
               ))}
             </dl>
 
-            <div className="sec">Activity</div>
+            {/* ---- Comments / activity ---- */}
+            <div className="sec">Activity & comments</div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <input
+                placeholder="Add a comment…"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && comment.trim()) {
+                    onComment(ticket.key, comment)
+                    setComment('')
+                  }
+                }}
+                style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '8px 10px', fontSize: 13 }}
+              />
+              <button
+                className="btn primary"
+                disabled={!comment.trim()}
+                onClick={() => {
+                  onComment(ticket.key, comment)
+                  setComment('')
+                }}
+              >
+                Comment
+              </button>
+            </div>
             <div className="activity">
               <div className="ev">
                 <div className="who">{ticket.requester}</div>
@@ -136,7 +239,7 @@ export default function TicketDrawer({ ticket, now, canTransition, onClose, onTr
               </div>
               {activity.map((e, i) => (
                 <div className="ev" key={i}>
-                  <div className="who">{e.who}</div>
+                  <div className="who">{e.who}{e.comment ? ' 💬' : ''}</div>
                   <div className="tm">{formatUK(e.tm)} · {timeAgo(e.tm, now)}</div>
                   <div className="tx">{e.tx}</div>
                 </div>
