@@ -13,11 +13,19 @@ import {
   waitUntilTableExists,
 } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb'
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
 
 const PORT = process.env.PORT || 8787
 const API_KEY = process.env.API_KEY || '' // optional shared key (x-api-key)
 const ORIGIN = process.env.CORS_ORIGIN || '*'
 const TABLE = process.env.DDB_TABLE || 'access_desk_tickets'
+
+// Email notifications (optional). Needs a verified SES sender in SES_FROM.
+// Without it, mention notifications self-disable and the UI just skips the email.
+const SES_FROM = process.env.SES_FROM || ''
+const APP_URL = process.env.APP_URL || (ORIGIN !== '*' ? ORIGIN : '')
+const emailEnabled = !!SES_FROM
+const ses = emailEnabled ? new SESClient({ ...(process.env.AWS_REGION ? { region: process.env.AWS_REGION } : {}) }) : null
 
 // AI triage (optional). The Anthropic key lives ONLY here, server-side — never
 // in the client bundle or the repo. If it's unset, the AI endpoints report
@@ -197,10 +205,55 @@ app.post('/api/ai/triage', async (req, res) => {
   }
 })
 
+// ---- Mention notifications (email a tagged person) ----
+
+app.get('/api/notify/status', (_req, res) => res.json({ enabled: emailEnabled }))
+
+const escapeHtml = (s) =>
+  String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+
+app.post('/api/notify/mention', wrap(async (req, res) => {
+  if (!emailEnabled) return res.status(503).json({ error: 'email_disabled' })
+  const { ticketKey, summary, actor, text, recipients } = req.body || {}
+  const to = [...new Set((recipients || []).filter((e) => /.+@.+\..+/.test(e)))]
+  if (!ticketKey || to.length === 0) return res.status(400).json({ error: 'ticketKey and recipients required' })
+
+  const subject = '[' + ticketKey + '] ' + (actor || 'Someone') + ' mentioned you'
+  const link = APP_URL ? '\n\nView the request: ' + APP_URL : ''
+  const bodyText =
+    (actor || 'Someone') + ' mentioned you in ' + ticketKey +
+    (summary ? ' — ' + summary : '') + ':\n\n"' + (text || '') + '"' + link
+  const bodyHtml =
+    '<p><strong>' + escapeHtml(actor || 'Someone') + '</strong> mentioned you in <strong>' + escapeHtml(ticketKey) +
+    '</strong>' + (summary ? ' — ' + escapeHtml(summary) : '') + ':</p>' +
+    '<blockquote style="border-left:3px solid #ccc;margin:0;padding:4px 12px;color:#444">' + escapeHtml(text || '') + '</blockquote>' +
+    (APP_URL ? '<p><a href="' + escapeHtml(APP_URL) + '">Open the Access Service Desk</a></p>' : '')
+
+  // One email per recipient so addresses aren't disclosed to each other.
+  let sent = 0
+  for (const addr of to) {
+    try {
+      await ses.send(new SendEmailCommand({
+        Source: SES_FROM,
+        Destination: { ToAddresses: [addr] },
+        Message: {
+          Subject: { Data: subject },
+          Body: { Text: { Data: bodyText }, Html: { Data: bodyHtml } },
+        },
+      }))
+      sent++
+    } catch (e) {
+      console.error('SES send failed for', addr, ':', e?.name || e?.message)
+    }
+  }
+  res.json({ sent, requested: to.length })
+}))
+
 app.listen(PORT, () =>
   console.log(
     'Access Service Desk API on :' + PORT +
       ' | DynamoDB table ' + TABLE +
-      (aiEnabled ? ' | AI triage on (' + AI_MODEL + ')' : ' | AI triage off — set ANTHROPIC_API_KEY')
+      (aiEnabled ? ' | AI triage on (' + AI_MODEL + ')' : ' | AI triage off — set ANTHROPIC_API_KEY') +
+      (emailEnabled ? ' | email on (' + SES_FROM + ')' : ' | email off — set SES_FROM')
   )
 )

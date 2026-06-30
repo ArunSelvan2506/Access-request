@@ -21,13 +21,16 @@ import { ToastProvider } from './components/common/Toast'
 import { useTicketStore } from './hooks/useTicketStore'
 import { useNow } from './hooks/useNow'
 import { useSession } from './hooks/useSession'
-import { displayName } from './auth/session'
+import { displayName, OWNER_EMAIL } from './auth/session'
+import { isApi } from './config'
+import { extractMentions } from './utils/mentions'
+import { notifyMention } from './api/notify'
 import { isOpen, isBreaching } from './utils/sla'
 
 const isPendingApproval = (t) => t.status === 'Pending Approval'
 
 function AppInner({ session }) {
-  const { email, role, isAdmin, isOwner } = session
+  const { email, role, isAdmin, isOwner, admins } = session
   const { tickets, createTicket, transitionTicket, decideApproval, assignTicket, addComment } =
     useTicketStore()
   const now = useNow() // ticks every 30s to refresh SLA timers
@@ -102,8 +105,29 @@ function AppInner({ session }) {
     if (!isAdmin) return
     assignTicket(key, assignee, displayName(email))
   }
+  // People who can be @mentioned on a ticket: its participants + the admin team.
+  const taggablePeople = (ticket) => {
+    if (!ticket) return []
+    const raw = [ticket.requesterEmail, ticket.manager, ticket.assignee, OWNER_EMAIL, ...admins].filter(Boolean)
+    const uniq = [...new Set(raw.map((e) => e.toLowerCase()))]
+    return uniq.map((e) => ({ email: e, name: displayName(e) }))
+  }
+
   const handleComment = (key, text, internal) => {
     addComment(key, displayName(email), text, internal)
+    // Email anyone tagged in the comment (server holds the SES creds). Internal
+    // notes only notify the admin team, so they stay hidden from requesters.
+    if (!isApi) return
+    const t = tickets.find((x) => x.key === key)
+    if (!t) return
+    let recipients = extractMentions(text, taggablePeople(t).map((p) => p.email)).filter((e) => e !== email)
+    if (internal) {
+      const adminSet = new Set([OWNER_EMAIL, ...admins].map((e) => e.toLowerCase()))
+      recipients = recipients.filter((e) => adminSet.has(e))
+    }
+    if (recipients.length) {
+      notifyMention({ ticketKey: key, summary: t.summary, actor: displayName(email), text, recipients })
+    }
   }
 
   return (
@@ -174,6 +198,7 @@ function AppInner({ session }) {
         canAssign={isAdmin}
         isAdmin={isAdmin}
         currentEmail={email}
+        people={taggablePeople(activeTicket)}
         onClose={() => setOpenKey(null)}
         onTransition={handleTransition}
         onApprove={handleApprove}

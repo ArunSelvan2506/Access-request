@@ -113,6 +113,12 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .ai-checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
 .ai-checks li{display:flex;gap:7px;font-size:12.5px;color:var(--ink);align-items:flex-start}
 .ai-draft{white-space:pre-wrap;font-size:13px;line-height:1.5;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;color:var(--ink)}
+.mention{color:var(--blue-tx);font-weight:600;background:var(--blue-bg);border-radius:4px;padding:0 4px}
+.mention-pop{position:absolute;top:100%;left:0;margin-top:4px;width:280px;max-height:220px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--sh);z-index:70}
+.mention-opt{padding:7px 10px;cursor:pointer;display:flex;flex-direction:column;gap:1px}
+.mention-opt:hover,.mention-opt.active{background:var(--surface-2)}
+.mention-name{font-size:13px;font-weight:600;color:var(--ink)}
+.mention-email{font-size:11px;color:var(--faint)}
 
 .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:3px;display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;white-space:nowrap}
 .tag.green{background:var(--green-bg);color:var(--green-tx);border-color:var(--green-bd)}

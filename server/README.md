@@ -70,6 +70,14 @@ Redeploy and the site reads/writes shared tickets from DynamoDB.
 - `PUT /api/tickets/:key` → replace a ticket
 - `GET /api/ai/status` → `{ enabled, model }`
 - `POST /api/ai/triage` → AI triage for one ticket (admin-facing, advisory)
+- `GET /api/notify/status` → `{ enabled }` (email configured?)
+- `POST /api/notify/mention` → email the people tagged in a comment (Amazon SES)
+
+## Mention emails (Amazon SES)
+Tagging a person in a comment (`@name`) emails them. Set `SES_FROM` to a
+**verified SES sender** and give the instance role `ses:SendEmail`. Internal
+notes only notify the admin team, never the requester. Without `SES_FROM` the
+feature self-disables and comments still post normally.
 
 ## Honest limits (for now)
 - `API_KEY` is a deterrent, not real per-user auth — anyone with the key + URL

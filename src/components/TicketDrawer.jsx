@@ -7,6 +7,7 @@ import { displayName } from '../auth/session'
 import { isApi } from '../config'
 import { aiStatus, aiTriage } from '../api/ai'
 import { StatusPill } from './common/Badges'
+import { MentionInput, renderMentions } from './common/MentionInput'
 
 const PRIORITY_TAG = { Critical: 'red', High: 'yellow', Medium: 'blue', Low: 'green' }
 const CHECK_ICON = { ok: '✅', missing: '🔴', unclear: '⚠️' }
@@ -19,6 +20,7 @@ export default function TicketDrawer({
   canAssign,
   isAdmin,
   currentEmail,
+  people = [],
   onClose,
   onTransition,
   onApprove,
@@ -359,12 +361,13 @@ export default function TicketDrawer({
             {/* ---- Comments / activity ---- */}
             <div className="sec">Activity & comments</div>
             <div style={{ marginBottom: 16 }}>
-              <input
-                placeholder="Add a comment…"
+              <MentionInput
+                placeholder="Add a comment…  (type @ to mention someone)"
                 value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && comment.trim()) {
+                onChange={setComment}
+                people={people}
+                onEnter={() => {
+                  if (comment.trim()) {
                     onComment(ticket.key, comment, false)
                     setComment('')
                   }
@@ -420,7 +423,7 @@ export default function TicketDrawer({
                       ) : null}
                     </div>
                     <div className="tm">{formatUK(e.tm)} · {timeAgo(e.tm, now)}</div>
-                    <div className="tx">{e.tx}</div>
+                    <div className="tx">{e.comment ? renderMentions(e.tx, displayName) : e.tx}</div>
                   </div>
                 </div>
               ))}
