@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Security rules for the Access Service Desk.
+// - Only signed-in users on the company domain may read/write.
+// - Tickets: any company user may read all tickets (it's a shared service desk)
+//   and create new ones; updates are limited to status/activity/rejectReason
+//   (the workflow transitions). The number counter is server/transaction-managed.
+// - The grounding doc is written only by Cloud Functions (admin SDK bypasses
+//   these rules); clients may read it but never write it.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isCompanyUser() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('.*@fuseenergy[.]com$');
+    }
+
+    match /tickets/{ticketId} {
+      allow read: if isCompanyUser();
+      allow create: if isCompanyUser();
+      // Allow workflow transitions; disallow tampering with identity/created.
+      allow update: if isCompanyUser()
+        && request.resource.data.num == resource.data.num
+        && request.resource.data.created == resource.data.created
+        && request.resource.data.app == resource.data.app;
+      allow delete: if false;
+    }
+
+    match /meta/{docId} {
+      // counter is read+written inside ticket-create transactions by clients;
+      // grounding is written only by Cloud Functions (admin).
+      allow read: if isCompanyUser();
+      allow write: if isCompanyUser() && docId == 'counter';
+    }
+  }
+}

@@ -87,6 +87,61 @@ The `CNAME` file is committed so GitHub keeps the custom domain across deploys.
 Asset paths are relative (`base: './'` in `vite.config.js`), so the build also
 works at the default `…/access-request/` Pages URL before DNS is live.
 
+## Backends: local vs Firebase
+
+The app runs in one of two modes, chosen at build time by `VITE_BACKEND`:
+
+| | **local** (default) | **firebase** |
+| --- | --- | --- |
+| Tickets | per-browser `localStorage` | shared Firestore, realtime |
+| Login | none | Google SSO, `@fuseenergy.com` only |
+| AI assistant | optional self-hosted proxy | Cloud Function with live grounding |
+| Daily maintenance | none | none — self-updating |
+
+Local mode is the current static GitHub Pages site and needs no setup. Firebase
+mode turns it into a real, company-wide Jira-style service desk.
+
+### How the AI grounding stays current (no daily code edits)
+
+The assistant is grounded in two things: the **catalog rules** (synced from the
+Notion page) and a **live ticket-activity summary** that is regenerated
+automatically on every ticket create and status change:
+
+```
+ticket created / moved to Done|Rejected
+        │  (Firestore trigger: functions/onTicketWritten)
+        ▼
+buildGrounding(all tickets)  →  meta/grounding  (open counts, top reject
+        │                        reasons, avg resolution time, per-app stats)
+        ▼
+chat() Cloud Function reads meta/grounding + catalog rules → Claude
+```
+
+Nobody edits code day-to-day. Policy changes happen in Notion → `catalog.js`;
+everything else updates itself from ticket activity.
+
+### Turning on Firebase mode
+
+**One-time (you):**
+
+1. **Create a Firebase project** (console.firebase.google.com), add a Web app,
+   and enable **Authentication → Google** + **Firestore**.
+2. **Set the build config** — put the `VITE_FIREBASE_*` values from the Firebase
+   SDK config (see `.env.example`) into the repo's **Actions → Variables**, and
+   set `VITE_BACKEND=firebase`.
+3. **Deploy rules + functions** (needs the [Firebase CLI](https://firebase.google.com/docs/cli)):
+   ```bash
+   npm --prefix functions install
+   firebase use <your-project-id>          # or edit .firebaserc
+   firebase functions:secrets:set ANTHROPIC_API_KEY   # paste the company key
+   firebase deploy --only firestore:rules,functions
+   ```
+4. **Authorize the domain** — Firebase console → Authentication → Settings →
+   Authorized domains → add `accessrequest.fuseenergy.com`.
+
+Hosting stays on GitHub Pages; only the database, auth and functions live in
+Firebase. Until step 2 is done, the site keeps running in local mode unchanged.
+
 ## AI assistant
 
 `Chatbot.jsx` posts to an endpoint defined by `VITE_CHAT_ENDPOINT`. The browser must **not**

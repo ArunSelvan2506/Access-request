@@ -9,13 +9,16 @@ import Catalog from './components/Catalog'
 import CreateModal from './components/CreateModal'
 import TicketDrawer from './components/TicketDrawer'
 import Chatbot from './components/Chatbot'
+import LoginGate from './components/LoginGate'
 import { ToastProvider } from './components/common/Toast'
-import { useTickets } from './hooks/useTickets'
+import { useTicketStore } from './hooks/useTicketStore'
+import { useAuth } from './hooks/useAuth'
 import { useNow } from './hooks/useNow'
 import { isOpen, isBreaching } from './utils/sla'
+import { isFirebase } from './config'
 
-function AppInner() {
-  const { tickets, createTicket, transitionTicket } = useTickets()
+function AppInner({ user, onSignOut }) {
+  const { tickets, createTicket, transitionTicket } = useTicketStore()
   const now = useNow() // ticks every 30s to refresh SLA timers
 
   const [nav, setNav] = useState({ view: 'dashboard', q: null })
@@ -33,8 +36,8 @@ function AppInner() {
 
   const activeTicket = openKey ? tickets.find((t) => t.key === openKey) : null
 
-  const handleCreate = (app, summary, data) => {
-    const ticket = createTicket(app, summary, data)
+  const handleCreate = async (app, summary, data) => {
+    const ticket = await createTicket(app, summary, data)
     // Jump to the All requests queue and open the new ticket, mirroring the original.
     setNav({ view: 'queue', q: null })
     setOpenKey(ticket.key)
@@ -47,7 +50,7 @@ function AppInner() {
 
   return (
     <>
-      <TopNav onCreate={() => setCreateOpen(true)} />
+      <TopNav onCreate={() => setCreateOpen(true)} user={user} onSignOut={onSignOut} />
       <div className="shell">
         <Sidebar active={nav} counts={counts} onSelect={selectNav} />
         <main className="main">
@@ -82,10 +85,24 @@ function AppInner() {
   )
 }
 
+// In Firebase mode, require a signed-in company user before mounting the app
+// (so the Firestore subscription only runs once authenticated). In local mode
+// this passes straight through.
+function AuthGate() {
+  const { user, ready, error, signIn, signOut } = useAuth()
+
+  if (!isFirebase) return <AppInner />
+  if (!ready) {
+    return <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--faint)' }}>Loading…</div>
+  }
+  if (!user) return <LoginGate onSignIn={signIn} error={error} />
+  return <AppInner user={user} onSignOut={signOut} />
+}
+
 export default function App() {
   return (
     <ToastProvider>
-      <AppInner />
+      <AuthGate />
     </ToastProvider>
   )
 }

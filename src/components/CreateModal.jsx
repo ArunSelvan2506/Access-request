@@ -43,7 +43,10 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
 
   const setField = (k, v) => setValues((prev) => ({ ...prev, [k]: v }))
 
-  const submit = () => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const submit = async () => {
+    if (submitting) return
     if (!app) {
       toast('Select an application first', 'bad')
       return
@@ -61,9 +64,16 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
       toast('Validation failed — ' + errors.length + ' issue' + (errors.length > 1 ? 's' : ''), 'bad')
       return
     }
-    const ticket = onCreate(app, summary.trim(), data)
-    toast('Created ' + ticket.key, 'good')
-    onClose()
+    setSubmitting(true)
+    try {
+      const ticket = await onCreate(app, summary.trim(), data)
+      toast('Created ' + ticket.key, 'good')
+      onClose()
+    } catch (e) {
+      toast('Could not create the request — please try again', 'bad')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (!open) return null
@@ -155,8 +165,8 @@ export default function CreateModal({ open, presetApp, onClose, onCreate }) {
           <button className="btn" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn primary" onClick={submit}>
-            Submit request
+          <button className="btn primary" onClick={submit} disabled={submitting}>
+            {submitting ? 'Submitting…' : 'Submit request'}
           </button>
         </div>
       </div>

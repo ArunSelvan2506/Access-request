@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { CATALOG } from '../data/catalog'
+import { askAssistant } from '../ai'
 
 const SUGGESTS = [
   'What do I need for GitHub access?',
@@ -7,33 +7,6 @@ const SUGGESTS = [
   'Why was my Cursor ticket rejected?',
   "What's the SLA for AWS?",
 ]
-
-// Knowledge base string fed to the model as grounding context.
-function buildKB() {
-  return CATALOG.map((a) => {
-    if (a.group === 'red')
-      return `${a.name}: NOT IT-managed — do not raise a Jira ticket (auto-rejected). How to request: ${a.route}`
-    const req = a.fields.filter((f) => f.req).map((f) => f.label).join('; ')
-    return `${a.name}: IT-managed, raise a Jira ticket. SLA target ${a.sla}h. Required fields: ${req}. Auto-reject trigger: ${a.reject}.${a.callout ? ' Note: ' + a.callout.x : ''}`
-  }).join('\n')
-}
-
-const SYSTEM_PROMPT = `You are the Access Assistant, an AI help bot embedded in a company IT Access Service Desk (a Jira Service Management replica). Answer staff questions about how to request access to applications, what fields are required, SLA targets, and why tickets get auto-rejected.
-
-Rules:
-- Answer ONLY from the knowledge base below. If something isn't covered, say you don't have that info and suggest posting in #access-request.
-- Be concise and practical. Use short paragraphs or tight bullet lists.
-- If an application is NOT IT-managed, make clear they must NOT raise a Jira ticket and tell them the correct channel.
-- If asked "why was my ticket rejected", explain the likely auto-reject trigger for that application.
-- Never invent fields, SLAs, contacts, or approval steps that aren't in the knowledge base.
-
-KNOWLEDGE BASE:
-${buildKB()}`
-
-// Chat endpoint. Point this at your own backend proxy that forwards to the
-// Claude API (the browser must never hold an API key). The endpoint should
-// accept { system, messages } and return { content: [...] } or { text }.
-const CHAT_ENDPOINT = import.meta.env.VITE_CHAT_ENDPOINT || ''
 
 export default function Chatbot() {
   const [open, setOpen] = useState(false)
@@ -69,24 +42,8 @@ export default function Chatbot() {
     setBusy(true)
 
     try {
-      if (!CHAT_ENDPOINT) {
-        throw new Error('No chat endpoint configured')
-      }
-      const res = await fetch(CHAT_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: history.map(({ role, content }) => ({ role, content })),
-        }),
-      })
-      const data = await res.json()
-      const txt =
-        (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim() ||
-        data.text ||
-        "Sorry, I couldn't generate a response. Try posting in #access-request."
+      const reply = await askAssistant(history.map(({ role, content }) => ({ role, content })))
+      const txt = reply || "Sorry, I couldn't generate a response. Try posting in #access-request."
       setMessages((prev) => [...prev, { role: 'assistant', content: txt }])
     } catch (e) {
       setMessages((prev) => [

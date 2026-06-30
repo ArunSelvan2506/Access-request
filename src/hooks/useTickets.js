@@ -13,10 +13,10 @@ function loadTickets() {
   return seedTickets()
 }
 
-// Central ticket store: holds the list, persists to localStorage on change,
-// and exposes the mutations the UI needs. The `seq` counter mirrors the
-// original app (new tickets start at ACC-106).
-export function useTickets() {
+// Local (localStorage) ticket store: holds the list, persists on change, and
+// exposes the mutations the UI needs. The `seq` counter mirrors the original
+// app (new tickets start at ACC-106). Used when VITE_BACKEND is not "firebase".
+export function useLocalTickets() {
   const [tickets, setTickets] = useState(loadTickets)
   const seqRef = useRef(tickets.reduce((m, t) => Math.max(m, t.num), 0))
 
