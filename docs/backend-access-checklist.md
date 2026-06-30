@@ -41,6 +41,14 @@ From Project settings → Your apps → Web app → SDK config, the 6 values:
   via the Firebase CLI in **Secret Manager**, never in the repo or chat.
 - Blaze plan (already covered above) so Functions can call the Anthropic API.
 
+## 6b. For Slack notifications
+- A **Slack Incoming Webhook URL** for the target channel (e.g. `#access-request`).
+  Created via a Slack app → Incoming Webhooks (may need a **Slack workspace admin**).
+- The webhook URL **is secret** → stored via
+  `firebase functions:secrets:set SLACK_WEBHOOK_URL` (never in the repo/chat).
+- Blaze plan (already covered) so the Cloud Function can call Slack.
+- Posts on ticket create + status change; the code is parked in `functions/`.
+
 ## 7. GitHub (already in place)
 - Repo: `arunselvan2506/Access-request` (you own it).
 - Ability to set **Actions → Variables/Secrets** (you have it).

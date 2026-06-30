@@ -8,4 +8,5 @@ export const RULES = [
   { ic: '🔗', bg: 'var(--purple-bg)', on: true, name: 'Require Linear ticket (AI tools)', desc: 'On create — Cursor and Claude requests without a valid Linear reference are auto-rejected. Claude Code additionally requires access type = developer/quant.', log: 'Applies to Cursor, Claude' },
   { ic: '💰', bg: 'var(--green-bg)', on: true, name: 'Finance gate — JetBrains', desc: 'On create — JetBrains tickets without a Finance approval reference are auto-rejected before reaching IT.', log: 'Applies to JetBrains' },
   { ic: '📸', bg: 'var(--bg)', on: false, name: 'AWS screenshot reminder', desc: 'On create — if an AWS ticket is missing a screenshot, post a comment asking the requester to attach one before auto-rejecting.', log: 'Currently disabled' },
+  { ic: '💬', bg: 'var(--blue-bg)', on: false, name: 'Slack notifications', desc: 'Posts to the #access-request Slack channel when a request is created or changes status (incl. rejected/resolved). Runs server-side via a Cloud Function + Slack incoming webhook.', log: 'Needs backend — inactive until Firebase + Slack webhook are configured' },
 ]

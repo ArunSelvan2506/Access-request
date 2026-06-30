@@ -14,35 +14,44 @@ const Anthropic = require('@anthropic-ai/sdk')
 
 const { buildCatalogKB } = require('./catalogRules')
 const { buildGrounding } = require('./grounding')
+const { notifySlack, ticketMessage } = require('./slack')
 
 admin.initializeApp()
 setGlobalOptions({ region: 'us-central1', maxInstances: 10 })
 
 const ANTHROPIC_API_KEY = defineSecret('ANTHROPIC_API_KEY')
+const SLACK_WEBHOOK_URL = defineSecret('SLACK_WEBHOOK_URL')
 const ALLOWED_DOMAIN = 'fuseenergy.com'
 const GROUNDING_REF = () => admin.firestore().doc('meta/grounding')
 
-// ---- 1. Auto-grounding: rebuild on every ticket create / status change ----
-exports.onTicketWritten = onDocumentWritten('tickets/{ticketId}', async (event) => {
-  const before = event.data?.before?.data()
-  const after = event.data?.after?.data()
+// ---- 1. On every ticket create / status change: rebuild grounding + Slack ----
+exports.onTicketWritten = onDocumentWritten(
+  { document: 'tickets/{ticketId}', secrets: [SLACK_WEBHOOK_URL] },
+  async (event) => {
+    const before = event.data?.before?.data()
+    const after = event.data?.after?.data()
 
-  // Only rebuild when something meaningful changed: creation, deletion, or a
-  // status transition (which covers the "closing state" — Done/Rejected).
-  const statusChanged = before?.status !== after?.status
-  const created = !before && !!after
-  const deleted = !!before && !after
-  if (!created && !deleted && !statusChanged) return
+    // Only act when something meaningful changed: creation, deletion, or a
+    // status transition (which covers the "closing state" — Done/Rejected).
+    const statusChanged = before?.status !== after?.status
+    const created = !before && !!after
+    const deleted = !!before && !after
+    if (!created && !deleted && !statusChanged) return
 
-  const snap = await admin.firestore().collection('tickets').get()
-  const tickets = snap.docs.map((d) => d.data())
-  const grounding = buildGrounding(tickets)
+    // Rebuild the AI grounding doc from the full ticket set.
+    const snap = await admin.firestore().collection('tickets').get()
+    const tickets = snap.docs.map((d) => d.data())
+    const grounding = buildGrounding(tickets)
+    await GROUNDING_REF().set(
+      { text: grounding, updatedAt: admin.firestore.FieldValue.serverTimestamp(), ticketCount: tickets.length },
+      { merge: true }
+    )
 
-  await GROUNDING_REF().set(
-    { text: grounding, updatedAt: admin.firestore.FieldValue.serverTimestamp(), ticketCount: tickets.length },
-    { merge: true }
-  )
-})
+    // Notify Slack (no-op until SLACK_WEBHOOK_URL is configured).
+    const msg = ticketMessage({ before, after, created, deleted })
+    await notifySlack(SLACK_WEBHOOK_URL.value(), msg)
+  }
+)
 
 // ---- 2. Access Assistant chat ----
 const SYSTEM_INSTRUCTIONS = `You are the Access Assistant, an AI help bot embedded in Fuse Energy's IT Access Service Desk (a Jira Service Management replica). Answer staff questions about how to request access to applications, what fields are required, SLA targets, why tickets get auto-rejected, and the current state of the service desk.
