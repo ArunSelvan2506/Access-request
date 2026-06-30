@@ -16,13 +16,45 @@ const TITLES = {
   done: 'Resolved',
 }
 
+// Sortable columns (in table order). `key` maps a header to how it sorts.
+const COLUMNS = [
+  { key: 'num', label: 'Key' },
+  { key: 'app', label: 'Application' },
+  { key: 'summary', label: 'Summary' },
+  { key: 'requester', label: 'Requester' },
+  { key: 'status', label: 'Status' },
+  { key: 'created', label: 'Submitted' },
+  { key: 'sla', label: 'SLA' },
+]
+// Sensible default direction the first time a column is clicked.
+const DEFAULT_DIR = { num: 'asc', app: 'asc', summary: 'asc', requester: 'asc', status: 'asc', created: 'desc', sla: 'asc' }
+
+// Time left against the SLA target (ms). Closed tickets have no live timer, so
+// they sort to the end of an ascending (most-urgent-first) SLA sort.
+const slaRemaining = (t, now) =>
+  ['Done', 'Rejected', 'Cancelled'].includes(t.status) ? Infinity : t.created + (t.sla || 0) * 36e5 - now
+
+function compareBy(a, b, key, now) {
+  switch (key) {
+    case 'num': return (a.num || 0) - (b.num || 0)
+    case 'created': return a.created - b.created
+    case 'sla': return slaRemaining(a, now) - slaRemaining(b, now)
+    case 'status': return STATUS_OPTIONS.indexOf(a.status) - STATUS_OPTIONS.indexOf(b.status)
+    default: return String(a[key] || '').localeCompare(String(b[key] || ''))
+  }
+}
+
 export default function Queue({ tickets, queueFilter, now, onOpen, title: titleProp, subtitle }) {
   const [search, setSearch] = useState('')
   const [fStatus, setFStatus] = useState('')
   const [fApp, setFApp] = useState('')
+  const [sort, setSort] = useState({ key: 'created', dir: 'desc' })
+
+  const toggleSort = (key) =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: DEFAULT_DIR[key] || 'asc' }))
 
   const list = useMemo(() => {
-    let l = [...tickets].sort((a, b) => b.created - a.created)
+    let l = [...tickets]
     if (queueFilter === 'open') l = l.filter(isOpen)
     else if (queueFilter === 'breach') l = l.filter(isBreaching)
     else if (queueFilter === 'expiring') l = l.filter((t) => { const e = expiryInfo(t, now); return e && (e.soon || e.expired) })
@@ -30,13 +62,16 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
     else if (queueFilter === 'done') l = l.filter((t) => t.status === 'Done')
 
     const q = search.toLowerCase()
-    return l.filter(
+    l = l.filter(
       (t) =>
         (!q || (t.key + t.app + t.summary + t.requester).toLowerCase().includes(q)) &&
         (!fStatus || t.status === fStatus) &&
         (!fApp || t.app === fApp)
     )
-  }, [tickets, queueFilter, search, fStatus, fApp, now])
+
+    const mult = sort.dir === 'asc' ? 1 : -1
+    return l.sort((a, b) => mult * compareBy(a, b, sort.key, now))
+  }, [tickets, queueFilter, search, fStatus, fApp, sort, now])
 
   const title = titleProp || TITLES[queueFilter] || 'All requests'
 
@@ -78,13 +113,18 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
       <table className="q">
         <thead>
           <tr>
-            <th>Key</th>
-            <th>Application</th>
-            <th>Summary</th>
-            <th>Requester</th>
-            <th>Status</th>
-            <th>Submitted</th>
-            <th>SLA</th>
+            {COLUMNS.map((c) => (
+              <th
+                key={c.key}
+                className="sortable"
+                onClick={() => toggleSort(c.key)}
+                aria-sort={sort.key === c.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                title={'Sort by ' + c.label.toLowerCase()}
+              >
+                {c.label}
+                <span className="sort-ind">{sort.key === c.key ? (sort.dir === 'asc' ? '▲' : '▼') : '↕'}</span>
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>

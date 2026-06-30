@@ -93,6 +93,10 @@ table.q td{padding:11px 12px;border-bottom:1px solid #f1f2f4;vertical-align:midd
 table.q tr:last-child td{border-bottom:none}
 table.q tbody tr{cursor:pointer}
 table.q tbody tr:hover{background:#fafbfc}
+table.q th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+table.q th.sortable:hover{color:var(--ink)}
+.sort-ind{margin-left:5px;font-size:9px;opacity:.5}
+table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .sort-ind{opacity:1;color:var(--nav)}
 .keycell{font-weight:600;color:var(--nav);white-space:nowrap}
 .app-ic{width:22px;height:22px;border-radius:5px;display:inline-grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;vertical-align:middle;margin-right:7px}
 .app-ic.logo{background:#fff;border:1px solid var(--border)}
