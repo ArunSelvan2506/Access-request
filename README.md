@@ -87,9 +87,22 @@ The `CNAME` file is committed so GitHub keeps the custom domain across deploys.
 Asset paths are relative (`base: './'` in `vite.config.js`), so the build also
 works at the default `…/access-request/` Pages URL before DNS is live.
 
-## Backends: local vs Firebase
+## Current build: standalone web tool
 
-The app runs in one of two modes, chosen at build time by `VITE_BACKEND`:
+The app ships as a **self-contained static web tool** — no backend, no login, no
+setup. Tickets persist in the browser's `localStorage`. This is what builds and
+deploys to GitHub Pages today.
+
+The Firebase backend below (shared tickets, Google SSO, auto-grounded AI) is
+**parked**: the code lives in the repo (`functions/`, `firestore.rules`, the
+Firebase hooks) but is **not wired into the default build**, so it adds nothing
+to the shipped bundle. Switch it on later — once the Anthropic API key is
+available — by re-enabling the backend flag (see git history for the wiring) and
+following the setup steps below.
+
+## Backends: local vs Firebase (parked)
+
+The app is built to run in one of two modes, chosen at build time by `VITE_BACKEND`:
 
 | | **local** (default) | **firebase** |
 | --- | --- | --- |

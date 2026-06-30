@@ -9,16 +9,13 @@ import Catalog from './components/Catalog'
 import CreateModal from './components/CreateModal'
 import TicketDrawer from './components/TicketDrawer'
 import Chatbot from './components/Chatbot'
-import LoginGate from './components/LoginGate'
 import { ToastProvider } from './components/common/Toast'
-import { useTicketStore } from './hooks/useTicketStore'
-import { useAuth } from './hooks/useAuth'
+import { useLocalTickets } from './hooks/useTickets'
 import { useNow } from './hooks/useNow'
 import { isOpen, isBreaching } from './utils/sla'
-import { isFirebase } from './config'
 
-function AppInner({ user, onSignOut }) {
-  const { tickets, createTicket, transitionTicket } = useTicketStore()
+function AppInner() {
+  const { tickets, createTicket, transitionTicket } = useLocalTickets()
   const now = useNow() // ticks every 30s to refresh SLA timers
 
   const [nav, setNav] = useState({ view: 'dashboard', q: null })
@@ -50,7 +47,7 @@ function AppInner({ user, onSignOut }) {
 
   return (
     <>
-      <TopNav onCreate={() => setCreateOpen(true)} user={user} onSignOut={onSignOut} />
+      <TopNav onCreate={() => setCreateOpen(true)} />
       <div className="shell">
         <Sidebar active={nav} counts={counts} onSelect={selectNav} />
         <main className="main">
@@ -85,24 +82,10 @@ function AppInner({ user, onSignOut }) {
   )
 }
 
-// In Firebase mode, require a signed-in company user before mounting the app
-// (so the Firestore subscription only runs once authenticated). In local mode
-// this passes straight through.
-function AuthGate() {
-  const { user, ready, error, signIn, signOut } = useAuth()
-
-  if (!isFirebase) return <AppInner />
-  if (!ready) {
-    return <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--faint)' }}>Loading…</div>
-  }
-  if (!user) return <LoginGate onSignIn={signIn} error={error} />
-  return <AppInner user={user} onSignOut={signOut} />
-}
-
 export default function App() {
   return (
     <ToastProvider>
-      <AuthGate />
+      <AppInner />
     </ToastProvider>
   )
 }
