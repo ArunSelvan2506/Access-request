@@ -125,7 +125,7 @@ function AppInner({ session }) {
         )}
         <main className="main">
           {nav.view === 'dashboard' && isAdmin && (
-            <Dashboard tickets={tickets} now={now} onOpen={openTicket} />
+            <Dashboard tickets={tickets} now={now} onOpen={openTicket} onNavigate={selectNav} />
           )}
           {nav.view === 'queue' && (
             <Queue

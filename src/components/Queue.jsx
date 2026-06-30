@@ -1,14 +1,20 @@
 import { useState, useMemo } from 'react'
 import { AppCell, StatusPill, SlaCell } from './common/Badges'
 import { CATALOG } from '../data/catalog'
-import { isOpen, isBreaching } from '../utils/sla'
+import { isOpen, isBreaching, expiryInfo } from '../utils/sla'
 import { formatUK, formatUKShort } from '../utils/format'
 import { exportTicketsCsv } from '../utils/csv'
 
 const STATUS_OPTIONS = ['Pending Approval', 'Open', 'In Progress', 'Waiting', 'Done', 'Rejected', 'Cancelled']
 const APP_OPTIONS = CATALOG.filter((a) => a.group === 'green').map((a) => a.name)
 
-const TITLES = { open: 'Open requests', breach: 'SLA at risk' }
+const TITLES = {
+  open: 'Open requests',
+  breach: 'SLA at risk',
+  expiring: 'Access expiring',
+  rejected: 'Auto-rejected',
+  done: 'Resolved',
+}
 
 export default function Queue({ tickets, queueFilter, now, onOpen, title: titleProp, subtitle }) {
   const [search, setSearch] = useState('')
@@ -19,6 +25,9 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
     let l = [...tickets].sort((a, b) => b.created - a.created)
     if (queueFilter === 'open') l = l.filter(isOpen)
     else if (queueFilter === 'breach') l = l.filter(isBreaching)
+    else if (queueFilter === 'expiring') l = l.filter((t) => { const e = expiryInfo(t, now); return e && (e.soon || e.expired) })
+    else if (queueFilter === 'rejected') l = l.filter((t) => t.status === 'Rejected')
+    else if (queueFilter === 'done') l = l.filter((t) => t.status === 'Done')
 
     const q = search.toLowerCase()
     return l.filter(
@@ -27,7 +36,7 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
         (!fStatus || t.status === fStatus) &&
         (!fApp || t.app === fApp)
     )
-  }, [tickets, queueFilter, search, fStatus, fApp])
+  }, [tickets, queueFilter, search, fStatus, fApp, now])
 
   const title = titleProp || TITLES[queueFilter] || 'All requests'
 
