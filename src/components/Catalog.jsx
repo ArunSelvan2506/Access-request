@@ -1,5 +1,5 @@
 import { AppCell } from './common/Badges'
-import { CATALOG } from '../data/catalog'
+import { CATALOG, NOTION_SOURCE } from '../data/catalog'
 
 export default function Catalog() {
   return (
@@ -7,7 +7,11 @@ export default function Catalog() {
       <h1 className="title">Service catalog & validation rules</h1>
       <p className="sub">
         The applications IT manages, their required fields, and SLA targets. The validation engine
-        and AI assistant both read from this catalog.
+        and AI assistant both read from this catalog, which is kept in sync with the{' '}
+        <a href={NOTION_SOURCE} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--nav)', fontWeight: 600 }}>
+          Field Validation Requirements
+        </a>{' '}
+        page in Notion.
       </p>
       <table className="q">
         <thead>

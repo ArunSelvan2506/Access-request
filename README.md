@@ -59,6 +59,34 @@ src/
 - **Workflow transitions** → `src/utils/format.js` (`TRANSITIONS`).
 - **Automation rules** → `src/data/rules.js`.
 
+## Deployment (GitHub Pages + custom domain)
+
+The app deploys automatically to GitHub Pages via `.github/workflows/deploy.yml`
+on every push to `main`. The production domain is **accessrequest.fuseenergy.com**
+(set in `public/CNAME`).
+
+**One-time setup (repo owner):**
+
+1. **Enable Pages** — repo *Settings → Pages → Build and deployment → Source:
+   **GitHub Actions***.
+2. **Merge to `main`** — the deploy workflow runs on pushes to `main`. Merge this
+   branch in and the first deploy starts (watch it under the *Actions* tab).
+3. **Add the DNS record** at the registrar that manages `fuseenergy.com`:
+
+   | Type  | Host / Name      | Value                       |
+   | ----- | ---------------- | --------------------------- |
+   | CNAME | `accessrequest`  | `arunselvan2506.github.io.` |
+
+   (For an apex/root domain you'd use A records instead; a subdomain like this
+   one uses a single CNAME.)
+4. **Set the custom domain** — repo *Settings → Pages → Custom domain* →
+   `accessrequest.fuseenergy.com` → **Save**, then tick **Enforce HTTPS** once the
+   certificate is issued (can take a few minutes after DNS propagates).
+
+The `CNAME` file is committed so GitHub keeps the custom domain across deploys.
+Asset paths are relative (`base: './'` in `vite.config.js`), so the build also
+works at the default `…/access-request/` Pages URL before DNS is live.
+
 ## AI assistant
 
 `Chatbot.jsx` posts to an endpoint defined by `VITE_CHAT_ENDPOINT`. The browser must **not**
