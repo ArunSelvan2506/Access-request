@@ -1,5 +1,5 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fuse">
-  <rect width="32" height="32" rx="8" fill="#FB5A1D"/>
-  <rect x="7" y="13" width="12" height="12" rx="3" fill="#ffffff"/>
-  <rect x="17.5" y="6.5" width="8.5" height="8.5" rx="2.5" fill="#ffffff"/>
+  <rect width="32" height="32" rx="8" fill="#F1592A"/>
+  <rect x="6.6" y="11.4" width="18.8" height="9.2" rx="3" fill="none" stroke="#ffffff" stroke-width="2.2"/>
+  <rect x="14.9" y="6.8" width="2.2" height="18.4" rx="1.1" fill="#ffffff"/>
 </svg>
