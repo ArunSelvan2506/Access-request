@@ -41,7 +41,8 @@ export default function GlobalSearch({ tickets, onOpen }) {
         onFocus={() => setFocused(true)}
         onBlur={() => setTimeout(() => setFocused(false), 150)}
         placeholder="Search tickets…  ( / )"
-        style={{ height: 32, width: 230, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '0 10px', fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}
+        className="topsearch"
+        style={{ height: 32, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '0 10px', fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}
       />
       {focused && q.trim() && (
         <div
