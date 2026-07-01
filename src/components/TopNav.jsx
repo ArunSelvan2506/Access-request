@@ -18,7 +18,7 @@ export default function TopNav({ onCreate, email, role, onSignOut, onHelp, searc
         </button>
       )}
       <div className="logo">
-        <span className="mark">A</span> Access Service Desk
+        <img className="brand-mark" src={import.meta.env.BASE_URL + 'logo.svg'} alt="Fuse" width="26" height="26" /> Access Service Desk
       </div>
       <span className="crumb">
         <b>Fuse Energy</b>

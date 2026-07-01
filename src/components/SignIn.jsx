@@ -38,9 +38,7 @@ export default function SignIn({ session }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <span className="mark" style={{ width: 34, height: 34, background: 'var(--nav)', borderRadius: 7, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 16 }}>
-            A
-          </span>
+          <img src={import.meta.env.BASE_URL + 'logo.svg'} alt="Fuse" width="34" height="34" style={{ borderRadius: 8, display: 'block' }} />
           <h1 style={{ fontSize: 19, fontWeight: 600 }}>Access Service Desk</h1>
         </div>
         <p style={{ color: 'var(--soft)', marginBottom: 18, fontSize: 13.5 }}>
