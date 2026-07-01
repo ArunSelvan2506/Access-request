@@ -18,11 +18,9 @@ export default function TopNav({ onCreate, email, role, onSignOut, onHelp, searc
         </button>
       )}
       <div className="logo">
-        <img className="brand-mark" src={import.meta.env.BASE_URL + 'logo.svg'} alt="Fuse" width="26" height="26" /> Access Service Desk
+        <img className="brand-logo" src={import.meta.env.BASE_URL + 'Fuse_Energy_logo.png'} alt="Fuse" />
+        <span className="brand-title">Access Service Desk</span>
       </div>
-      <span className="crumb">
-        <b>Fuse Energy</b>
-      </span>
       <div className="nav-r">
         {search}
         {onToggleTheme && (

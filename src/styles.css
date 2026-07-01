@@ -48,8 +48,10 @@ button{font-family:inherit}
 /* top nav */
 .topnav{background:#fff;border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 16px;gap:14px;position:sticky;top:0;z-index:50}
 .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;white-space:nowrap}
-.logo .mark{width:26px;height:26px;background:var(--nav);border-radius:5px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0}
-.brand-mark{width:26px;height:26px;border-radius:6px;flex-shrink:0;display:block}
+.brand-logo{height:24px;width:auto;display:block;flex-shrink:0}
+.brand-title{border-left:1px solid var(--border);padding-left:10px}
+/* The wordmark is black, so give it a light chip on the dark theme. */
+[data-theme="dark"] .brand-logo{background:#fff;padding:3px 7px;border-radius:6px}
 .crumb{color:var(--faint);font-size:13px;white-space:nowrap}.crumb b{color:var(--ink)}
 .nav-r{margin-left:auto;display:flex;align-items:center;gap:12px;min-width:0}
 .topsearch{width:230px}
@@ -256,4 +258,4 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
    secondary items as the bar narrows so the essentials stay on one line. */
 @media(max-width:820px){.topnav{gap:10px}.crumb{display:none}.nav-r{gap:10px}.nav-r .tag{display:none}}
 @media(max-width:640px){.topsearch{width:150px}.nav-r{gap:8px}.btn{padding:0 9px}}
-@media(max-width:480px){.logo{font-size:0}.logo .mark{font-size:13px}.topsearch{width:120px}}
+@media(max-width:480px){.brand-title{display:none}.topsearch{width:120px}}

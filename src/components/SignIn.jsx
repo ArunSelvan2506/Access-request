@@ -38,7 +38,7 @@ export default function SignIn({ session }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <img src={import.meta.env.BASE_URL + 'logo.svg'} alt="Fuse" width="34" height="34" style={{ borderRadius: 8, display: 'block' }} />
+          <img className="brand-logo" src={import.meta.env.BASE_URL + 'Fuse_Energy_logo.png'} alt="Fuse" style={{ height: 30, width: 'auto', display: 'block' }} />
           <h1 style={{ fontSize: 19, fontWeight: 600 }}>Access Service Desk</h1>
         </div>
         <p style={{ color: 'var(--soft)', marginBottom: 18, fontSize: 13.5 }}>
