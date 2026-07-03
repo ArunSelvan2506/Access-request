@@ -14,11 +14,20 @@ import {
 } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb'
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
+import { OAuth2Client } from 'google-auth-library'
 
 const PORT = process.env.PORT || 8787
 const API_KEY = process.env.API_KEY || '' // optional shared key (x-api-key)
 const ORIGIN = process.env.CORS_ORIGIN || '*'
 const TABLE = process.env.DDB_TABLE || 'access_desk_tickets'
+
+// Google SSO (optional). Verifies Google ID tokens and enforces the company
+// domain. Needs only the OAuth Client ID (public) — no client secret. Without
+// GOOGLE_CLIENT_ID this is disabled and the app uses the shared-password gate.
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || ''
+const AUTH_DOMAIN = process.env.AUTH_DOMAIN || 'fuseenergy.com'
+const authEnabled = !!GOOGLE_CLIENT_ID
+const googleClient = authEnabled ? new OAuth2Client(GOOGLE_CLIENT_ID) : null
 
 // Email notifications (optional). Needs a verified SES sender in SES_FROM.
 // Without it, mention notifications self-disable and the UI just skips the email.
@@ -86,6 +95,29 @@ app.use((req, res, next) => {
 })
 
 app.get('/health', (_req, res) => res.json({ ok: true }))
+
+// ---- Google SSO ----
+app.get('/api/auth/status', (_req, res) => res.json({ enabled: authEnabled, domain: authEnabled ? AUTH_DOMAIN : null }))
+
+// Verify a Google ID token, enforce the company domain, return the user.
+app.post('/api/auth/google', async (req, res) => {
+  if (!authEnabled) return res.status(503).json({ error: 'sso_disabled' })
+  const { credential } = req.body || {}
+  if (!credential) return res.status(400).json({ error: 'credential required' })
+  try {
+    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID })
+    const p = ticket.getPayload()
+    const email = (p.email || '').toLowerCase()
+    const domainOk = p.hd === AUTH_DOMAIN || email.endsWith('@' + AUTH_DOMAIN)
+    if (!p.email_verified || !domainOk) {
+      return res.status(403).json({ error: 'domain_forbidden', message: 'Use your ' + AUTH_DOMAIN + ' Google account.' })
+    }
+    res.json({ email, name: p.name || null, picture: p.picture || null })
+  } catch (e) {
+    console.error('Google token verify failed:', e?.message)
+    res.status(401).json({ error: 'invalid_token' })
+  }
+})
 
 // Wraps an async handler so a rejected promise (e.g. a DynamoDB throttle or
 // transient error) returns a 500 instead of crashing the process.
@@ -281,6 +313,7 @@ app.listen(PORT, () =>
     'Access Service Desk API on :' + PORT +
       ' | DynamoDB table ' + TABLE +
       (aiEnabled ? ' | AI triage on (' + AI_MODEL + ')' : ' | AI triage off — set ANTHROPIC_API_KEY') +
-      (emailEnabled ? ' | email on (' + SES_FROM + ')' : ' | email off — set SES_FROM')
+      (emailEnabled ? ' | email on (' + SES_FROM + ')' : ' | email off — set SES_FROM') +
+      (authEnabled ? ' | Google SSO on (' + AUTH_DOMAIN + ')' : ' | SSO off — set GOOGLE_CLIENT_ID')
   )
 )

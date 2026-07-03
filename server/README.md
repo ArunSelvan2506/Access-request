@@ -72,6 +72,19 @@ Redeploy and the site reads/writes shared tickets from DynamoDB.
 - `POST /api/ai/triage` → AI triage for one ticket (admin-facing, advisory)
 - `GET /api/notify/status` → `{ enabled }` (email configured?)
 - `POST /api/notify/mention` → email the people tagged in a comment (Amazon SES)
+- `POST /api/notify/assign` → email a ticket's new assignee (Amazon SES)
+- `GET /api/auth/status` → `{ enabled, domain }` (Google SSO configured?)
+- `POST /api/auth/google` → verify a Google ID token, enforce the domain, return the user
+
+## Google SSO
+Everyone signs in with their own Google account, restricted to your domain.
+1. Google Cloud console → **APIs & Services → Credentials → Create OAuth client ID → Web application**.
+2. **Authorized JavaScript origins**: your site origin (e.g. `https://arunselvan2506.github.io`).
+3. Copy the **Client ID** and set it in **both** places (no client secret needed):
+   - server env `GOOGLE_CLIENT_ID` (+ optional `AUTH_DOMAIN`, default `fuseenergy.com`)
+   - web app build var `VITE_GOOGLE_CLIENT_ID` (same value)
+When set, the sign-in screen shows "Sign in with Google"; otherwise it falls back
+to the shared-password gate.
 
 ## Mention emails (Amazon SES)
 Tagging a person in a comment (`@name`) emails them. Set `SES_FROM` to a

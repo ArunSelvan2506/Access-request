@@ -19,6 +19,11 @@ export const API_KEY = import.meta.env.VITE_API_KEY || ''
 // Only emails on this domain may sign in (enforced again server-side).
 export const ALLOWED_EMAIL_DOMAIN = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN || 'fuseenergy.com'
 
+// Google SSO client ID (public — safe in the bundle). When set, the sign-in
+// screen shows "Sign in with Google"; the server verifies the token and
+// enforces the domain. Empty → fall back to the shared-password gate.
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
+
 export const FIREBASE_CONFIG = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
