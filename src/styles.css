@@ -54,6 +54,13 @@ button{font-family:inherit}
 [data-theme="dark"] .brand-logo{background:#fff;padding:3px 7px;border-radius:6px}
 .crumb{color:var(--faint);font-size:13px;white-space:nowrap}.crumb b{color:var(--ink)}
 .nav-r{margin-left:auto;display:flex;align-items:center;gap:12px;min-width:0}
+.profile{position:relative}
+.profile-menu{position:absolute;right:0;top:42px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--sh);min-width:230px;z-index:60;overflow:hidden}
+.pm-head{padding:12px 14px;border-bottom:1px solid var(--border)}
+.pm-name{font-weight:700;font-size:14px;color:var(--ink)}
+.pm-email{font-size:12px;color:var(--faint);margin-top:2px;word-break:break-all}
+.pm-item{display:block;width:100%;text-align:left;padding:11px 14px;background:none;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.pm-item:hover{background:var(--surface-2)}
 .topsearch{width:230px}
 .btn{height:32px;border:1px solid var(--border);background:#fff;border-radius:var(--r);padding:0 12px;font-size:13px;font-weight:600;color:var(--soft);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{background:var(--bg)}

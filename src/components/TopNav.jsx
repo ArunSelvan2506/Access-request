@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import { displayName } from '../auth/session'
 
 const ROLE_LABEL = { owner: 'Primary owner', admin: 'Administrator', user: 'Requester' }
@@ -10,6 +11,19 @@ function initials(email) {
 }
 
 export default function TopNav({ onCreate, email, role, onSignOut, onHelp, search, onToggleSidebar, theme, onToggleTheme }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  // Close the account menu on outside click / Escape.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onDoc = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false) }
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false) }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
+  }, [menuOpen])
+
   return (
     <nav className="topnav">
       {onToggleSidebar && (
@@ -37,14 +51,30 @@ export default function TopNav({ onCreate, email, role, onSignOut, onHelp, searc
           + Create
         </button>
         {role && <span className={'tag ' + (ROLE_TAG[role] || 'grey')}>{ROLE_LABEL[role]}</span>}
-        <button
-          className="avatar"
-          title={`${email} — sign out`}
-          onClick={onSignOut}
-          style={{ border: 'none', cursor: 'pointer' }}
-        >
-          {initials(email)}
-        </button>
+        <div className="profile" ref={menuRef}>
+          <button
+            className="avatar"
+            title="Account"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            style={{ border: 'none', cursor: 'pointer' }}
+          >
+            {initials(email)}
+          </button>
+          {menuOpen && (
+            <div className="profile-menu" role="menu">
+              <div className="pm-head">
+                <div className="pm-name">{displayName(email)}</div>
+                <div className="pm-email">{email}</div>
+                {role && <span className={'tag ' + (ROLE_TAG[role] || 'grey')} style={{ marginTop: 8 }}>{ROLE_LABEL[role]}</span>}
+              </div>
+              <button className="pm-item" role="menuitem" onClick={() => { setMenuOpen(false); onSignOut() }}>
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   )
