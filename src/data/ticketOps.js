@@ -1,7 +1,7 @@
 // Pure ticket operations shared by every backend (localStorage, API/SQLite,
 // Firebase). Keeping the business logic here means a ticket behaves identically
 // no matter where it's stored.
-import { needsApproval } from './catalog'
+import { needsApproval, assigneeFor } from './catalog'
 import { durationDays, slaForUrgency } from './jira'
 
 // Build a brand-new ticket. `app` is a catalog entry (needs .name).
@@ -13,6 +13,17 @@ export function buildTicket({ num, app, summary, data, user = {}, meta = {} }) {
   const days = durationDays(meta.duration)
   const expiresAt = days ? now + days * 864e5 : null
   const urgency = meta.urgency || 'Medium'
+  const assignee = assigneeFor(app.name) // auto-assign to the app's named owner, if any
+  const activity = [
+    {
+      who: 'Automation',
+      tm: now,
+      tx: requireApproval
+        ? 'Passed validation. Awaiting line-manager approval from ' + manager + '.'
+        : 'Passed validation — all required fields present. Ticket opened and SLA timer started (' + slaForUrgency(urgency) + 'h target).',
+    },
+  ]
+  if (assignee) activity.push({ who: 'Automation', tm: now, tx: 'Auto-assigned to ' + assignee + ' (' + app.name + ' owner).' })
   return {
     num,
     key: 'ACC-' + num,
@@ -24,7 +35,7 @@ export function buildTicket({ num, app, summary, data, user = {}, meta = {} }) {
     role: meta.role || null,
     manager,
     approval: requireApproval ? { state: 'Pending', by: null, at: null, note: null } : null,
-    assignee: null,
+    assignee,
     urgency,
     duration: meta.duration || null,
     expiresAt,
@@ -32,15 +43,7 @@ export function buildTicket({ num, app, summary, data, user = {}, meta = {} }) {
     created: now,
     sla: slaForUrgency(urgency),
     fields: data,
-    activity: [
-      {
-        who: 'Automation',
-        tm: now,
-        tx: requireApproval
-          ? 'Passed validation. Awaiting line-manager approval from ' + manager + '.'
-          : 'Passed validation — all required fields present. Ticket opened and SLA timer started (' + slaForUrgency(urgency) + 'h target).',
-      },
-    ],
+    activity,
   }
 }
 

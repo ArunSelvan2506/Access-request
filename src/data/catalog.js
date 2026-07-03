@@ -264,6 +264,11 @@ export const APP_ITHELP = new Set([
 export const appCategory = (name) =>
   APP_HARDWARE.has(name) ? 'hardware' : APP_ITHELP.has(name) ? 'ithelp' : 'app'
 
+// Auto-assignment: new requests for these apps are assigned to a named owner on
+// creation. Update the email if the owner changes.
+export const APP_ASSIGNEE = { AWS: 'david@fuseenergy.com' }
+export const assigneeFor = (name) => APP_ASSIGNEE[name] || null
+
 // Self-contained per-application icons (emoji, so no external assets / offline-safe).
 // Rendered inside the coloured app tile; falls back to the 2-letter code if missing.
 export const APP_EMOJI = {

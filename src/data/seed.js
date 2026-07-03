@@ -1,4 +1,5 @@
 import { slaForUrgency } from './jira'
+import { assigneeFor } from './catalog'
 
 // Realistic demo dataset reflecting the real IT/Security desk mix (no personal
 // names — role-based requesters). Generated from a compact table so it stays
@@ -125,7 +126,7 @@ export function seedTickets() {
       created,
       sla: slaForUrgency(urgency),
       fields: FIELDS[app] || { just: 'Business need' },
-      assignee: null,
+      assignee: assigneeFor(app),
       activity: [],
       ...extra,
     }

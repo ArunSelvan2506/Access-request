@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
 
-// Bumped to v6 so returning visitors re-seed with the updated SLA targets
-// (Critical 2h · High 4h · Medium 24h · Low 48h).
-const STORE = 'acc_sd_tickets_v6'
+// Bumped to v7 so returning visitors re-seed (AWS tickets auto-assigned to David).
+const STORE = 'acc_sd_tickets_v7'
 
 function loadTickets() {
   try {
