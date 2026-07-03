@@ -24,3 +24,14 @@ export function notifyMention({ ticketKey, summary, actor, text, recipients }) {
     .then((r) => (r.ok ? r.json() : null))
     .catch(() => null)
 }
+
+// Fire-and-forget: email the person a ticket was just assigned to.
+export function notifyAssignment({ ticketKey, summary, actor, assignee }) {
+  return fetch(API_BASE + '/api/notify/assign', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ ticketKey, summary, actor, assignee }),
+  })
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null)
+}

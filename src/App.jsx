@@ -24,7 +24,7 @@ import { useSession } from './hooks/useSession'
 import { displayName, OWNER_EMAIL } from './auth/session'
 import { isApi } from './config'
 import { extractMentions } from './utils/mentions'
-import { notifyMention } from './api/notify'
+import { notifyMention, notifyAssignment } from './api/notify'
 import { isOpen, isBreaching } from './utils/sla'
 
 const isPendingApproval = (t) => t.status === 'Pending Approval'
@@ -101,9 +101,20 @@ function AppInner({ session }) {
   const handleApprove = (key, decision, note, channel) => {
     decideApproval(key, decision, displayName(email), note, channel)
   }
+  // The admin team — the people a ticket can be assigned to.
+  const adminPeople = [...new Set([OWNER_EMAIL, ...admins].map((e) => e.toLowerCase()))].map((e) => ({
+    email: e,
+    name: displayName(e),
+  }))
+
   const handleAssign = (key, assignee) => {
     if (!isAdmin) return
     assignTicket(key, assignee, displayName(email))
+    // Let the assignee know by email — unless you assigned it to yourself.
+    if (isApi && assignee && assignee !== email) {
+      const t = tickets.find((x) => x.key === key)
+      notifyAssignment({ ticketKey: key, summary: t?.summary, actor: displayName(email), assignee })
+    }
   }
   // People who can be @mentioned on a ticket: its participants + the admin team.
   const taggablePeople = (ticket) => {
@@ -199,6 +210,7 @@ function AppInner({ session }) {
         isAdmin={isAdmin}
         currentEmail={email}
         people={taggablePeople(activeTicket)}
+        assignees={adminPeople}
         onClose={() => setOpenKey(null)}
         onTransition={handleTransition}
         onApprove={handleApprove}

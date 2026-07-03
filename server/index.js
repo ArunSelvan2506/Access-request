@@ -249,6 +249,33 @@ app.post('/api/notify/mention', wrap(async (req, res) => {
   res.json({ sent, requested: to.length })
 }))
 
+app.post('/api/notify/assign', wrap(async (req, res) => {
+  if (!emailEnabled) return res.status(503).json({ error: 'email_disabled' })
+  const { ticketKey, summary, actor, assignee } = req.body || {}
+  if (!ticketKey || !/.+@.+\..+/.test(assignee || '')) return res.status(400).json({ error: 'ticketKey and assignee required' })
+
+  const subject = '[' + ticketKey + '] Assigned to you'
+  const link = APP_URL ? '\n\nView the request: ' + APP_URL : ''
+  const bodyText =
+    (actor || 'An administrator') + ' assigned ' + ticketKey + (summary ? ' — ' + summary : '') + ' to you.' + link
+  const bodyHtml =
+    '<p><strong>' + escapeHtml(actor || 'An administrator') + '</strong> assigned <strong>' + escapeHtml(ticketKey) +
+    '</strong>' + (summary ? ' — ' + escapeHtml(summary) : '') + ' to you.</p>' +
+    (APP_URL ? '<p><a href="' + escapeHtml(APP_URL) + '">Open the Access Service Desk</a></p>' : '')
+
+  try {
+    await ses.send(new SendEmailCommand({
+      Source: SES_FROM,
+      Destination: { ToAddresses: [assignee] },
+      Message: { Subject: { Data: subject }, Body: { Text: { Data: bodyText }, Html: { Data: bodyHtml } } },
+    }))
+    res.json({ sent: 1 })
+  } catch (e) {
+    console.error('SES assign notify failed for', assignee, ':', e?.name || e?.message)
+    res.status(502).json({ error: 'ses_error' })
+  }
+}))
+
 app.listen(PORT, () =>
   console.log(
     'Access Service Desk API on :' + PORT +

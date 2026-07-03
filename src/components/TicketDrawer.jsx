@@ -21,6 +21,7 @@ export default function TicketDrawer({
   isAdmin,
   currentEmail,
   people = [],
+  assignees = [],
   onClose,
   onTransition,
   onApprove,
@@ -273,19 +274,35 @@ export default function TicketDrawer({
 
             {/* ---- Assignment ---- */}
             <div className="sec">Assignee</div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 13 }}>{ticket.assignee ? displayName(ticket.assignee) + ' (' + ticket.assignee + ')' : 'Unassigned'}</span>
-              {canAssign && ticket.assignee !== currentEmail && (
-                <button className="btn" onClick={() => onAssign(ticket.key, currentEmail)}>
-                  Assign to me
-                </button>
-              )}
-              {canAssign && ticket.assignee && (
-                <button className="btn" onClick={() => onAssign(ticket.key, null)}>
-                  Unassign
-                </button>
-              )}
-            </div>
+            {canAssign ? (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+                <select
+                  value={ticket.assignee || ''}
+                  onChange={(e) => onAssign(ticket.key, e.target.value || null)}
+                  style={{ height: 32, minWidth: 220, border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '0 10px', fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}
+                >
+                  <option value="">Unassigned</option>
+                  {assignees.map((a) => (
+                    <option key={a.email} value={a.email}>
+                      {a.name} ({a.email})
+                    </option>
+                  ))}
+                  {/* Keep the current assignee selectable even if no longer an admin. */}
+                  {ticket.assignee && !assignees.some((a) => a.email === ticket.assignee) && (
+                    <option value={ticket.assignee}>{displayName(ticket.assignee)} ({ticket.assignee})</option>
+                  )}
+                </select>
+                {ticket.assignee !== currentEmail && (
+                  <button className="btn" onClick={() => onAssign(ticket.key, currentEmail)}>
+                    Assign to me
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div style={{ marginBottom: 20, fontSize: 13 }}>
+                {ticket.assignee ? displayName(ticket.assignee) + ' (' + ticket.assignee + ')' : 'Unassigned'}
+              </div>
+            )}
 
             {/* ---- Workflow transitions (admins, once approved) ---- */}
             {canTransition && !pendingApproval && (
