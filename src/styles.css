@@ -188,6 +188,15 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .sysk{width:150px;flex-shrink:0;color:var(--faint);font-weight:600}
 .sysv{color:var(--ink)}
 .onlinedot{width:9px;height:9px;border-radius:50%;background:#22a06b;flex-shrink:0;box-shadow:0 0 0 3px rgba(34,160,107,.18)}
+.cat-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:520px){.cat-grid{grid-template-columns:1fr 1fr}}
+.cat-tile{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;font-family:inherit;transition:border-color .1s,box-shadow .1s,transform .1s}
+.cat-tile:hover{border-color:var(--nav);box-shadow:var(--sh);transform:translateY(-1px)}
+.cat-tile .cti{font-size:22px;line-height:1;flex-shrink:0}
+.cat-tile .ctbody{display:flex;flex-direction:column;min-width:0}
+.cat-tile .ctt{font-weight:700;font-size:14px;color:var(--ink)}
+.cat-tile .ctd{font-size:12px;color:var(--soft);margin-top:2px;line-height:1.4}
+.linkback{background:none;border:none;color:var(--nav);font-weight:600;font-size:13px;cursor:pointer;padding:0;margin-bottom:12px;font-family:inherit}
 
 /* modal */
 .scrim{position:fixed;inset:0;background:rgba(9,30,66,.54);opacity:0;pointer-events:none;transition:.18s;z-index:90}

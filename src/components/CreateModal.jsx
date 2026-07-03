@@ -5,12 +5,22 @@ import { validateRequest } from '../utils/validation'
 import { isOpen } from '../utils/sla'
 import { useToast } from './common/Toast'
 
-// Grouped catalog for the selector.
-const GROUPS = [
-  { cat: 'app', label: 'Applications & access' },
-  { cat: 'hardware', label: 'Hardware & devices' },
-  { cat: 'ithelp', label: 'IT help & accounts' },
+// Category-first selector. Requesters pick one of these, then the specific item.
+const CATS = [
+  { cat: 'app', ic: '🧩', label: 'Applications & access', desc: 'SaaS apps, cloud, repos, dashboards, licences' },
+  { cat: 'hardware', ic: '💻', label: 'Hardware & devices', desc: 'Laptops, monitors, phones, SIMs, peripherals' },
+  { cat: 'ithelp', ic: '🛟', label: 'IT help & accounts', desc: 'Passwords, MFA, installs, onboarding, mailboxes' },
+  { cat: 'other', ic: '🔴', label: 'Something else', desc: 'Tools not managed by IT — we’ll point you the right way' },
 ]
+const itemsFor = (cat) =>
+  cat === 'other'
+    ? CATALOG.filter((a) => a.group === 'red')
+    : CATALOG.filter((a) => a.group === 'green' && appCategory(a.name) === cat)
+const catLabel = (cat) => (CATS.find((c) => c.cat === cat) || {}).label || 'Select'
+const catOf = (name) => {
+  const a = findApp(name)
+  return a && a.group === 'red' ? 'other' : appCategory(name)
+}
 
 // Build the initial form values for an app (applies any field defaults).
 function initialValues(app) {
@@ -21,6 +31,7 @@ function initialValues(app) {
 
 export default function CreateModal({ open, presetApp, onClose, onCreate, existing = [] }) {
   const [appName, setAppName] = useState(presetApp || '')
+  const [category, setCategory] = useState(presetApp ? catOf(presetApp) : null)
   const [summary, setSummary] = useState('')
   const [values, setValues] = useState({})
   const [urgency, setUrgency] = useState(DEFAULT_URGENCY)
@@ -56,6 +67,7 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
     if (open) {
       const a = findApp(presetApp || '')
       setAppName(presetApp || '')
+      setCategory(a ? catOf(a.name) : null)
       setSummary('')
       setValues(initialValues(a))
       setUrgency(DEFAULT_URGENCY)
@@ -145,29 +157,39 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
           </button>
         </div>
         <div className="mb">
-          <div className="field">
-            <label>
-              What do you need? <span className="req">*</span>
-            </label>
-            <select value={appName} onChange={(e) => onAppChange(e.target.value)}>
-              <option value="">Select an application, device or service…</option>
-              {GROUPS.map((g) => {
-                const items = CATALOG.filter((a) => a.group === 'green' && appCategory(a.name) === g.cat)
-                return items.length ? (
-                  <optgroup key={g.cat} label={g.label}>
-                    {items.map((a) => (
-                      <option key={a.name} value={a.name}>{a.name}</option>
-                    ))}
-                  </optgroup>
-                ) : null
-              })}
-              <optgroup label="Not managed by IT">
-                {CATALOG.filter((a) => a.group === 'red').map((a) => (
-                  <option key={a.name} value={a.name}>🔴 {a.name}</option>
+          {category === null ? (
+            <>
+              <p className="sub" style={{ marginTop: 0 }}>What do you need? Choose a category to begin.</p>
+              <div className="cat-grid">
+                {CATS.map((c) => (
+                  <button type="button" className="cat-tile" key={c.cat} onClick={() => { setCategory(c.cat); onAppChange('') }}>
+                    <span className="cti">{c.ic}</span>
+                    <span className="ctbody">
+                      <span className="ctt">{c.label}</span>
+                      <span className="ctd">{c.desc}</span>
+                    </span>
+                  </button>
                 ))}
-              </optgroup>
-            </select>
-          </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <button type="button" className="linkback" onClick={() => { setCategory(null); onAppChange('') }}>
+                ‹ Change category
+              </button>
+              <div className="field">
+                <label>
+                  {catLabel(category)} <span className="req">*</span>
+                </label>
+                <select value={appName} onChange={(e) => onAppChange(e.target.value)}>
+                  <option value="">Select…</option>
+                  {itemsFor(category).map((a) => (
+                    <option key={a.name} value={a.name}>{(a.group === 'red' ? '🔴 ' : '') + a.name}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
           {/* Application callout / routing note */}
           {app && app.group === 'red' && (
