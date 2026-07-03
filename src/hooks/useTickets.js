@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
 
-// Bumped to v4 so returning visitors pick up the refreshed demo dataset
-// (priority-driven SLAs) instead of the stale tickets cached from a prior visit.
-const STORE = 'acc_sd_tickets_v4'
+// Bumped to v5 so returning visitors pick up the refreshed demo dataset
+// (this week's new review tickets) instead of tickets cached from a prior visit.
+const STORE = 'acc_sd_tickets_v5'
 
 function loadTickets() {
   try {

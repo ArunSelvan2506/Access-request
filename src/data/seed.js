@@ -93,6 +93,15 @@ const ROWS = [
   [153, 'Phone / Mobile / SIM', 'New work SIM', 'Cancelled', 'Low', 60],
   [154, 'Metabase', 'Marketing dashboard access', 'Done', 'Low', 510, { expiresIn: 25, duration: '90 days' }],
   [155, 'AWS', 'Athena workgroup access', 'Pending Approval', 'High', 7, { manager: 'arun@fuseenergy.com' }],
+  // ---- This week — fresh requests awaiting review ----
+  [156, 'Password / MFA Reset', 'Locked out after password change', 'Open', 'Critical', 1],
+  [157, 'AWS', 'S3 write access — fuse-data-exports', 'Open', 'High', 3],
+  [158, 'Claude', 'Claude Code for new quant hire', 'Pending Approval', 'High', 4, { manager: 'arun@fuseenergy.com' }],
+  [159, 'Datadog', 'Elevated Datadog access for incident', 'Pending Approval', 'High', 8, { manager: 'eng-lead@fuseenergy.com' }],
+  [160, 'Metabase', 'Finance close dashboard access', 'Waiting', 'Medium', 12, { pendingReason: 'More info required' }],
+  [161, 'Hardware / Device', 'Replacement laptop — cracked screen', 'In Progress', 'Medium', 20],
+  [162, 'Account Onboarding / Offboarding', 'Onboard two support hires — start Monday', 'Open', 'High', 26],
+  [163, 'GitHub', 'Write access to payments-service repo', 'Open', 'Medium', 30],
 ]
 
 export function seedTickets() {
