@@ -10,3 +10,13 @@ export const RULES = [
   { ic: '📸', bg: 'var(--bg)', on: false, name: 'AWS screenshot reminder', desc: 'On create — if an AWS ticket is missing a screenshot, post a comment asking the requester to attach one before auto-rejecting.', log: 'Currently disabled' },
   { ic: '💬', bg: 'var(--blue-bg)', on: false, name: 'Slack notifications', desc: 'Posts to the #access-request Slack channel when a request is created or changes status (incl. rejected/resolved). Runs server-side via a Cloud Function + Slack incoming webhook.', log: 'Needs backend — inactive until Firebase + Slack webhook are configured' },
 ]
+
+// Proactive automations we can switch on (not yet built). Shown to admins as
+// suggestions on the Automations screen.
+export const PROPOSED = [
+  { ic: '🔁', bg: 'var(--blue-bg)', name: 'Auto-assign (on-call / round-robin)', desc: 'Route new requests to the on-call administrator automatically, instead of leaving them unassigned.', log: 'Would run on every new request' },
+  { ic: '💤', bg: 'var(--yellow-bg)', name: 'Stale-ticket nudges', desc: 'Ping the owner when a request sits in Waiting or unassigned beyond a set number of days.', log: 'Would run daily' },
+  { ic: '📅', bg: 'var(--green-bg)', name: 'Access-expiry reminders', desc: 'Email the requester and their manager a few days before time-bound access expires, to renew or revoke it.', log: 'Would run daily' },
+  { ic: '🔐', bg: 'var(--purple-bg)', name: 'Periodic access reviews', desc: 'Schedule recurring re-certification of standing access so entitlements don’t drift over time.', log: 'Would run on a schedule' },
+  { ic: '🧹', bg: 'var(--bg)', name: 'Auto-archive resolved', desc: 'Move tickets that have been Done for N days into an archive to keep the queues and board clean.', log: 'Would run daily' },
+]

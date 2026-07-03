@@ -15,6 +15,7 @@ import TicketDrawer from './components/TicketDrawer'
 import SignIn from './components/SignIn'
 import AdminSettings from './components/AdminSettings'
 import Reports from './components/Reports'
+import Automations from './components/Automations'
 import GlobalSearch from './components/GlobalSearch'
 import HelpPanel from './components/HelpPanel'
 import { ToastProvider } from './components/common/Toast'
@@ -62,7 +63,7 @@ function AppInner({ session }) {
 
   // Keep people out of views they shouldn't see (e.g. after a role change).
   const allowedViews = isAdmin
-    ? ['dashboard', 'queue', 'board', 'approvals', 'reports', 'catalog', ...(isOwner ? ['admins'] : [])]
+    ? ['dashboard', 'queue', 'board', 'approvals', 'reports', 'automations', 'catalog', ...(isOwner ? ['admins'] : [])]
     : ['queue', 'catalog', ...(approvalsList.length ? ['approvals'] : [])]
   useEffect(() => {
     if (!allowedViews.includes(nav.view)) {
@@ -184,6 +185,7 @@ function AppInner({ session }) {
           )}
           {nav.view === 'board' && isAdmin && <Board tickets={tickets} now={now} onOpen={openTicket} />}
           {nav.view === 'reports' && isAdmin && <Reports tickets={tickets} now={now} />}
+          {nav.view === 'automations' && isAdmin && <Automations />}
           {nav.view === 'catalog' && <Catalog />}
           {nav.view === 'admins' && isOwner && <AdminSettings session={session} />}
         </main>

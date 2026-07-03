@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RULES } from '../data/rules'
+import { RULES, PROPOSED } from '../data/rules'
 import { useToast } from './common/Toast'
 
 export default function Automations() {
@@ -19,11 +19,13 @@ export default function Automations() {
 
   return (
     <section className="view">
-      <h1 className="title">Automation rules</h1>
+      <h1 className="title">Automations</h1>
       <p className="sub">
-        Rules run automatically when tickets are created or transitioned. Built from the
-        access-request policy.
+        Rules the service desk runs automatically when tickets are created or transitioned, plus
+        proactive automations we can switch on. Visible to administrators only.
       </p>
+
+      <div className="auto-sec">Active rules</div>
       <div>
         {RULES.map((r, i) => (
           <div className="rule" key={r.name}>
@@ -45,6 +47,30 @@ export default function Automations() {
           </div>
         ))}
       </div>
+
+      <div className="auto-sec" style={{ marginTop: 24 }}>Proactive — available to add</div>
+      <div>
+        {PROPOSED.map((r) => (
+          <div className="rule" key={r.name}>
+            <div className="ric" style={{ background: r.bg }}>
+              {r.ic}
+            </div>
+            <div>
+              <h4>{r.name}</h4>
+              <p>{r.desc}</p>
+              <div className="runlog">{r.log}</div>
+            </div>
+            <div className="toggle">
+              <span className="tag grey">Proposed</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p style={{ color: 'var(--faint)', fontSize: 12.5, marginTop: 10 }}>
+        Notification and scheduled automations (Slack, email alerts, reminders, reviews) run
+        server-side and activate once the AWS server is deployed. Ask to enable any proposed
+        automation and it’ll be wired up.
+      </p>
     </section>
   )
 }
