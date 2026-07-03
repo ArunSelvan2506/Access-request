@@ -226,6 +226,15 @@ export const CATALOG = [
       { k: 'just', label: 'Business justification', req: true, type: 'textarea' },
     ],
   },
+  {
+    name: 'Network / VPN', group: 'green', ic: ic('NW', '#e9f2ff', '#0055cc'), sla: 8,
+    callout: { t: 'warn', x: '⚠️ VPN, Wi-Fi, connectivity, firewall and port requests.' },
+    reject: 'Missing detail',
+    fields: [
+      { k: 'issue', label: 'Network issue or request', req: true, type: 'textarea', hint: 'e.g. VPN access, Wi-Fi, port/firewall, connectivity problem' },
+      { k: 'location', label: 'Office / location', req: true, hint: 'Which office, or remote' },
+    ],
+  },
   // not IT-managed
   { name: 'Backoffice', group: 'red', ic: ic('BO', '#ffeceb', '#ae2a19'), route: 'Post in #access-request and tag @ops-permission-managers.' },
   { name: 'Navan', group: 'red', ic: ic('NV', '#ffeceb', '#ae2a19'), route: 'Contact Hongyi or Manuel (Finance) directly.' },
@@ -259,14 +268,18 @@ export const isTimed = (name) => APP_TIMED.has(name)
 export const APP_HARDWARE = new Set(['Hardware / Device', 'Phone / Mobile / SIM'])
 export const APP_ITHELP = new Set([
   'Password / MFA Reset', 'Google Account Reset / 2FA', 'Software Installation',
-  'Account Onboarding / Offboarding', 'Email / Distribution List',
+  'Account Onboarding / Offboarding', 'Email / Distribution List', 'Network / VPN',
 ])
 export const appCategory = (name) =>
   APP_HARDWARE.has(name) ? 'hardware' : APP_ITHELP.has(name) ? 'ithelp' : 'app'
 
 // Auto-assignment: new requests for these apps are assigned to a named owner on
 // creation. Update the email if the owner changes.
-export const APP_ASSIGNEE = { AWS: 'david@fuseenergy.com' }
+export const APP_ASSIGNEE = {
+  AWS: 'davidnoonan@fuseenergy.com',
+  'Hardware / Device': 'arun@fuseenergy.com',
+  'Network / VPN': 'tyler.austin@fuseenergy.com',
+}
 export const assigneeFor = (name) => APP_ASSIGNEE[name] || null
 
 // Self-contained per-application icons (emoji, so no external assets / offline-safe).
@@ -294,6 +307,7 @@ export const APP_EMOJI = {
   'Software Installation': '📦',
   'Email / Distribution List': '📧',
   'Phone / Mobile / SIM': '📱',
+  'Network / VPN': '🌐',
   Backoffice: '🏢',
   Navan: '✈️',
   'GES / ECOES': '⚡',

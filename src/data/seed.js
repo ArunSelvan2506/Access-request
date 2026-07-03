@@ -35,6 +35,7 @@ const FIELDS = {
   'Software Installation': { software: 'Docker Desktop', device: 'LAP-204', just: 'Local development' },
   'Email / Distribution List': { type: 'Distribution list', name: 'trading-alerts@fuseenergy.com', just: 'Team alerting' },
   'Phone / Mobile / SIM': { type: 'New SIM', just: 'Replacement SIM for work mobile' },
+  'Network / VPN': { issue: 'VPN disconnects every few minutes', location: 'London HQ' },
 }
 
 // [num, app, summary, status, urgency, hoursAgo, extra?]
@@ -103,6 +104,7 @@ const ROWS = [
   [161, 'Hardware / Device', 'Replacement laptop — cracked screen', 'In Progress', 'Medium', 20],
   [162, 'Account Onboarding / Offboarding', 'Onboard two support hires — start Monday', 'Open', 'High', 26],
   [163, 'GitHub', 'Write access to payments-service repo', 'Open', 'Medium', 30],
+  [164, 'Network / VPN', 'VPN keeps disconnecting', 'Open', 'High', 5],
 ]
 
 export function seedTickets() {

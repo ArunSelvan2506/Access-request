@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
 
-// Bumped to v7 so returning visitors re-seed (AWS tickets auto-assigned to David).
-const STORE = 'acc_sd_tickets_v7'
+// Bumped to v8 so returning visitors re-seed with the updated auto-assignments
+// (AWS → David, Hardware → Arun, Network → Tyler) and the new Network ticket.
+const STORE = 'acc_sd_tickets_v8'
 
 function loadTickets() {
   try {
