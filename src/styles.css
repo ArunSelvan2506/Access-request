@@ -197,6 +197,10 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .cat-tile .ctt{font-weight:700;font-size:14px;color:var(--ink)}
 .cat-tile .ctd{font-size:12px;color:var(--soft);margin-top:2px;line-height:1.4}
 .linkback{background:none;border:none;color:var(--nav);font-weight:600;font-size:13px;cursor:pointer;padding:0;margin-bottom:12px;font-family:inherit}
+.createhero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:26px 24px;text-align:center;margin-bottom:18px;box-shadow:var(--sh)}
+.createhero .ch-t{font-size:16px;font-weight:700;color:var(--ink)}
+.createhero .ch-s{font-size:13px;color:var(--soft);margin:6px auto 16px;max-width:440px;line-height:1.5}
+.btn.lg{height:42px;padding:0 22px;font-size:14px}
 
 /* modal */
 .scrim{position:fixed;inset:0;background:rgba(9,30,66,.54);opacity:0;pointer-events:none;transition:.18s;z-index:90}

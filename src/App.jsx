@@ -174,6 +174,7 @@ function AppInner({ session }) {
               subtitle={isAdmin ? undefined : 'The access requests you have submitted, with live SLA timers.'}
               now={now}
               onOpen={openTicket}
+              onCreate={isAdmin ? undefined : () => setCreateOpen(true)}
             />
           )}
           {nav.view === 'approvals' && (

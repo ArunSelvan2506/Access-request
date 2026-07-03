@@ -44,7 +44,7 @@ function compareBy(a, b, key, now) {
   }
 }
 
-export default function Queue({ tickets, queueFilter, now, onOpen, title: titleProp, subtitle }) {
+export default function Queue({ tickets, queueFilter, now, onOpen, onCreate, title: titleProp, subtitle }) {
   const [search, setSearch] = useState('')
   const [fStatus, setFStatus] = useState('')
   const [fApp, setFApp] = useState('')
@@ -80,6 +80,15 @@ export default function Queue({ tickets, queueFilter, now, onOpen, title: titleP
     <section className="view">
       <h1 className="title">{title}</h1>
       <p className="sub">{subtitle || 'Every access request, with live SLA timers. Click a row to open the ticket.'}</p>
+
+      {onCreate && (
+        <div className="createhero">
+          <div className="ch-t">Need access to an app, device, or IT help?</div>
+          <div className="ch-s">Raise a request and track it right here — most are actioned within their SLA target.</div>
+          <button className="btn primary lg" onClick={onCreate}>＋ Raise a request</button>
+        </div>
+      )}
+
       <div className="toolbar">
         <input
           type="text"
