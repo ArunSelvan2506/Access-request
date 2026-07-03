@@ -182,6 +182,11 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .kc-un{font-size:10px;color:var(--faint);border:1px dashed var(--border);border-radius:999px;padding:2px 8px;flex-shrink:0}
 .kboard-foot{display:flex;justify-content:center;margin-top:10px}
 .auto-sec{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);margin:0 0 12px}
+.sysinfo{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:22px;overflow:hidden}
+.sysrow{display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.sysrow:last-child{border-bottom:none}
+.sysk{width:150px;flex-shrink:0;color:var(--faint);font-weight:600}
+.sysv{color:var(--ink)}
 
 /* modal */
 .scrim{position:fixed;inset:0;background:rgba(9,30,66,.54);opacity:0;pointer-events:none;transition:.18s;z-index:90}

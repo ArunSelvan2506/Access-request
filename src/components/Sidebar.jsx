@@ -45,6 +45,7 @@ export default function Sidebar({ active, counts, onSelect, isAdmin, isOwner }) 
     { view: 'automations', label: '⚙️ Automations' },
     { view: 'catalog', label: '📚 Service catalog' },
   ]
+  if (isOwner) configure.push({ view: 'owner', label: '🛡️ Owner portal' })
   if (isOwner) configure.push({ view: 'admins', label: '🔑 Admin settings' })
 
   return (
