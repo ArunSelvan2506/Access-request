@@ -36,6 +36,13 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Build-time config, read from repo Actions → Variables.
+          VITE_BACKEND: ${{ vars.VITE_BACKEND }}
+          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+          VITE_API_KEY: ${{ vars.VITE_API_KEY }}
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_ALLOWED_EMAIL_DOMAIN: ${{ vars.VITE_ALLOWED_EMAIL_DOMAIN }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
