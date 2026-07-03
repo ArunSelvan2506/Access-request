@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
 
-// Bumped to v5 so returning visitors pick up the refreshed demo dataset
-// (this week's new review tickets) instead of tickets cached from a prior visit.
-const STORE = 'acc_sd_tickets_v5'
+// Bumped to v6 so returning visitors re-seed with the updated SLA targets
+// (Critical 2h · High 4h · Medium 24h · Low 48h).
+const STORE = 'acc_sd_tickets_v6'
 
 function loadTickets() {
   try {

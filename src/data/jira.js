@@ -14,7 +14,7 @@ export const URGENCY_OPTIONS = ['Critical', 'High', 'Medium', 'Low']
 export const DEFAULT_URGENCY = 'Medium'
 
 // Priority → SLA target (hours). Higher priority = tighter SLA.
-export const PRIORITY_SLA = { Critical: 4, High: 8, Medium: 24, Low: 48 }
+export const PRIORITY_SLA = { Critical: 2, High: 4, Medium: 24, Low: 48 }
 export const slaForUrgency = (u) => PRIORITY_SLA[u] || 24
 
 // Requester context captured on every request so reviewers can see who's
