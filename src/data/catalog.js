@@ -229,14 +229,13 @@ export const CATALOG = [
   // not IT-managed
   { name: 'Backoffice', group: 'red', ic: ic('BO', '#ffeceb', '#ae2a19'), route: 'Post in #access-request and tag @ops-permission-managers.' },
   { name: 'Navan', group: 'red', ic: ic('NV', '#ffeceb', '#ae2a19'), route: 'Contact Hongyi or Manuel (Finance) directly.' },
-  { name: 'GES / ECOES', group: 'red', ic: ic('GE', '#ffeceb', '#ae2a19'), route: 'Post in #access-request, include your email address (required for setup).' },
+  { name: 'GES / ECOES', group: 'red', ic: ic('GE', '#ffeceb', '#ae2a19'), route: 'Post in #access-request and tag @ops-permission-managers. Include your email address (required for setup).' },
   { name: 'TMA', group: 'red', ic: ic('TM', '#ffeceb', '#ae2a19'), route: 'Post in #access-request, tag @installs-third-liners. Background check required.' },
   { name: 'Figma', group: 'red', ic: ic('FG', '#ffeceb', '#ae2a19'), route: 'Message Rory Keohane (Design) directly.' },
   { name: 'Adobe', group: 'red', ic: ic('AD', '#ffeceb', '#ae2a19'), route: 'Email rory@fuseenergy.com (Design).' },
-  { name: 'Docusign', group: 'red', ic: ic('DS', '#ffeceb', '#ae2a19'), route: 'Contact Wei Sheng Neo or Deepu (Legal/Compliance).' },
+  { name: 'Docusign', group: 'red', ic: ic('DS', '#ffeceb', '#ae2a19'), route: 'Contact Wei Sheng Neo (Legal/Compliance).' },
   { name: 'LinkedIn Premium', group: 'red', ic: ic('LI', '#ffeceb', '#ae2a19'), route: 'Contact Laura (People) directly.' },
-  { name: 'Deliveroo', group: 'red', ic: ic('DL', '#ffeceb', '#ae2a19'), route: 'Contact Labib (People) directly.' },
-  { name: 'Devbox', group: 'red', ic: ic('DV', '#ffeceb', '#ae2a19'), route: 'Post in #access-request, tag or contact Roman directly.' },
+  { name: 'Deliveroo', group: 'red', ic: ic('DL', '#ffeceb', '#ae2a19'), route: 'Contact Muba (muborakkhon.mirzaeva@fuseenergy.com).' },
 ]
 
 export const findApp = (n) => CATALOG.find((a) => a.name === n)
@@ -290,5 +289,4 @@ export const APP_EMOJI = {
   Docusign: '✍️',
   'LinkedIn Premium': '💼',
   Deliveroo: '🛵',
-  Devbox: '📦',
 }
