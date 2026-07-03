@@ -289,6 +289,15 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
                   <div className="hint">Time-bound access auto-flags for review when it nears expiry.</div>
                 </div>
               )}
+              {app.fields.map((f) => (
+                <Field
+                  key={f.k}
+                  field={f}
+                  value={values[f.k] || ''}
+                  error={fieldErrors[f.k]}
+                  onChange={(v) => setField(f.k, v)}
+                />
+              ))}
               {requireApproval && (
                 <div className={'field' + (managerBad ? ' bad' : '')}>
                   <label>
@@ -307,15 +316,6 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
                   <div className="err">A valid @fuseenergy.com manager email is required.</div>
                 </div>
               )}
-              {app.fields.map((f) => (
-                <Field
-                  key={f.k}
-                  field={f}
-                  value={values[f.k] || ''}
-                  error={fieldErrors[f.k]}
-                  onChange={(v) => setField(f.k, v)}
-                />
-              ))}
             </div>
           )}
         </div>
