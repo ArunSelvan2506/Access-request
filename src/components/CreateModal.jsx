@@ -1,9 +1,16 @@
 import { useState, useMemo, useEffect } from 'react'
-import { CATALOG, findApp, needsApproval, isTimed } from '../data/catalog'
+import { CATALOG, findApp, needsApproval, isTimed, appCategory } from '../data/catalog'
 import { URGENCY_OPTIONS, DEFAULT_URGENCY, DURATION_OPTIONS, DEFAULT_DURATION, DEPARTMENTS } from '../data/jira'
 import { validateRequest } from '../utils/validation'
 import { isOpen } from '../utils/sla'
 import { useToast } from './common/Toast'
+
+// Grouped catalog for the selector.
+const GROUPS = [
+  { cat: 'app', label: 'Applications & access' },
+  { cat: 'hardware', label: 'Hardware & devices' },
+  { cat: 'ithelp', label: 'IT help & accounts' },
+]
 
 // Build the initial form values for an app (applies any field defaults).
 function initialValues(app) {
@@ -140,15 +147,25 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
         <div className="mb">
           <div className="field">
             <label>
-              Application <span className="req">*</span>
+              What do you need? <span className="req">*</span>
             </label>
             <select value={appName} onChange={(e) => onAppChange(e.target.value)}>
-              <option value="">Select an application…</option>
-              {CATALOG.map((a) => (
-                <option key={a.name} value={a.name}>
-                  {(a.group === 'red' ? '🔴 ' : '') + a.name}
-                </option>
-              ))}
+              <option value="">Select an application, device or service…</option>
+              {GROUPS.map((g) => {
+                const items = CATALOG.filter((a) => a.group === 'green' && appCategory(a.name) === g.cat)
+                return items.length ? (
+                  <optgroup key={g.cat} label={g.label}>
+                    {items.map((a) => (
+                      <option key={a.name} value={a.name}>{a.name}</option>
+                    ))}
+                  </optgroup>
+                ) : null
+              })}
+              <optgroup label="Not managed by IT">
+                {CATALOG.filter((a) => a.group === 'red').map((a) => (
+                  <option key={a.name} value={a.name}>🔴 {a.name}</option>
+                ))}
+              </optgroup>
             </select>
           </div>
 

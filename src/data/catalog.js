@@ -255,6 +255,15 @@ export const APP_TIMED = new Set([
 ])
 export const isTimed = (name) => APP_TIMED.has(name)
 
+// Category used to group the "what do you need" selector on create.
+export const APP_HARDWARE = new Set(['Hardware / Device', 'Phone / Mobile / SIM'])
+export const APP_ITHELP = new Set([
+  'Password / MFA Reset', 'Google Account Reset / 2FA', 'Software Installation',
+  'Account Onboarding / Offboarding', 'Email / Distribution List',
+])
+export const appCategory = (name) =>
+  APP_HARDWARE.has(name) ? 'hardware' : APP_ITHELP.has(name) ? 'ithelp' : 'app'
+
 // Self-contained per-application icons (emoji, so no external assets / offline-safe).
 // Rendered inside the coloured app tile; falls back to the 2-letter code if missing.
 export const APP_EMOJI = {
