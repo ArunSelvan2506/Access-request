@@ -74,41 +74,37 @@ export default function SignIn({ session }) {
           Sign in with your Fuse Energy account to raise and track access requests.
         </p>
 
-        {sso ? (
+        {sso && (
           <>
             <div ref={gbtn} style={{ display: 'flex', justifyContent: 'center', minHeight: 44 }} />
-            {error && <div className="validation" style={{ marginTop: 14 }}>{error}</div>}
-            <p style={{ color: 'var(--faint)', marginTop: 16, fontSize: 12, lineHeight: 1.5 }}>
-              Use your <b>@{ALLOWED_DOMAIN}</b> Google account. Access is limited to Fuse Energy staff.
-            </p>
+            <div className="or-sep">or sign in with the site password</div>
           </>
-        ) : (
-          <form onSubmit={submit}>
-            <div className="field">
-              <label>Work email</label>
-              <input
-                type="email"
-                autoFocus
-                placeholder={`you@${ALLOWED_DOMAIN}`}
-                value={value}
-                onChange={(e) => { setValue(e.target.value); setError(null) }}
-              />
-            </div>
-            <div className="field">
-              <label>Site password</label>
-              <input
-                type="password"
-                placeholder="Shared access password"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setError(null) }}
-              />
-            </div>
-            {error && <div className="validation" style={{ marginBottom: 14 }}>{error}</div>}
-            <button className="btn primary" type="submit" style={{ width: '100%', height: 40, justifyContent: 'center' }}>
-              Continue
-            </button>
-          </form>
         )}
+
+        <form onSubmit={submit}>
+          <div className="field">
+            <label>Work email</label>
+            <input
+              type="email"
+              placeholder={`you@${ALLOWED_DOMAIN}`}
+              value={value}
+              onChange={(e) => { setValue(e.target.value); setError(null) }}
+            />
+          </div>
+          <div className="field">
+            <label>Site password</label>
+            <input
+              type="password"
+              placeholder="Shared access password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setError(null) }}
+            />
+          </div>
+          {error && <div className="validation" style={{ marginBottom: 14 }}>{error}</div>}
+          <button className="btn primary" type="submit" style={{ width: '100%', height: 40, justifyContent: 'center' }}>
+            Continue
+          </button>
+        </form>
 
         <p style={{ color: 'var(--faint)', marginTop: 16, fontSize: 12, lineHeight: 1.5 }}>
           Staff can submit requests and track their own tickets. Administrators manage and resolve

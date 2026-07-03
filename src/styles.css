@@ -61,6 +61,8 @@ button{font-family:inherit}
 .pm-email{font-size:12px;color:var(--faint);margin-top:2px;word-break:break-all}
 .pm-item{display:block;width:100%;text-align:left;padding:11px 14px;background:none;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
 .pm-item:hover{background:var(--surface-2)}
+.or-sep{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--faint);font-size:12px}
+.or-sep::before,.or-sep::after{content:'';flex:1;height:1px;background:var(--border)}
 .topsearch{width:230px}
 .btn{height:32px;border:1px solid var(--border);background:#fff;border-radius:var(--r);padding:0 12px;font-size:13px;font-weight:600;color:var(--soft);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{background:var(--bg)}
