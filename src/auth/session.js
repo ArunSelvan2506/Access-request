@@ -8,7 +8,11 @@
 // project demo but not real security. Server-enforced roles come with the
 // parked Firebase backend (real Google login + Firestore rules).
 
-export const OWNER_EMAIL = 'arun@fuseenergy.com' // primary owner — cannot be removed
+export const OWNER_EMAIL = 'arun@fuseenergy.com' // primary owner — shown in the UI
+// Full-access owners (can't be removed as admins). The primary owner above is
+// listed first; add more owner emails here.
+export const OWNERS = ['arun@fuseenergy.com', 'davidnoonan@fuseenergy.com']
+export const isOwnerEmail = (email) => OWNERS.includes((email || '').toLowerCase())
 export const ALLOWED_DOMAIN = 'fuseenergy.com'
 
 // Temporary shared site password (demo gate). NOTE: because this is a static
@@ -54,7 +58,7 @@ export function saveCurrentUser(email) {
 export function roleOf(email, admins) {
   if (!email) return null
   const e = email.toLowerCase()
-  if (e === OWNER_EMAIL) return 'owner'
+  if (isOwnerEmail(e)) return 'owner'
   if ((admins || []).map((a) => a.toLowerCase()).includes(e)) return 'admin'
   return 'user'
 }

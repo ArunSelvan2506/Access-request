@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { OWNER_EMAIL, isCompanyEmail, displayName } from '../auth/session'
+import { OWNER_EMAIL, OWNERS, isOwnerEmail, isCompanyEmail, displayName } from '../auth/session'
 import { useToast } from './common/Toast'
 
 // Owner-only screen to manage administrators — mirrors Jira's project people
@@ -16,8 +16,8 @@ export default function AdminSettings({ session }) {
       toast('Enter a valid @fuseenergy.com email', 'bad')
       return
     }
-    if (email === OWNER_EMAIL) {
-      toast('That is the primary owner', 'bad')
+    if (isOwnerEmail(email)) {
+      toast('That account is already an owner', 'bad')
       return
     }
     if (admins.includes(email)) {
@@ -39,7 +39,7 @@ export default function AdminSettings({ session }) {
         <p>{email}</p>
       </div>
       <div className="toggle" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span className={'tag ' + (role === 'Primary owner' ? 'purple' : 'green')}>{role}</span>
+        <span className={'tag ' + (role === 'Administrator' ? 'green' : 'purple')}>{role}</span>
         {removable && (
           <button
             className="btn"
@@ -72,8 +72,10 @@ export default function AdminSettings({ session }) {
       <div className="sec" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--faint)', margin: '0 0 8px' }}>
         People with full access
       </div>
-      <Row email={OWNER_EMAIL} role="Primary owner" removable={false} />
-      {admins.map((a) => (
+      {OWNERS.map((o) => (
+        <Row key={o} email={o} role={o === OWNER_EMAIL ? 'Primary owner' : 'Owner'} removable={false} />
+      ))}
+      {admins.filter((a) => !isOwnerEmail(a)).map((a) => (
         <Row key={a} email={a} role="Administrator" removable />
       ))}
 

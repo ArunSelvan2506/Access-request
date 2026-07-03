@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { displayName } from '../auth/session'
+import { displayName, OWNER_EMAIL } from '../auth/session'
 
-const ROLE_LABEL = { owner: 'Primary owner', admin: 'Administrator', user: 'Requester' }
+const ROLE_LABEL = { owner: 'Owner', admin: 'Administrator', user: 'Requester' }
 const ROLE_TAG = { owner: 'purple', admin: 'green', user: 'grey' }
 
 function initials(email) {
@@ -13,6 +13,7 @@ function initials(email) {
 export default function TopNav({ onCreate, email, role, onSignOut, onHelp, search, onToggleSidebar, theme, onToggleTheme }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
+  const roleLabel = role === 'owner' && email === OWNER_EMAIL ? 'Primary owner' : ROLE_LABEL[role]
 
   // Close the account menu on outside click / Escape.
   useEffect(() => {
@@ -50,7 +51,7 @@ export default function TopNav({ onCreate, email, role, onSignOut, onHelp, searc
         <button className="btn primary" onClick={onCreate}>
           + Create
         </button>
-        {role && <span className={'tag ' + (ROLE_TAG[role] || 'grey')}>{ROLE_LABEL[role]}</span>}
+        {role && <span className={'tag ' + (ROLE_TAG[role] || 'grey')}>{roleLabel}</span>}
         <div className="profile" ref={menuRef}>
           <button
             className="avatar"
@@ -67,7 +68,7 @@ export default function TopNav({ onCreate, email, role, onSignOut, onHelp, searc
               <div className="pm-head">
                 <div className="pm-name">{displayName(email)}</div>
                 <div className="pm-email">{email}</div>
-                {role && <span className={'tag ' + (ROLE_TAG[role] || 'grey')} style={{ marginTop: 8 }}>{ROLE_LABEL[role]}</span>}
+                {role && <span className={'tag ' + (ROLE_TAG[role] || 'grey')} style={{ marginTop: 8 }}>{roleLabel}</span>}
               </div>
               <button className="pm-item" role="menuitem" onClick={() => { setMenuOpen(false); onSignOut() }}>
                 Sign out

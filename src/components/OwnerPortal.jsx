@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { formatUK, formatUKShort, timeAgo } from '../utils/format'
 import { isOpen, isBreaching } from '../utils/sla'
 import { BACKEND, isApi, GOOGLE_CLIENT_ID } from '../config'
-import { OWNER_EMAIL, displayName } from '../auth/session'
+import { OWNER_EMAIL, OWNERS, displayName } from '../auth/session'
 import { getPresence } from '../api/presence'
 import { BASE_ROUTING, loadRouting, saveRouting, resetRouting } from '../data/catalog'
 import { useToast } from './common/Toast'
@@ -89,7 +89,7 @@ export default function OwnerPortal({ tickets, now, admins = [], currentEmail, o
   }, [log, q, fType])
   const shown = filtered.slice(0, 300)
 
-  const adminCount = new Set([OWNER_EMAIL, ...admins].map((e) => e.toLowerCase())).size
+  const adminCount = new Set([...OWNERS, ...admins].map((e) => e.toLowerCase())).size
   const breaching = tickets.filter(isBreaching).length
 
   const feature = (on, offText = 'Off') => (
@@ -118,7 +118,7 @@ export default function OwnerPortal({ tickets, now, admins = [], currentEmail, o
         <div className="sysrow"><span className="sysk">Shared data</span><span className="sysv">{isApi ? 'Connected to server' : 'Local only — data lives in each browser'}</span></div>
         <div className="sysrow"><span className="sysk">Google SSO</span><span className="sysv">{feature(!!GOOGLE_CLIENT_ID, 'Not configured')}</span></div>
         <div className="sysrow"><span className="sysk">Email &amp; AI</span><span className="sysv"><span className="tag grey">Server-side</span> <span style={{ color: 'var(--faint)', fontSize: 12 }}>activate when the server is deployed</span></span></div>
-        <div className="sysrow"><span className="sysk">Primary owner</span><span className="sysv">{OWNER_EMAIL}</span></div>
+        <div className="sysrow"><span className="sysk">Owners</span><span className="sysv">{OWNERS.join(', ')}</span></div>
       </div>
 
       <div className="auto-sec">Ticket routing — auto-assign</div>

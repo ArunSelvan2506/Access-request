@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
-  OWNER_EMAIL,
+  isOwnerEmail,
   loadAdmins,
   saveAdmins,
   loadCurrentUser,
@@ -26,7 +26,7 @@ export function useSession() {
   // Owner-only operations (guarded again in the UI).
   const addAdmin = useCallback((e) => {
     const v = (e || '').trim().toLowerCase()
-    if (!v || v === OWNER_EMAIL) return
+    if (!v || isOwnerEmail(v)) return
     setAdmins((prev) => (prev.includes(v) ? prev : [...prev, v]))
   }, [])
   const removeAdmin = useCallback(

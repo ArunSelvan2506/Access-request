@@ -23,7 +23,7 @@ import { ToastProvider } from './components/common/Toast'
 import { useTicketStore } from './hooks/useTicketStore'
 import { useNow } from './hooks/useNow'
 import { useSession } from './hooks/useSession'
-import { displayName, OWNER_EMAIL } from './auth/session'
+import { displayName, OWNER_EMAIL, OWNERS } from './auth/session'
 import { isApi } from './config'
 import { extractMentions } from './utils/mentions'
 import { notifyMention, notifyAssignment } from './api/notify'
@@ -108,7 +108,7 @@ function AppInner({ session }) {
     decideApproval(key, decision, displayName(email), note, channel)
   }
   // The admin team — the people a ticket can be assigned to.
-  const adminPeople = [...new Set([OWNER_EMAIL, ...admins].map((e) => e.toLowerCase()))].map((e) => ({
+  const adminPeople = [...new Set([...OWNERS, ...admins].map((e) => e.toLowerCase()))].map((e) => ({
     email: e,
     name: displayName(e),
   }))
@@ -125,7 +125,7 @@ function AppInner({ session }) {
   // People who can be @mentioned on a ticket: its participants + the admin team.
   const taggablePeople = (ticket) => {
     if (!ticket) return []
-    const raw = [ticket.requesterEmail, ticket.manager, ticket.assignee, OWNER_EMAIL, ...admins].filter(Boolean)
+    const raw = [ticket.requesterEmail, ticket.manager, ticket.assignee, ...OWNERS, ...admins].filter(Boolean)
     const uniq = [...new Set(raw.map((e) => e.toLowerCase()))]
     return uniq.map((e) => ({ email: e, name: displayName(e) }))
   }
@@ -139,7 +139,7 @@ function AppInner({ session }) {
     if (!t) return
     let recipients = extractMentions(text, taggablePeople(t).map((p) => p.email)).filter((e) => e !== email)
     if (internal) {
-      const adminSet = new Set([OWNER_EMAIL, ...admins].map((e) => e.toLowerCase()))
+      const adminSet = new Set([...OWNERS, ...admins].map((e) => e.toLowerCase()))
       recipients = recipients.filter((e) => adminSet.has(e))
     }
     if (recipients.length) {
