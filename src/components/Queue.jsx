@@ -14,6 +14,7 @@ const TITLES = {
   expiring: 'Access expiring',
   rejected: 'Auto-rejected',
   done: 'Resolved',
+  unassigned: 'Unassigned',
 }
 
 // Sortable columns (in table order). `key` maps a header to how it sorts.
@@ -61,6 +62,7 @@ export default function Queue({ tickets, queueFilter, now, onOpen, onCreate, tit
     else if (queueFilter === 'expiring') l = l.filter((t) => { const e = expiryInfo(t, now); return e && (e.soon || e.expired) })
     else if (queueFilter === 'rejected') l = l.filter((t) => t.status === 'Rejected')
     else if (queueFilter === 'done') l = l.filter((t) => t.status === 'Done')
+    else if (queueFilter === 'unassigned') l = l.filter((t) => !t.assignee && !['Done', 'Rejected', 'Cancelled'].includes(t.status))
 
     const q = search.toLowerCase()
     l = l.filter(

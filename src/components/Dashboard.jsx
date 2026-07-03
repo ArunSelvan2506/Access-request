@@ -1,6 +1,10 @@
 import { AppCell, StatusPill, SlaCell } from './common/Badges'
 import { slaState, isOpen, isBreaching, expiryInfo } from '../utils/sla'
 import { formatUK, formatUKShort } from '../utils/format'
+import { displayName } from '../auth/session'
+
+// Active (not closed) and unassigned — the tickets with no owner yet.
+const isUnassigned = (t) => !t.assignee && !['Done', 'Rejected', 'Cancelled'].includes(t.status)
 
 function Stat({ n, label, onClick }) {
   const clickable = !!onClick
@@ -30,6 +34,7 @@ export default function Dashboard({ tickets, now, onOpen, onNavigate }) {
     const e = expiryInfo(t, now)
     return e && (e.soon || e.expired)
   }).length
+  const unassigned = tickets.filter(isUnassigned).length
 
   const recent = [...tickets].sort((a, b) => b.created - a.created).slice(0, 6)
 
@@ -44,6 +49,7 @@ export default function Dashboard({ tickets, now, onOpen, onNavigate }) {
         <Stat n={appr} label="Awaiting approval" onClick={go('approvals')} />
         <Stat n={open} label="Open requests" onClick={go('queue', 'open')} />
         <Stat n={breach} label="SLA at risk" onClick={go('queue', 'breach')} />
+        <Stat n={unassigned} label="Unassigned" onClick={go('queue', 'unassigned')} />
         <Stat n={expiring} label="Access expiring" onClick={go('queue', 'expiring')} />
         <Stat n={rej} label="Auto-rejected" onClick={go('queue', 'rejected')} />
         <Stat n={done} label="Resolved" onClick={go('queue', 'done')} />
@@ -58,6 +64,7 @@ export default function Dashboard({ tickets, now, onOpen, onNavigate }) {
             <th>Application</th>
             <th>Summary</th>
             <th>Status</th>
+            <th>Assignee</th>
             <th>SLA</th>
             <th>Submitted</th>
           </tr>
@@ -65,7 +72,7 @@ export default function Dashboard({ tickets, now, onOpen, onNavigate }) {
         <tbody>
           {recent.length === 0 ? (
             <tr>
-              <td colSpan={6} style={{ textAlign: 'center', padding: 30, color: 'var(--faint)' }}>
+              <td colSpan={7} style={{ textAlign: 'center', padding: 30, color: 'var(--faint)' }}>
                 No requests found.
               </td>
             </tr>
@@ -79,6 +86,9 @@ export default function Dashboard({ tickets, now, onOpen, onNavigate }) {
                 <td>{t.summary}</td>
                 <td>
                   <StatusPill status={t.status} />
+                </td>
+                <td style={{ whiteSpace: 'nowrap' }}>
+                  {t.assignee ? displayName(t.assignee) : <span style={{ color: 'var(--faint)' }}>Unassigned</span>}
                 </td>
                 <td>
                   <SlaCell ticket={t} now={now} />
