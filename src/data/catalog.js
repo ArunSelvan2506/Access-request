@@ -173,7 +173,10 @@ export const CATALOG = [
     callout: { t: 'warn', x: '⚠️ Laptops, monitors and peripherals. Most items need line-manager approval — mice, keyboards and chargers/cables don\'t.' },
     reject: 'Missing device detail or justification',
     fields: [
-      { k: 'device', label: 'Item needed', req: true, type: 'select', opts: ['Laptop', 'Desktop', 'Monitor', 'Docking station', 'Headset', 'Webcam', 'Mouse', 'Keyboard', 'Charger / cable', 'Other peripheral'] },
+      { k: 'device', label: 'Item needed', req: true, type: 'select', groups: [
+        { label: 'Equipment — needs manager approval', opts: ['Laptop', 'Desktop', 'Monitor', 'Docking station', 'Headset', 'Webcam', 'Other peripheral'] },
+        { label: 'Accessories — no approval needed', opts: ['Mouse', 'Keyboard', 'Charger / cable'] },
+      ] },
       { k: 'detail', label: 'Model / details', req: true, hint: 'e.g. MacBook Pro 14", Dell 27" monitor' },
       { k: 'reason', label: 'Business justification', req: true, type: 'textarea' },
       { k: 'location', label: 'Delivery / office location', req: true, hint: 'Office or delivery address' },

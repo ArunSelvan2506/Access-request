@@ -341,9 +341,17 @@ function Field({ field, value, error, onChange }) {
     control = (
       <select value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">Select…</option>
-        {field.opts.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
+        {field.groups
+          ? field.groups.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.opts.map((o) => (
+                  <option key={o}>{o}</option>
+                ))}
+              </optgroup>
+            ))
+          : field.opts.map((o) => (
+              <option key={o}>{o}</option>
+            ))}
       </select>
     )
   } else {
