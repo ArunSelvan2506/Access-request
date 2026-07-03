@@ -26,12 +26,7 @@ export default function Board({ tickets, now, onOpen }) {
 
   return (
     <section className="view">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <h1 className="title" style={{ marginBottom: 0 }}>Board</h1>
-        <button className="btn" onClick={() => setShowClosed((v) => !v)}>
-          {showClosed ? '－ Hide done & rejected' : '＋ Show done & rejected'}
-        </button>
-      </div>
+      <h1 className="title">Board</h1>
       <p className="sub">
         Live work across the desk. Open a ticket to move it between stages. Cards are colour-coded by priority.
       </p>
@@ -86,6 +81,12 @@ export default function Board({ tickets, now, onOpen }) {
             </div>
           )
         })}
+      </div>
+
+      <div className="kboard-foot">
+        <button className="btn" onClick={() => setShowClosed((v) => !v)}>
+          {showClosed ? '－ Hide done & rejected' : '＋ Show done & rejected'}
+        </button>
       </div>
     </section>
   )
