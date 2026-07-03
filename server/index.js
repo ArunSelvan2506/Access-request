@@ -308,6 +308,36 @@ app.post('/api/notify/assign', wrap(async (req, res) => {
   }
 }))
 
+// ---- Presence & login activity (owner portal) ----
+// In-memory: "who's online now" is inherently ephemeral, and recent logins are
+// kept since the server last started. Fine for a single instance.
+const PRESENCE = new Map() // email -> { firstSeen, lastSeen }
+const LOGINS = [] // recent login events, newest first: { email, at }
+const ONLINE_MS = 3 * 60 * 1000
+
+app.post('/api/presence/ping', wrap(async (req, res) => {
+  const email = (req.body?.email || '').toLowerCase()
+  if (!/.+@.+\..+/.test(email)) return res.status(400).json({ error: 'email required' })
+  const now = Date.now()
+  const cur = PRESENCE.get(email)
+  if (cur) cur.lastSeen = now
+  else PRESENCE.set(email, { firstSeen: now, lastSeen: now })
+  if (req.body?.event === 'login') {
+    LOGINS.unshift({ email, at: now })
+    if (LOGINS.length > 300) LOGINS.length = 300
+  }
+  res.json({ ok: true })
+}))
+
+app.get('/api/presence', wrap(async (_req, res) => {
+  const now = Date.now()
+  const online = [...PRESENCE.entries()]
+    .filter(([, v]) => now - v.lastSeen <= ONLINE_MS)
+    .map(([email, v]) => ({ email, lastSeen: v.lastSeen }))
+    .sort((a, b) => b.lastSeen - a.lastSeen)
+  res.json({ online, logins: LOGINS.slice(0, 100) })
+}))
+
 app.listen(PORT, () =>
   console.log(
     'Access Service Desk API on :' + PORT +

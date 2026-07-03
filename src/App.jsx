@@ -27,6 +27,7 @@ import { displayName, OWNER_EMAIL } from './auth/session'
 import { isApi } from './config'
 import { extractMentions } from './utils/mentions'
 import { notifyMention, notifyAssignment } from './api/notify'
+import { usePresence } from './hooks/usePresence'
 import { isOpen, isBreaching } from './utils/sla'
 
 const isPendingApproval = (t) => t.status === 'Pending Approval'
@@ -36,6 +37,7 @@ function AppInner({ session }) {
   const { tickets, createTicket, transitionTicket, decideApproval, assignTicket, addComment } =
     useTicketStore()
   const now = useNow() // ticks every 30s to refresh SLA timers
+  usePresence(email) // heartbeat so the owner can see who's active (api mode)
 
   const [nav, setNav] = useState({ view: isAdmin ? 'dashboard' : 'queue', q: null })
   const [createOpen, setCreateOpen] = useState(false)
@@ -187,7 +189,7 @@ function AppInner({ session }) {
           {nav.view === 'board' && isAdmin && <Board tickets={tickets} now={now} onOpen={openTicket} />}
           {nav.view === 'reports' && isAdmin && <Reports tickets={tickets} now={now} />}
           {nav.view === 'automations' && isAdmin && <Automations />}
-          {nav.view === 'owner' && isOwner && <OwnerPortal tickets={tickets} now={now} admins={admins} onOpen={openTicket} />}
+          {nav.view === 'owner' && isOwner && <OwnerPortal tickets={tickets} now={now} admins={admins} currentEmail={email} onOpen={openTicket} />}
           {nav.view === 'catalog' && <Catalog />}
           {nav.view === 'admins' && isOwner && <AdminSettings session={session} />}
         </main>

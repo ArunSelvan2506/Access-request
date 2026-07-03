@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { formatUK, formatUKShort, timeAgo } from '../utils/format'
 import { isOpen, isBreaching } from '../utils/sla'
 import { BACKEND, isApi, GOOGLE_CLIENT_ID } from '../config'
-import { OWNER_EMAIL } from '../auth/session'
+import { OWNER_EMAIL, displayName } from '../auth/session'
+import { getPresence } from '../api/presence'
 
 const TYPE_LABEL = {
   created: 'Created', update: 'Status', comment: 'Comment', internal: 'Internal',
@@ -53,9 +54,24 @@ function Stat({ n, label }) {
   )
 }
 
-export default function OwnerPortal({ tickets, now, admins = [], onOpen }) {
+export default function OwnerPortal({ tickets, now, admins = [], currentEmail, onOpen }) {
   const [q, setQ] = useState('')
   const [fType, setFType] = useState('')
+  const [presence, setPresence] = useState({ online: [], logins: [] })
+
+  // Live presence + login history from the server (api mode). Poll every 30s.
+  useEffect(() => {
+    if (!isApi) return
+    let stop = false
+    const load = () => getPresence().then((d) => { if (!stop) setPresence(d) })
+    load()
+    const id = setInterval(load, 30000)
+    return () => { stop = true; clearInterval(id) }
+  }, [])
+
+  // In local mode we can only see this browser's own session.
+  const online = isApi ? presence.online : (currentEmail ? [{ email: currentEmail, lastSeen: now }] : [])
+  const logins = presence.logins
 
   const log = useMemo(() => buildLog(tickets), [tickets])
   const filtered = useMemo(() => {
@@ -97,6 +113,55 @@ export default function OwnerPortal({ tickets, now, admins = [], onOpen }) {
         <div className="sysrow"><span className="sysk">Email &amp; AI</span><span className="sysv"><span className="tag grey">Server-side</span> <span style={{ color: 'var(--faint)', fontSize: 12 }}>activate when the server is deployed</span></span></div>
         <div className="sysrow"><span className="sysk">Primary owner</span><span className="sysv">{OWNER_EMAIL}</span></div>
       </div>
+
+      <div className="auto-sec">
+        Who’s online now <span className="tag green" style={{ marginLeft: 6 }}>{online.length}</span>
+      </div>
+      <div className="sysinfo" style={{ marginBottom: 22 }}>
+        {online.length === 0 ? (
+          <div className="sysrow" style={{ color: 'var(--faint)' }}>No one is active right now.</div>
+        ) : (
+          online.map((u) => (
+            <div className="sysrow" key={u.email}>
+              <span className="onlinedot" />
+              <span className="sysv" style={{ flex: 1 }}>
+                <b>{displayName(u.email)}</b> <span style={{ color: 'var(--faint)' }}>{u.email}{u.email === currentEmail ? ' · you' : ''}</span>
+              </span>
+              <span style={{ color: 'var(--faint)', fontSize: 12 }}>active {timeAgo(u.lastSeen, now)}</span>
+            </div>
+          ))
+        )}
+      </div>
+      {!isApi && (
+        <p style={{ color: 'var(--faint)', fontSize: 12.5, marginTop: -14, marginBottom: 22 }}>
+          Only your own session shows on the local build. Org-wide presence and the full login
+          history below populate once the server is deployed.
+        </p>
+      )}
+
+      <div className="auto-sec">Login activity</div>
+      {logins.length === 0 ? (
+        <div className="sysinfo" style={{ marginBottom: 22 }}>
+          <div className="sysrow" style={{ color: 'var(--faint)' }}>
+            {isApi ? 'No logins recorded since the server last started.' : 'Login history is recorded on the server (deploy to enable).'}
+          </div>
+        </div>
+      ) : (
+        <table className="q" style={{ marginBottom: 22 }}>
+          <thead>
+            <tr><th>Who</th><th>Email</th><th>Signed in</th></tr>
+          </thead>
+          <tbody>
+            {logins.map((l, i) => (
+              <tr key={i}>
+                <td style={{ whiteSpace: 'nowrap' }}>{displayName(l.email)}</td>
+                <td style={{ color: 'var(--soft)' }}>{l.email}</td>
+                <td title={formatUK(l.at)} style={{ whiteSpace: 'nowrap' }}>{formatUKShort(l.at)} · {timeAgo(l.at, now)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       <div className="auto-sec">Activity log</div>
       <div className="toolbar">

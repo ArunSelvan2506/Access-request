@@ -187,6 +187,7 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .sysrow:last-child{border-bottom:none}
 .sysk{width:150px;flex-shrink:0;color:var(--faint);font-weight:600}
 .sysv{color:var(--ink)}
+.onlinedot{width:9px;height:9px;border-radius:50%;background:#22a06b;flex-shrink:0;box-shadow:0 0 0 3px rgba(34,160,107,.18)}
 
 /* modal */
 .scrim{position:fixed;inset:0;background:rgba(9,30,66,.54);opacity:0;pointer-events:none;transition:.18s;z-index:90}
