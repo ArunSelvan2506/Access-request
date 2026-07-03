@@ -151,6 +151,7 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:start}
 .bcol{background:var(--bg);border-radius:8px;padding:8px;min-height:120px}
 .bcol h4{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);font-weight:700;padding:6px 6px 10px;display:flex;justify-content:space-between}
+.bcards{max-height:62vh;overflow-y:auto;padding-right:2px}
 .bcard{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:10px;margin-bottom:8px;cursor:pointer}
 .bcard:hover{border-color:var(--nav)}
 .bcard .bt{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.35}
