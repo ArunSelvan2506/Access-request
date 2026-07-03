@@ -188,6 +188,7 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .sysk{width:150px;flex-shrink:0;color:var(--faint);font-weight:600}
 .sysv{color:var(--ink)}
 .onlinedot{width:9px;height:9px;border-radius:50%;background:#22a06b;flex-shrink:0;box-shadow:0 0 0 3px rgba(34,160,107,.18)}
+.routing-in{flex:1;max-width:340px;height:32px;border:1px solid var(--border);border-radius:var(--r);padding:0 10px;font-size:13px;background:var(--surface);color:var(--ink);font-family:inherit}
 .cat-grid{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:520px){.cat-grid{grid-template-columns:1fr 1fr}}
 .cat-tile{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;font-family:inherit;transition:border-color .1s,box-shadow .1s,transform .1s}

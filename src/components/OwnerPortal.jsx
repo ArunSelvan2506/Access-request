@@ -4,6 +4,8 @@ import { isOpen, isBreaching } from '../utils/sla'
 import { BACKEND, isApi, GOOGLE_CLIENT_ID } from '../config'
 import { OWNER_EMAIL, displayName } from '../auth/session'
 import { getPresence } from '../api/presence'
+import { BASE_ROUTING, loadRouting, saveRouting, resetRouting } from '../data/catalog'
+import { useToast } from './common/Toast'
 
 const TYPE_LABEL = {
   created: 'Created', update: 'Status', comment: 'Comment', internal: 'Internal',
@@ -58,6 +60,11 @@ export default function OwnerPortal({ tickets, now, admins = [], currentEmail, o
   const [q, setQ] = useState('')
   const [fType, setFType] = useState('')
   const [presence, setPresence] = useState({ online: [], logins: [] })
+  const [routing, setRouting] = useState(loadRouting())
+  const toast = useToast()
+
+  const saveRoute = () => { saveRouting(routing); toast('Ticket routing saved', 'good') }
+  const resetRoute = () => { resetRouting(); setRouting(loadRouting()); toast('Routing reset to defaults', 'good') }
 
   // Live presence + login history from the server (api mode). Poll every 30s.
   useEffect(() => {
@@ -112,6 +119,35 @@ export default function OwnerPortal({ tickets, now, admins = [], currentEmail, o
         <div className="sysrow"><span className="sysk">Google SSO</span><span className="sysv">{feature(!!GOOGLE_CLIENT_ID, 'Not configured')}</span></div>
         <div className="sysrow"><span className="sysk">Email &amp; AI</span><span className="sysv"><span className="tag grey">Server-side</span> <span style={{ color: 'var(--faint)', fontSize: 12 }}>activate when the server is deployed</span></span></div>
         <div className="sysrow"><span className="sysk">Primary owner</span><span className="sysv">{OWNER_EMAIL}</span></div>
+      </div>
+
+      <div className="auto-sec">Ticket routing — auto-assign</div>
+      <div className="sysinfo">
+        {Object.keys(BASE_ROUTING).map((app) => (
+          <div className="sysrow" key={app}>
+            <span className="sysk">{app}</span>
+            <input
+              className="routing-in"
+              value={routing.map[app] || ''}
+              placeholder="owner@fuseenergy.com"
+              onChange={(e) => setRouting((r) => ({ ...r, map: { ...r.map, [app]: e.target.value.trim().toLowerCase() } }))}
+            />
+          </div>
+        ))}
+        <div className="sysrow">
+          <span className="sysk">All other requests</span>
+          <input
+            className="routing-in"
+            value={routing.fallback || ''}
+            placeholder="owner@fuseenergy.com"
+            onChange={(e) => setRouting((r) => ({ ...r, fallback: e.target.value.trim().toLowerCase() }))}
+          />
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '10px 0 24px' }}>
+        <button className="btn primary" onClick={saveRoute}>Save routing</button>
+        <button className="btn" onClick={resetRoute}>Reset to defaults</button>
+        <span style={{ color: 'var(--faint)', fontSize: 12 }}>Applies to new requests. Assignees should be admins to action tickets.</span>
       </div>
 
       <div className="auto-sec">

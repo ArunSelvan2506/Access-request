@@ -273,14 +273,34 @@ export const APP_ITHELP = new Set([
 export const appCategory = (name) =>
   APP_HARDWARE.has(name) ? 'hardware' : APP_ITHELP.has(name) ? 'ithelp' : 'app'
 
-// Auto-assignment: new requests for these apps are assigned to a named owner on
-// creation. Update the email if the owner changes.
-export const APP_ASSIGNEE = {
+// ---- Ticket routing (auto-assignment) ----
+// New requests are auto-assigned to a named owner by application; everything
+// else goes to the default owner. The owner can edit these in the Owner portal
+// (overrides saved to localStorage; base defaults below).
+export const DEFAULT_ASSIGNEE = 'sanjay@fuseenergy.com'
+export const BASE_ROUTING = {
   AWS: 'davidnoonan@fuseenergy.com',
   'Hardware / Device': 'arun@fuseenergy.com',
   'Network / VPN': 'tyler.austin@fuseenergy.com',
 }
-export const assigneeFor = (name) => APP_ASSIGNEE[name] || null
+const ROUTING_KEY = 'acc_sd_routing_v1'
+
+// Effective routing = base defaults merged with any owner overrides.
+export function loadRouting() {
+  let o = {}
+  try { o = JSON.parse(localStorage.getItem(ROUTING_KEY)) || {} } catch (e) { /* ignore */ }
+  return { map: { ...BASE_ROUTING, ...(o.map || {}) }, fallback: o.fallback || DEFAULT_ASSIGNEE }
+}
+export function saveRouting(r) {
+  try { localStorage.setItem(ROUTING_KEY, JSON.stringify(r)) } catch (e) { /* ignore */ }
+}
+export function resetRouting() {
+  try { localStorage.removeItem(ROUTING_KEY) } catch (e) { /* ignore */ }
+}
+export const assigneeFor = (name) => {
+  const r = loadRouting()
+  return r.map[name] || r.fallback || null
+}
 
 // Self-contained per-application icons (emoji, so no external assets / offline-safe).
 // Rendered inside the coloured app tile; falls back to the 2-letter code if missing.

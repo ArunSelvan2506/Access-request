@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
 
-// Bumped to v8 so returning visitors re-seed with the updated auto-assignments
-// (AWS → David, Hardware → Arun, Network → Tyler) and the new Network ticket.
-const STORE = 'acc_sd_tickets_v8'
+// Bumped to v9 so returning visitors re-seed with the default owner (Sanjay)
+// applied to everything not explicitly routed.
+const STORE = 'acc_sd_tickets_v9'
 
 function loadTickets() {
   try {
