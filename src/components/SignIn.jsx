@@ -9,6 +9,7 @@ import { verifyGoogle } from '../api/auth'
 export default function SignIn({ session }) {
   const [value, setValue] = useState('')
   const [password, setPassword] = useState('')
+  const [showPwd, setShowPwd] = useState(false)
   const [error, setError] = useState(null)
   const gbtn = useRef(null)
   const sso = !!GOOGLE_CLIENT_ID
@@ -92,9 +93,18 @@ export default function SignIn({ session }) {
             />
           </div>
           <div className="field">
-            <label>Site password</label>
+            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span>Site password <span style={{ color: 'var(--faint)', fontWeight: 400 }}>(case-sensitive)</span></span>
+              <button
+                type="button"
+                onClick={() => setShowPwd((s) => !s)}
+                style={{ background: 'none', border: 'none', color: 'var(--nav)', cursor: 'pointer', fontSize: 12, fontWeight: 600, padding: 0 }}
+              >
+                {showPwd ? 'Hide' : 'Show'}
+              </button>
+            </label>
             <input
-              type="password"
+              type={showPwd ? 'text' : 'password'}
               placeholder="Shared access password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(null) }}
