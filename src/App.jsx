@@ -182,7 +182,7 @@ function AppInner({ session }) {
               onOpen={openTicket}
             />
           )}
-          {nav.view === 'board' && isAdmin && <Board tickets={tickets} onOpen={openTicket} />}
+          {nav.view === 'board' && isAdmin && <Board tickets={tickets} now={now} onOpen={openTicket} />}
           {nav.view === 'reports' && isAdmin && <Reports tickets={tickets} now={now} />}
           {nav.view === 'catalog' && <Catalog />}
           {nav.view === 'admins' && isOwner && <AdminSettings session={session} />}

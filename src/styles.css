@@ -156,15 +156,30 @@ table.q th[aria-sort="ascending"] .sort-ind,table.q th[aria-sort="descending"] .
 .sla.ok .dotc{background:#22a06b}.sla.warn .dotc{background:#e2a200}.sla.breach .dotc{background:#e2483d}
 .sla.ok{color:#216e4e}.sla.warn{color:#7f5f01}.sla.breach{color:#ae2a19}
 
-/* board */
-.board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:start}
-.bcol{background:var(--bg);border-radius:8px;padding:8px;min-height:120px}
-.bcol h4{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);font-weight:700;padding:6px 6px 10px;display:flex;justify-content:space-between}
-.bcards{max-height:62vh;overflow-y:auto;padding-right:2px}
-.bcard{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:10px;margin-bottom:8px;cursor:pointer}
-.bcard:hover{border-color:var(--nav)}
-.bcard .bt{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.35}
-.bcard .bm{display:flex;align-items:center;gap:6px;justify-content:space-between;font-size:11px;color:var(--faint)}
+/* board — Kanban */
+.kboard{display:flex;gap:14px;overflow-x:auto;align-items:flex-start;padding:4px 2px 14px;scrollbar-width:thin}
+.kcol{flex:0 0 290px;width:290px;background:var(--th);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;max-height:calc(100vh - 215px)}
+.kcol-h{display:flex;align-items:center;gap:8px;padding:13px 14px 11px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)}
+.kcol-h .kdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.kcol-h .kcount{margin-left:auto;background:var(--surface);border:1px solid var(--border);color:var(--soft);border-radius:999px;font-size:11px;font-weight:700;padding:1px 9px;text-transform:none}
+.kcol-body{overflow-y:auto;padding:0 10px 12px;display:flex;flex-direction:column;gap:9px;scrollbar-width:thin}
+.kcol-empty{color:var(--faint);font-size:12px;padding:10px 4px;text-align:center}
+.kcard{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--faint);border-radius:9px;padding:11px 12px;cursor:pointer;box-shadow:0 1px 2px rgba(9,30,66,.08);transition:transform .1s,box-shadow .1s,border-color .1s}
+.kcard:hover{transform:translateY(-1px);box-shadow:var(--sh);border-color:var(--nav)}
+.kcard[data-prio=crit]{border-left-color:#e2483d}
+.kcard[data-prio=high]{border-left-color:#e2a200}
+.kcard[data-prio=med]{border-left-color:#3b82f6}
+.kcard[data-prio=low]{border-left-color:#22a06b}
+.kc-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.kc-key{font-size:11px;font-weight:700;color:var(--nav);letter-spacing:.02em}
+.kc-top .sla{font-size:10.5px;font-weight:600}
+.kc-sum{font-size:13px;font-weight:600;line-height:1.4;color:var(--ink);margin-bottom:11px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.kc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kc-app{display:flex;align-items:center;font-size:11.5px;color:var(--soft);min-width:0;overflow:hidden;white-space:nowrap}
+.kc-app .app-ic{width:18px;height:18px;font-size:9px;margin-right:5px}
+.kc-app .app-ic svg{width:11px;height:11px}
+.kc-av{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,#1868db,#5e4db2);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0}
+.kc-un{font-size:10px;color:var(--faint);border:1px dashed var(--border);border-radius:999px;padding:2px 8px;flex-shrink:0}
 
 /* modal */
 .scrim{position:fixed;inset:0;background:rgba(9,30,66,.54);opacity:0;pointer-events:none;transition:.18s;z-index:90}
