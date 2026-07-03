@@ -2,7 +2,7 @@ import { AppCell } from './common/Badges'
 import { CATALOG } from '../data/catalog'
 import { PRIORITY_SLA, URGENCY_OPTIONS } from '../data/jira'
 
-export default function Catalog() {
+export default function Catalog({ onRaise }) {
   return (
     <section className="view">
       <h1 className="title">Service catalog</h1>
@@ -53,7 +53,9 @@ export default function Catalog() {
                   <AppCell name={a.name} />
                 </td>
                 <td>
-                  <span className="tag green">Raise a request</span>
+                  <button className="tag green raise" onClick={() => onRaise && onRaise(a.name)}>
+                    Raise a request →
+                  </button>
                 </td>
                 <td style={{ color: 'var(--soft)' }}>{required}</td>
               </tr>

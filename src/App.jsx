@@ -41,6 +41,8 @@ function AppInner({ session }) {
 
   const [nav, setNav] = useState({ view: isAdmin ? 'dashboard' : 'queue', q: null })
   const [createOpen, setCreateOpen] = useState(false)
+  const [presetApp, setPresetApp] = useState(null)
+  const openCreate = useCallback((app = null) => { setPresetApp(app); setCreateOpen(true) }, [])
   const [helpOpen, setHelpOpen] = useState(false)
   const [openKey, setOpenKey] = useState(null)
   const [navOpen, setNavOpen] = useState(true)
@@ -148,7 +150,7 @@ function AppInner({ session }) {
   return (
     <>
       <TopNav
-        onCreate={() => setCreateOpen(true)}
+        onCreate={() => openCreate()}
         email={email}
         role={role}
         onSignOut={session.signOut}
@@ -174,7 +176,7 @@ function AppInner({ session }) {
               subtitle={isAdmin ? undefined : 'The access requests you have submitted, with live SLA timers.'}
               now={now}
               onOpen={openTicket}
-              onCreate={isAdmin ? undefined : () => setCreateOpen(true)}
+              onCreate={isAdmin ? undefined : () => openCreate()}
             />
           )}
           {nav.view === 'approvals' && (
@@ -191,14 +193,14 @@ function AppInner({ session }) {
           {nav.view === 'reports' && isAdmin && <Reports tickets={tickets} now={now} />}
           {nav.view === 'automations' && isAdmin && <Automations />}
           {nav.view === 'owner' && isOwner && <OwnerPortal tickets={tickets} now={now} admins={admins} currentEmail={email} onOpen={openTicket} />}
-          {nav.view === 'catalog' && <Catalog />}
+          {nav.view === 'catalog' && <Catalog onRaise={(name) => openCreate(name)} />}
           {nav.view === 'admins' && isOwner && <AdminSettings session={session} />}
         </main>
       </div>
 
       <CreateModal
         open={createOpen}
-        presetApp={null}
+        presetApp={presetApp}
         existing={tickets.filter((t) => t.requesterEmail === email)}
         onClose={() => setCreateOpen(false)}
         onCreate={handleCreate}
