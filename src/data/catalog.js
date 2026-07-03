@@ -170,10 +170,11 @@ export const CATALOG = [
   // ----- General IT requests (added from the real IT/Security Service Desk mix) -----
   {
     name: 'Hardware / Device', group: 'green', ic: ic('HW', '#e9f2ff', '#0055cc'), sla: 24,
-    callout: { t: 'warn', x: '⚠️ Laptops, monitors and peripherals. Standard kit ships from stock; non-standard items may need manager approval.' },
+    callout: { t: 'warn', x: '⚠️ Laptops, monitors and peripherals. Most items need line-manager approval — mice, keyboards and chargers/cables don\'t.' },
     reject: 'Missing device detail or justification',
     fields: [
-      { k: 'device', label: 'Device / item needed', req: true, hint: 'e.g. MacBook Pro 14", external monitor, headset' },
+      { k: 'device', label: 'Item needed', req: true, type: 'select', opts: ['Laptop', 'Desktop', 'Monitor', 'Docking station', 'Headset', 'Webcam', 'Mouse', 'Keyboard', 'Charger / cable', 'Other peripheral'] },
+      { k: 'detail', label: 'Model / details', req: true, hint: 'e.g. MacBook Pro 14", Dell 27" monitor' },
       { k: 'reason', label: 'Business justification', req: true, type: 'textarea' },
       { k: 'location', label: 'Delivery / office location', req: true, hint: 'Office or delivery address' },
     ],
@@ -255,7 +256,13 @@ export const APP_APPROVAL = new Set([
   'AWS', 'Datadog', 'Claude', 'Cursor', 'Microsoft', 'Bitwarden', 'JetBrains',
   'Social Media', 'Account Onboarding / Offboarding',
 ])
-export const needsApproval = (name) => APP_APPROVAL.has(name)
+// Hardware items that DON'T need approval — low-cost accessories. Everything
+// else under Hardware / Device requires line-manager sign-off.
+export const HARDWARE_NO_APPROVAL = new Set(['Mouse', 'Keyboard', 'Charger / cable'])
+export const needsApproval = (name, fields) => {
+  if (name === 'Hardware / Device') return !HARDWARE_NO_APPROVAL.has((fields && fields.device) || '')
+  return APP_APPROVAL.has(name)
+}
 
 // Applications that grant standing access — eligible for time-bound (expiring) access.
 export const APP_TIMED = new Set([

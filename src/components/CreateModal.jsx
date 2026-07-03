@@ -47,7 +47,7 @@ export default function CreateModal({ open, presetApp, onClose, onCreate, existi
   const toast = useToast()
 
   const app = useMemo(() => findApp(appName), [appName])
-  const requireApproval = !!app && app.group === 'green' && needsApproval(app.name)
+  const requireApproval = !!app && app.group === 'green' && needsApproval(app.name, values)
   const timed = !!app && app.group === 'green' && isTimed(app.name)
 
   // Duplicate / existing-access detection: same app already open or resolved

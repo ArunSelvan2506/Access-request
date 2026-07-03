@@ -8,7 +8,7 @@ import { durationDays, slaForUrgency } from './jira'
 // SLA is driven by priority (urgency), not the application.
 export function buildTicket({ num, app, summary, data, user = {}, meta = {} }) {
   const now = Date.now()
-  const requireApproval = needsApproval(app.name)
+  const requireApproval = needsApproval(app.name, data)
   const manager = requireApproval ? (meta.manager || '').trim().toLowerCase() || null : null
   const days = durationDays(meta.duration)
   const expiresAt = days ? now + days * 864e5 : null
