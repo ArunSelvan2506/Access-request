@@ -70,7 +70,7 @@ Redeploy and the site reads/writes shared tickets from DynamoDB.
 - `PUT /api/tickets/:key` → replace a ticket
 - `GET /api/ai/status` → `{ enabled, model }`
 - `POST /api/ai/triage` → AI triage for one ticket (admin-facing, advisory)
-- `GET /api/notify/status` → `{ enabled }` (email configured?)
+- `GET /api/notify/status` → `{ enabled, slack }` (email / Slack configured?)
 - `POST /api/notify/mention` → email the people tagged in a comment (Amazon SES)
 - `POST /api/notify/assign` → email a ticket's new assignee (Amazon SES)
 - `GET /api/auth/status` → `{ enabled, domain }` (Google SSO configured?)
@@ -91,6 +91,12 @@ Tagging a person in a comment (`@name`) emails them. Set `SES_FROM` to a
 **verified SES sender** and give the instance role `ses:SendEmail`. Internal
 notes only notify the admin team, never the requester. Without `SES_FROM` the
 feature self-disables and comments still post normally.
+
+## Slack notifications
+New tickets are posted to Slack (Jira-style) when created. In Slack, create an
+**incoming webhook** for the channel you want, then set `SLACK_WEBHOOK_URL` on
+the server. The channel is whatever the webhook targets. Without it, nothing is
+posted. (Only fires in `api` mode — the server does the posting.)
 
 ## Honest limits (for now)
 - `API_KEY` is a deterrent, not real per-user auth — anyone with the key + URL

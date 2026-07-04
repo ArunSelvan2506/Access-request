@@ -9,7 +9,7 @@ export const RULES = [
   { ic: '💰', bg: 'var(--green-bg)', on: true, name: 'Finance gate — JetBrains', desc: 'On create — JetBrains tickets without a Finance approval reference are auto-rejected before reaching IT.', log: 'Applies to JetBrains' },
   { ic: '🧑‍💻', bg: 'var(--blue-bg)', on: true, name: 'Auto-assign by application', desc: 'On create — requests are assigned to the right owner automatically: AWS → David, Hardware → Arun, Network / VPN → Tyler; everything else → Sanjay. Routing is editable by the owner in the Owner portal.', log: 'Editable in Owner portal → Ticket routing' },
   { ic: '📸', bg: 'var(--bg)', on: false, name: 'AWS screenshot reminder', desc: 'On create — if an AWS ticket is missing a screenshot, post a comment asking the requester to attach one before auto-rejecting.', log: 'Currently disabled' },
-  { ic: '💬', bg: 'var(--blue-bg)', on: false, name: 'Slack notifications', desc: 'Posts to the #access-request Slack channel when a request is created or changes status (incl. rejected/resolved). Runs server-side via a Cloud Function + Slack incoming webhook.', log: 'Needs backend — inactive until Firebase + Slack webhook are configured' },
+  { ic: '💬', bg: 'var(--blue-bg)', on: true, name: 'Slack notifications', desc: 'Posts a card to your Slack channel when a request is created (Jira-style). Runs server-side via a Slack incoming webhook.', log: 'Set SLACK_WEBHOOK_URL on the server to activate' },
 ]
 
 // Proactive automations we can switch on (not yet built). Shown to admins as

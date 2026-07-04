@@ -36,6 +36,38 @@ const APP_URL = process.env.APP_URL || (ORIGIN !== '*' ? ORIGIN : '')
 const emailEnabled = !!SES_FROM
 const ses = emailEnabled ? new SESClient({ ...(process.env.AWS_REGION ? { region: process.env.AWS_REGION } : {}) }) : null
 
+// Slack notifications (optional). Set SLACK_WEBHOOK_URL to a Slack incoming
+// webhook — the channel is whatever that webhook points at. New tickets are
+// posted there, Jira-style. Disabled (no-op) when unset.
+const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || ''
+const slackEnabled = !!SLACK_WEBHOOK_URL
+const PRIORITY_EMOJI = { Critical: '🔴', High: '🟠', Medium: '🔵', Low: '🟢' }
+
+// Fire-and-forget post to Slack. Never throws — a Slack hiccup must not break
+// ticket creation.
+function postToSlack(t) {
+  if (!slackEnabled || !t) return
+  const link = APP_URL ? '<' + APP_URL + '|' + t.key + '>' : t.key
+  const body = [
+    '*' + link + '* — ' + (t.summary || ''),
+    '*App:* ' + t.app + '   *Priority:* ' + (PRIORITY_EMOJI[t.urgency] || '') + ' ' + (t.urgency || '—') + '   *SLA:* ' + (t.sla || '—') + 'h',
+    '*Requester:* ' + (t.requester || '—') + (t.department ? ' (' + t.department + ')' : ''),
+    t.assignee ? '*Assigned to:* ' + t.assignee : '*Unassigned*',
+    '*Status:* ' + t.status,
+  ].join('\n')
+  fetch(SLACK_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: '🎫 New access request — ' + t.key + ': ' + (t.summary || ''),
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: '🎫 New access request — ' + t.key } },
+        { type: 'section', text: { type: 'mrkdwn', text: body } },
+      ],
+    }),
+  }).catch((e) => console.error('Slack post failed:', e?.message))
+}
+
 // AI triage (optional). The Anthropic key lives ONLY here, server-side — never
 // in the client bundle or the repo. If it's unset, the AI endpoints report
 // disabled and the UI hides the feature.
@@ -143,6 +175,7 @@ app.post('/api/tickets', wrap(async (req, res) => {
   const t = req.body
   if (!t || !t.key) return res.status(400).json({ error: 'ticket.key required' })
   await ddb.send(new PutCommand({ TableName: TABLE, Item: { key: t.key, num: t.num || 0, updated_at: Date.now(), data: t } }))
+  postToSlack(t) // Jira-style: announce new requests in Slack (no-op if unset)
   res.status(201).json(t)
 }))
 
@@ -239,7 +272,7 @@ app.post('/api/ai/triage', async (req, res) => {
 
 // ---- Mention notifications (email a tagged person) ----
 
-app.get('/api/notify/status', (_req, res) => res.json({ enabled: emailEnabled }))
+app.get('/api/notify/status', (_req, res) => res.json({ enabled: emailEnabled, slack: slackEnabled }))
 
 const escapeHtml = (s) =>
   String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
@@ -344,6 +377,7 @@ app.listen(PORT, () =>
       ' | DynamoDB table ' + TABLE +
       (aiEnabled ? ' | AI triage on (' + AI_MODEL + ')' : ' | AI triage off — set ANTHROPIC_API_KEY') +
       (emailEnabled ? ' | email on (' + SES_FROM + ')' : ' | email off — set SES_FROM') +
+      (slackEnabled ? ' | Slack on' : ' | Slack off — set SLACK_WEBHOOK_URL') +
       (authEnabled ? ' | Google SSO on (' + AUTH_DOMAIN + ')' : ' | SSO off — set GOOGLE_CLIENT_ID')
   )
 )
