@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
 
-// Bumped to v9 so returning visitors re-seed with the default owner (Sanjay)
-// applied to everything not explicitly routed.
-const STORE = 'acc_sd_tickets_v9'
+// Bumped to v10 so returning visitors re-seed (fewer SLA breaches; ~10).
+const STORE = 'acc_sd_tickets_v10'
 
 function loadTickets() {
   try {

@@ -1,9 +1,9 @@
 // Computes the live SLA state for a ticket.
 // Returns { cls, txt } where cls is one of "ok" | "warn" | "breach".
-// Closed tickets (Done/Rejected) stop their timer.
+// Closed tickets (Done/Rejected/Cancelled) stop their timer.
 export function slaState(t, now = Date.now()) {
-  if (t.status === 'Done' || t.status === 'Rejected') {
-    return { cls: 'ok', txt: t.status === 'Done' ? 'Met' : 'Closed', pct: 0 }
+  if (t.status === 'Done' || t.status === 'Rejected' || t.status === 'Cancelled') {
+    return { cls: 'ok', txt: t.status === 'Done' ? 'Met' : t.status === 'Cancelled' ? 'Cancelled' : 'Closed', pct: 0 }
   }
   const target = t.sla * 36e5
   const elapsed = now - t.created
@@ -16,7 +16,7 @@ export function slaState(t, now = Date.now()) {
 }
 
 export const isBreaching = (t) =>
-  slaState(t).cls === 'breach' && !['Done', 'Rejected'].includes(t.status)
+  slaState(t).cls === 'breach' && !['Done', 'Rejected', 'Cancelled'].includes(t.status)
 
 export const isOpen = (t) => ['Open', 'In Progress', 'Waiting'].includes(t.status)
 
