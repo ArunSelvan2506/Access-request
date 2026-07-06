@@ -82,7 +82,7 @@ The app deploys automatically to GitHub Pages via `.github/workflows/deploy.yml`
 on every push to `main`. It serves from the default Pages URL:
 
 ```
-https://arunselvan2506.github.io/access-request/
+https://your-org.github.io/access-request/
 ```
 
 **One-time setup (repo owner):**
@@ -123,9 +123,13 @@ Sign in with a `@fuseenergy.com` email; your role is derived from it (see
 
 | Role | Who | Can |
 | --- | --- | --- |
-| **Owner** | the fixed owner list | Everything + audit log, presence, routing, manage admins |
+| **Owner** | `VITE_OWNER_EMAILS` (build-time config) | Everything + audit log, presence, routing, manage admins |
 | **Administrator** | emails an owner adds | See all requests, assign, action, approve, automations |
 | **Requester** | everyone else | Submit requests and track only their own |
+
+> Owner emails are **not** hardcoded — set `VITE_OWNER_EMAILS` (comma-separated)
+> as an Actions Variable so no personal address is committed to source. It
+> defaults to a generic `owner@fuseenergy.com` mailbox.
 
 > ⚠️ In **local** mode roles are enforced in the browser — fine for a demo, not
 > real security. In **api** mode the server verifies the Google ID token and the

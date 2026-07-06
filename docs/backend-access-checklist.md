@@ -20,7 +20,7 @@ assistant later). Frontend stays on GitHub Pages; the backend is **Firebase**.
 
 ## 3. Firebase services to enable (in the console)
 - **Authentication** → enable the chosen provider (Google and/or Email/Password).
-  - Add **authorized domain:** `arunselvan2506.github.io`.
+  - Add **authorized domain:** `your-org.github.io`.
 - **Cloud Firestore** → create database (production mode), chosen region.
 - **Cloud Functions** (for the AI proxy + auto-grounding) — enabling these turns
   on the underlying Google Cloud APIs automatically: Cloud Functions, Cloud Build,
@@ -50,7 +50,7 @@ From Project settings → Your apps → Web app → SDK config, the 6 values:
 - Posts on ticket create + status change; the code is parked in `functions/`.
 
 ## 7. GitHub (already in place)
-- Repo: `arunselvan2506/Access-request` (you own it).
+- Repo: `your-org/access-request` (you own it).
 - Ability to set **Actions → Variables/Secrets** (you have it).
 
 ## 8. Optional — auto-deploy the backend from GitHub Actions

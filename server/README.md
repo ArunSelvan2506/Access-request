@@ -47,7 +47,7 @@ App Runner builds the included `Dockerfile` and gives you an HTTPS URL.
    `dynamodb:GetItem,PutItem,Scan,DescribeTable` (+ `CreateTable` if auto-creating).
 4. **Env vars / secrets** on the service:
    - `ANTHROPIC_API_KEY` → from **AWS Secrets Manager / SSM** (not plaintext)
-   - `CORS_ORIGIN=https://arunselvan2506.github.io`
+   - `CORS_ORIGIN=https://your-org.github.io`
    - `DDB_TABLE=access_desk_tickets` (optional)
    - `API_KEY=<long random>` (optional shared-key deterrent)
 5. The service URL (e.g. `https://xxxx.eu-west-2.awsapprunner.com`) becomes the
@@ -79,7 +79,7 @@ Redeploy and the site reads/writes shared tickets from DynamoDB.
 ## Google SSO
 Everyone signs in with their own Google account, restricted to your domain.
 1. Google Cloud console → **APIs & Services → Credentials → Create OAuth client ID → Web application**.
-2. **Authorized JavaScript origins**: your site origin (e.g. `https://arunselvan2506.github.io`).
+2. **Authorized JavaScript origins**: your site origin (e.g. `https://your-org.github.io`).
 3. Copy the **Client ID** and set it in **both** places (no client secret needed):
    - server env `GOOGLE_CLIENT_ID` (+ optional `AUTH_DOMAIN`, default `fuseenergy.com`)
    - web app build var `VITE_GOOGLE_CLIENT_ID` (same value)

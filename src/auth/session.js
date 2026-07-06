@@ -4,21 +4,26 @@
 //   admin  — can see all tickets and change their status (workflow transitions).
 //   user   — can only submit requests and see their own.
 //
-// NOTE: this is enforced in the browser (no backend yet), which is right for a
-// project demo but not real security. Server-enforced roles come with the
-// parked Firebase backend (real Google login + Firestore rules).
+// NOTE: in local mode this is enforced in the browser, which is right for a
+// demo but not real security. In api mode the server verifies the Google ID
+// token and the email domain on sign-in (see server/).
 
-export const OWNER_EMAIL = 'arun@fuseenergy.com' // primary owner — shown in the UI
-// Full-access owners (can't be removed as admins). The primary owner above is
-// listed first; add more owner emails here.
-export const OWNERS = ['arun@fuseenergy.com', 'davidnoonan@fuseenergy.com']
+// Full-access owners (audit log, presence, routing, managing admins) — they
+// can't be removed as admins. Configure the real owner(s) at build time via
+// VITE_OWNER_EMAILS (comma-separated) so no personal address is committed to
+// source; defaults to a generic mailbox for local/demo builds.
+export const OWNERS = (import.meta.env.VITE_OWNER_EMAILS || 'owner@fuseenergy.com')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean)
+export const OWNER_EMAIL = OWNERS[0] // primary owner — shown in the UI
 export const isOwnerEmail = (email) => OWNERS.includes((email || '').toLowerCase())
 export const ALLOWED_DOMAIN = 'fuseenergy.com'
 
 // Temporary shared site password (demo gate). NOTE: because this is a static
 // site, the password ships in the built JS — it's a deterrent, not real
 // security. Change it by setting VITE_SITE_PASSWORD at build time, or edit the
-// default below. Replace with Firebase Auth for genuine security.
+// default below. Use Google SSO (api mode) for genuine authentication.
 export const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD || 'fuse-access-2026'
 
 const ADMINS_KEY = 'acc_sd_admins_v1'
@@ -68,7 +73,7 @@ export const isAdminRole = (r) => r === 'owner' || r === 'admin'
 export const isCompanyEmail = (email) =>
   !!email && email.toLowerCase().endsWith('@' + ALLOWED_DOMAIN)
 
-// "arun@fuseenergy.com" -> "Arun", "priya.nair@..." -> "Priya Nair"
+// "owner@fuseenergy.com" -> "Owner", "first.last@..." -> "First Last"
 export function displayName(email) {
   if (!email) return 'Unknown'
   const local = email.split('@')[0]

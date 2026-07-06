@@ -2,7 +2,7 @@
 # App Runner builds from the Dockerfile in this directory and runs the container.
 # Set env vars / secrets in the App Runner service (console or IaC), NOT here:
 #   - ANTHROPIC_API_KEY  -> from AWS Secrets Manager / SSM (never plaintext)
-#   - CORS_ORIGIN=https://arunselvan2506.github.io
+#   - CORS_ORIGIN=https://your-org.github.io
 #   - DDB_TABLE (optional; defaults to access_desk_tickets)
 # The service's instance IAM role needs DynamoDB access to that table
 # (and CreateTable/DescribeTable if you let the app auto-create it).

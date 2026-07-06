@@ -239,14 +239,14 @@ export const CATALOG = [
   },
   // not IT-managed
   { name: 'Backoffice', group: 'red', ic: ic('BO', '#ffeceb', '#ae2a19'), route: 'Post in #access-request and tag @ops-permission-managers.' },
-  { name: 'Navan', group: 'red', ic: ic('NV', '#ffeceb', '#ae2a19'), route: 'Contact Hongyi or Manuel (Finance) directly.' },
+  { name: 'Navan', group: 'red', ic: ic('NV', '#ffeceb', '#ae2a19'), route: 'Contact the Finance team directly.' },
   { name: 'GES / ECOES', group: 'red', ic: ic('GE', '#ffeceb', '#ae2a19'), route: 'Post in #access-request and tag @ops-permission-managers. Include your email address (required for setup).' },
   { name: 'TMA', group: 'red', ic: ic('TM', '#ffeceb', '#ae2a19'), route: 'Post in #access-request, tag @installs-third-liners. Background check required.' },
-  { name: 'Figma', group: 'red', ic: ic('FG', '#ffeceb', '#ae2a19'), route: 'Message Rory Keohane (Design) directly.' },
-  { name: 'Adobe', group: 'red', ic: ic('AD', '#ffeceb', '#ae2a19'), route: 'Email rory@fuseenergy.com (Design).' },
-  { name: 'Docusign', group: 'red', ic: ic('DS', '#ffeceb', '#ae2a19'), route: 'Contact Wei Sheng Neo (Legal/Compliance).' },
-  { name: 'LinkedIn Premium', group: 'red', ic: ic('LI', '#ffeceb', '#ae2a19'), route: 'Contact Laura (People) directly.' },
-  { name: 'Deliveroo', group: 'red', ic: ic('DL', '#ffeceb', '#ae2a19'), route: 'Contact Muba (muborakkhon.mirzaeva@fuseenergy.com).' },
+  { name: 'Figma', group: 'red', ic: ic('FG', '#ffeceb', '#ae2a19'), route: 'Contact the Design team directly.' },
+  { name: 'Adobe', group: 'red', ic: ic('AD', '#ffeceb', '#ae2a19'), route: 'Contact the Design team directly.' },
+  { name: 'Docusign', group: 'red', ic: ic('DS', '#ffeceb', '#ae2a19'), route: 'Contact the Legal / Compliance team directly.' },
+  { name: 'LinkedIn Premium', group: 'red', ic: ic('LI', '#ffeceb', '#ae2a19'), route: 'Contact the People team directly.' },
+  { name: 'Deliveroo', group: 'red', ic: ic('DL', '#ffeceb', '#ae2a19'), route: 'Contact the People team directly.' },
 ]
 
 export const findApp = (n) => CATALOG.find((a) => a.name === n)
@@ -285,11 +285,13 @@ export const appCategory = (name) =>
 // New requests are auto-assigned to a named owner by application; everything
 // else goes to the default owner. The owner can edit these in the Owner portal
 // (overrides saved to localStorage; base defaults below).
-export const DEFAULT_ASSIGNEE = 'sanjay@fuseenergy.com'
+// Generic team mailboxes as defaults (no personal addresses in source). The
+// owner assigns real people in the Owner portal; overrides persist locally.
+export const DEFAULT_ASSIGNEE = 'service-desk@fuseenergy.com'
 export const BASE_ROUTING = {
-  AWS: 'davidnoonan@fuseenergy.com',
-  'Hardware / Device': 'arun@fuseenergy.com',
-  'Network / VPN': 'tyler.austin@fuseenergy.com',
+  AWS: 'cloud-team@fuseenergy.com',
+  'Hardware / Device': 'it-support@fuseenergy.com',
+  'Network / VPN': 'network-team@fuseenergy.com',
 }
 const ROUTING_KEY = 'acc_sd_routing_v1'
 

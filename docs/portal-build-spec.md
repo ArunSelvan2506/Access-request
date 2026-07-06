@@ -57,15 +57,15 @@ SLAs / Automation) — it cannot be created through the Jira API.
 | Application | How to request |
 |---|---|
 | Backoffice | Post in #access-request, tag @ops-permission-managers |
-| Navan | Contact Hongyi or Manuel (Finance) |
+| Navan | Contact the Finance team |
 | GES / ECOES | Post in #access-request, include your email |
 | TMA | Post in #access-request, tag @installs-third-liners (background check) |
-| Figma | Message Rory Keohane (Design) |
-| Adobe | Email rory@fuseenergy.com (Design) |
-| Docusign | Contact Wei Sheng Neo or Deepu (Legal/Compliance) |
-| LinkedIn Premium | Contact Laura (People) |
-| Deliveroo | Contact Labib (People) |
-| Devbox | Post in #access-request, tag/contact Roman |
+| Figma | Contact the Design team |
+| Adobe | Contact the Design team |
+| Docusign | Contact the Legal / Compliance team |
+| LinkedIn Premium | Contact the People team |
+| Deliveroo | Contact the People team |
+| Devbox | Post in #access-request, tag the platform team |
 
 ## 6. Workflow / statuses
 `Open → In Progress → Waiting (set Pending reason) → Done`, plus **Rejected**
