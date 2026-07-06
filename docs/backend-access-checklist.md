@@ -1,78 +1,85 @@
 # Backend Access Checklist (for IT)
 
 Everything needed to turn the Access Service Desk web tool from a static demo
-into a real backend-powered tool (secure login + shared data, and the AI
-assistant later). Frontend stays on GitHub Pages; the backend is **Firebase**.
+into a real backend-powered tool (secure login + shared data, plus email, Slack
+and AI triage). The frontend stays on GitHub Pages; the backend is the Express +
+**Amazon DynamoDB** API in `server/`, deployed on AWS. See `server/README.md`
+for the step-by-step deploy.
 
 ## 0. Decisions to confirm first
-- **Login method:** Google SSO (recommended, locked to `@fuseenergy.com`) **or** email + password.
+- **Login method:** Google SSO (recommended, locked to `@fuseenergy.com`) **or** the shared-password gate.
 - **Allowed email domain:** `fuseenergy.com`.
-- **Firestore region:** e.g. `europe-west2` (London) — pick once, can't change later.
+- **AWS region:** e.g. `eu-west-2` (London) — used for DynamoDB and SES.
 
-## 1. Firebase project
-- A **Firebase project** — new (e.g. `access-service-desk`) or an existing one.
-- On the **Blaze (pay-as-you-go) plan** — needed for Cloud Functions / the AI.
-  (Usage for an internal tool is a few cents; free allowances still apply.)
+## 1. AWS account & compute
+- An **AWS account** (or a dedicated sub-account for this tool).
+- A place to run the container: **AWS App Runner** (simplest) or **ECS Fargate**.
+  Point it at the `server/` `Dockerfile`; the service listens on **port 8787**.
+- Cost for an internal tool is minimal — DynamoDB on-demand + one small container.
 
 ## 2. Access to grant the person setting it up (me/you)
-- **Owner** or **Editor** role on that Firebase / Google Cloud project
-  (simplest). A dedicated project where you're Owner avoids touching anything else.
+- Permission to create the App Runner/ECS service, a **DynamoDB table**, an
+  **IAM role**, and to read the relevant **Secrets Manager / SSM** secrets.
+  A dedicated account/project where you have admin avoids touching anything else.
 
-## 3. Firebase services to enable (in the console)
-- **Authentication** → enable the chosen provider (Google and/or Email/Password).
-  - Add **authorized domain:** `your-org.github.io`.
-- **Cloud Firestore** → create database (production mode), chosen region.
-- **Cloud Functions** (for the AI proxy + auto-grounding) — enabling these turns
-  on the underlying Google Cloud APIs automatically: Cloud Functions, Cloud Build,
-  Artifact Registry, Cloud Run, Eventarc, **Secret Manager**, Pub/Sub.
+## 3. AWS resources to create
+- **DynamoDB table** (default `access_desk_tickets`, on-demand billing). The app
+  auto-creates it on first run if its IAM role allows `CreateTable`; otherwise
+  create it with partition key `key` (string) and set `DDB_AUTOCREATE=false`.
+- **Instance IAM role** for the service granting, on that table:
+  `dynamodb:GetItem, PutItem, Scan, DescribeTable` (+ `CreateTable` if auto-creating).
+  Credentials come from this role — **no AWS keys live in code or env**.
 
 ## 4. Config to hand over (NOT secret — safe to share)
-From Project settings → Your apps → Web app → SDK config, the 6 values:
-`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`.
-→ These go into the GitHub repo's Actions **Variables**.
+Set these as the GitHub repo's Actions **Variables** so the site points at the API:
+- `VITE_BACKEND=api`
+- `VITE_API_BASE=https://<your-app-runner-url>`
+- `VITE_GOOGLE_CLIENT_ID=<oauth-client-id>` (only if using Google SSO)
+- `VITE_OWNER_EMAILS=<comma-separated owner emails>`
 
-## 5. For Google SSO only — Google Workspace
-- If the project is under the company Google Workspace org, set the **OAuth
-  consent screen to "Internal"** so only `@fuseenergy.com` accounts can sign in.
-  (May need a **Google Workspace admin**.)
+## 5. For Google SSO — Google Cloud / Workspace
+- Google Cloud console → **APIs & Services → Credentials → Create OAuth client ID
+  → Web application**. Add your site origin to **Authorized JavaScript origins**
+  (e.g. `https://your-org.github.io`).
+- Copy the **Client ID** (no client secret needed) into **both** the server env
+  `GOOGLE_CLIENT_ID` and the web build var `VITE_GOOGLE_CLIENT_ID`.
+- If under the company Workspace org, set the **OAuth consent screen to
+  "Internal"** so only `@fuseenergy.com` accounts can sign in (may need a
+  **Google Workspace admin**).
 
-## 6. For the AI assistant (later)
-- An **Anthropic API key** (company account) — this **is secret**; it's stored
-  via the Firebase CLI in **Secret Manager**, never in the repo or chat.
-- Blaze plan (already covered above) so Functions can call the Anthropic API.
+## 6. For the AI triage assistant
+- An **Anthropic API key** (company account) — this **is secret**; store it in
+  **AWS Secrets Manager / SSM** and inject as the service env `ANTHROPIC_API_KEY`,
+  never in the repo or chat.
 
-## 6b. For Slack notifications
+## 6b. For email notifications (Amazon SES)
+- A **verified SES sender** address; set it as the server env `SES_FROM` and give
+  the instance role `ses:SendEmail`. Without it, mention/assignment emails
+  self-disable and the UI just skips the email.
+
+## 6c. For Slack notifications
 - A **Slack Incoming Webhook URL** for the target channel (e.g. `#access-request`).
   Created via a Slack app → Incoming Webhooks (may need a **Slack workspace admin**).
-- The webhook URL **is secret** → stored via
-  `firebase functions:secrets:set SLACK_WEBHOOK_URL` (never in the repo/chat).
-- Blaze plan (already covered) so the Cloud Function can call Slack.
-- Posts on ticket create + status change; the code is parked in `functions/`.
+- The webhook URL **is secret** → store it in Secrets Manager / SSM and inject as
+  the server env `SLACK_WEBHOOK_URL` (never in the repo/chat).
+- Posts a card to Slack when a ticket is created (Jira-style).
 
 ## 7. GitHub (already in place)
-- Repo: `your-org/access-request` (you own it).
-- Ability to set **Actions → Variables/Secrets** (you have it).
-
-## 8. Optional — auto-deploy the backend from GitHub Actions
-Only if you want functions/rules to deploy automatically on push. Needs a Google
-**service account** key (stored as a GitHub secret) with roles:
-`Firebase Admin`, `Cloud Functions Admin`, `Cloud Datastore Owner`,
-`Firebase Rules Admin`, `Service Account User`, `Artifact Registry Writer`,
-`Cloud Build Editor`, `Secret Manager Admin`.
-(Not required to start — first deploy can be done manually with the Firebase CLI.)
+- Repo: `your-org/access-request`.
+- Ability to set **Actions → Variables/Secrets** and **CORS_ORIGIN** on the
+  server to the site origin (e.g. `https://your-org.github.io`).
 
 ---
 
 ## Who does what
 | Step | Who |
 | --- | --- |
-| Create Firebase project, set Blaze, grant access | IT / you |
-| Enable Auth + Firestore + Functions | IT / you |
-| OAuth consent = Internal (Google SSO) | Google Workspace admin |
-| Provide the 6 web-config values | you → me |
-| Wire the app to Firebase (code) | me |
-| Set Anthropic key as a secret (AI phase) | you (CLI) / me with access |
+| Create AWS account/service, DynamoDB table, IAM role | IT / you |
+| Deploy the `server/` container (App Runner / ECS) | IT / you |
+| OAuth client ID + consent = Internal (Google SSO) | Google Workspace admin |
+| Set Actions Variables to point the site at the API | you → me |
+| Store `ANTHROPIC_API_KEY` / `SLACK_WEBHOOK_URL` as secrets | you / me with access |
 
 ## Minimum to start (login + shared data)
-Steps **1–4** only. The AI (steps 6) can come later — it doesn't block secure
-login and shared tickets.
+Steps **1–4** only. Email, Slack and AI (steps 6–6c) can come later — they don't
+block secure login and shared tickets, and each self-disables until configured.
