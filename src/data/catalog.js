@@ -4,8 +4,6 @@
 // Slack/contact-only routing below are kept in sync with that page. When the
 // Notion page changes, update this file to match (it is the one place the whole
 // app reads its rules from).
-export const NOTION_SOURCE =
-  'https://app.notion.com/p/349700034a5c81e4b551e80f0422ceba'
 //
 // The applications IT manages (group "green") plus the ones that are NOT
 // IT-managed (group "red"). The validation engine and the AI assistant both

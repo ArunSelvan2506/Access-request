@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Tiny SQLite (libSQL/Turso) API for the Access Service Desk",
+  "description": "Express + Amazon DynamoDB API for the Access Service Desk (AI triage, SES email, Slack, Google SSO)",
   "scripts": {
     "start": "node index.js"
   },

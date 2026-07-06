@@ -9,7 +9,7 @@ async function req(path, opts = {}) {
   return res.status === 204 ? null : res.json()
 }
 
-// Ticket REST client for the SQLite-backed server.
+// Ticket REST client for the DynamoDB-backed server.
 export const listTickets = () => req('/api/tickets')
 export const createTicketApi = (ticket) => req('/api/tickets', { method: 'POST', body: JSON.stringify(ticket) })
 export const saveTicketApi = (key, ticket) =>

@@ -2,11 +2,8 @@
 
 A Jira Service Management–style **access-request ticketing tool**, built with React + Vite.
 Staff raise access requests against a service catalog; the app validates them on submission,
-auto-rejects incomplete requests, tracks SLA timers live, and offers an AI assistant grounded
-in the catalog rules.
-
-This is a React port of the original single-file HTML prototype, decomposed into small,
-focused components so the business logic is easy to extend.
+auto-rejects incomplete requests, routes for line-manager approval, tracks SLA timers live,
+and gives admins an audit trail, a Kanban board and reports.
 
 ## Getting started
 
@@ -23,41 +20,61 @@ npm run preview  # preview the production build
 src/
   main.jsx              App entry
   App.jsx               Layout + view routing + shared state wiring
-  styles.css            All styles (ported from the prototype)
+  config.js             Build-time backend flag (local | api) and public config
+  styles.css            All styles
 
   data/
-    catalog.js          Service catalog: apps, required fields, SLAs, routing, validators
-    seed.js             Demo tickets used on first run
+    catalog.js          Service catalog: apps, required fields, routing, validators
+    jira.js             Priority → SLA map and workflow helpers
+    seed.js             Demo tickets used on first run (local mode)
     rules.js            Automation rules shown on the Automations screen
+    ticketOps.js        Pure ticket lifecycle ops (create/transition/approve/assign/comment)
+    logos.js            App logos for the catalog
+
+  auth/
+    session.js          Roles (owner/admin/user), owner list, display names
 
   hooks/
-    useTickets.js       Ticket store: localStorage persistence + create/transition
+    useTicketStore.js   Picks the store from the backend flag (local vs api)
+    useTickets.js       Local store: localStorage persistence + create/transition
+    useApiTickets.js    API store: reads/writes tickets via the server
+    useSession.js       Sign-in state (Google SSO or shared-password gate)
+    usePresence.js      Presence heartbeat (api mode)
     useNow.js           Ticking clock that refreshes SLA timers (30s)
 
+  api/                  Thin client wrappers over the server endpoints
+    client.js  ai.js  auth.js  notify.js  presence.js
+
   utils/
-    sla.js              SLA state computation (ok / warn / breach)
+    sla.js              SLA state computation (ok / warn / breach) + expiry
     validation.js       Pure validation engine for the create form
     format.js           timeAgo, status classes, workflow transition map
+    mentions.js  csv.js  reports.js
 
   components/
-    TopNav.jsx  Sidebar.jsx
-    Dashboard.jsx  Queue.jsx  Board.jsx  Automations.jsx  Catalog.jsx
+    TopNav.jsx  Sidebar.jsx  GlobalSearch.jsx  HelpPanel.jsx  SignIn.jsx
+    Dashboard.jsx  Queue.jsx  Board.jsx  Automations.jsx  Catalog.jsx  Reports.jsx
+    OwnerPortal.jsx  AdminSettings.jsx
     CreateModal.jsx       Create form + dynamic fields + validation
     TicketDrawer.jsx      Ticket detail + workflow transitions + activity
-    Chatbot.jsx           AI assistant (Access Assistant)
     common/
       Badges.jsx          AppCell, StatusPill, SlaCell
+      MentionInput.jsx    @mention-aware comment box
       Toast.jsx           Toast provider + useToast() hook
+
+server/                 Optional Express + Amazon DynamoDB API (see server/README.md)
 ```
 
 ## Where to add logic
 
 - **New application or changed rules** → edit `src/data/catalog.js`. The catalog drives the
-  create form, the catalog screen, the validation engine and the AI knowledge base.
+  create form, the catalog screen, and the validation engine.
 - **Validation behavior** → `src/utils/validation.js` (pure function, easy to test).
-- **Ticket lifecycle / persistence** → `src/hooks/useTickets.js`.
+- **Ticket lifecycle** → `src/data/ticketOps.js` (pure ops, shared by both stores).
+- **Persistence** → `src/hooks/useTickets.js` (local) / `src/hooks/useApiTickets.js` (api).
+- **Priority → SLA** → `PRIORITY_SLA` in `src/data/jira.js`.
 - **Workflow transitions** → `src/utils/format.js` (`TRANSITIONS`).
-- **Automation rules** → `src/data/rules.js`.
+- **Automation rules (display)** → `src/data/rules.js`.
 
 ## Deployment (GitHub Pages)
 
@@ -79,103 +96,53 @@ Asset paths are relative (`base: './'` in `vite.config.js`), so the build works
 at the project sub-path above. A custom domain can be added later by setting one
 in *Settings → Pages* and committing a matching `public/CNAME` file.
 
-## Current build: standalone web tool
+## Backends: local vs api
 
-The app ships as a **self-contained static web tool** — no server, just a sign-in
-by email. Tickets persist in the browser's `localStorage`. This is what builds and
-deploys to GitHub Pages today.
+The app runs in one of two modes, chosen at build time by `VITE_BACKEND`:
 
-### Roles (Jira-style)
+| | **local** (default) | **api** |
+| --- | --- | --- |
+| Tickets | per-browser `localStorage` | shared, in **Amazon DynamoDB** |
+| Sign-in | shared-password gate | Google SSO (`@fuseenergy.com`), password fallback |
+| Notifications | none | Slack on create · SES email on @mention / assignment |
+| AI triage | off | Claude, server-side |
+| Presence & login history | this browser only | org-wide, from the server |
 
-Sign in with a `@fuseenergy.com` email; your role is derived from it:
+**Local mode** is the current static GitHub Pages site and needs no setup —
+sign in by email, tickets persist in the browser's `localStorage`.
+
+**API mode** turns it into a shared, company-wide service desk. All the
+server-backed features (shared data, Google SSO, email, Slack, AI triage,
+presence) degrade gracefully in local mode and activate once the API server is
+deployed and the site points at it — there is no separate code path to enable.
+
+### Roles
+
+Sign in with a `@fuseenergy.com` email; your role is derived from it (see
+`src/auth/session.js`):
 
 | Role | Who | Can |
 | --- | --- | --- |
-| **Primary owner** | `arun@fuseenergy.com` (fixed, in `src/auth/session.js`) | Everything + add/remove administrators (Admin settings) |
-| **Administrator** | emails the owner adds | See all requests, change ticket status (transitions), pending reasons |
+| **Owner** | the fixed owner list | Everything + audit log, presence, routing, manage admins |
+| **Administrator** | emails an owner adds | See all requests, assign, action, approve, automations |
 | **Requester** | everyone else | Submit requests and track only their own |
 
-> ⚠️ Roles are enforced **in the browser** for this demo — fine for a project
-> outcome, not real security. Server-enforced roles (real Google sign-in +
-> Firestore rules) come with the parked Firebase backend.
+> ⚠️ In **local** mode roles are enforced in the browser — fine for a demo, not
+> real security. In **api** mode the server verifies the Google ID token and the
+> email domain on sign-in.
 
-### Jira logic mirrored from the real IAM service desk
-- **GeminiAI** added to the application catalog
-- **Urgency** field on requests (Critical/High/Medium/Low)
-- **Pending reason** captured when an admin moves a ticket to *Waiting*
-  (More info required / Awaiting approval / Waiting on vendor / Pending on change request)
+## API server
 
-The Firebase backend below (shared tickets, Google SSO, auto-grounded AI) is
-**parked**: the code lives in the repo (`functions/`, `firestore.rules`, the
-Firebase hooks) but is **not wired into the default build**, so it adds nothing
-to the shipped bundle. Switch it on later — once the Anthropic API key is
-available — by re-enabling the backend flag (see git history for the wiring) and
-following the setup steps below.
+The optional backend lives in `server/` — an Express app that stores tickets in
+Amazon DynamoDB and hosts the AI triage, email (SES), Slack and Google SSO
+endpoints. It's designed to run on AWS (App Runner or ECS Fargate) using an IAM
+role, so no AWS keys live in code or env. See **[server/README.md](server/README.md)**
+for the data model, local run instructions and the AWS deploy steps.
 
-## Backends: local vs Firebase (parked)
-
-The app is built to run in one of two modes, chosen at build time by `VITE_BACKEND`:
-
-| | **local** (default) | **firebase** |
-| --- | --- | --- |
-| Tickets | per-browser `localStorage` | shared Firestore, realtime |
-| Login | none | Google SSO, `@fuseenergy.com` only |
-| AI assistant | optional self-hosted proxy | Cloud Function with live grounding |
-| Daily maintenance | none | none — self-updating |
-
-Local mode is the current static GitHub Pages site and needs no setup. Firebase
-mode turns it into a real, company-wide Jira-style service desk.
-
-### How the AI grounding stays current (no daily code edits)
-
-The assistant is grounded in two things: the **catalog rules** (synced from the
-Notion page) and a **live ticket-activity summary** that is regenerated
-automatically on every ticket create and status change:
+To point the web app at it, set these repo **Actions → Variables**:
 
 ```
-ticket created / moved to Done|Rejected
-        │  (Firestore trigger: functions/onTicketWritten)
-        ▼
-buildGrounding(all tickets)  →  meta/grounding  (open counts, top reject
-        │                        reasons, avg resolution time, per-app stats)
-        ▼
-chat() Cloud Function reads meta/grounding + catalog rules → Claude
-```
-
-Nobody edits code day-to-day. Policy changes happen in Notion → `catalog.js`;
-everything else updates itself from ticket activity.
-
-### Turning on Firebase mode
-
-**One-time (you):**
-
-1. **Create a Firebase project** (console.firebase.google.com), add a Web app,
-   and enable **Authentication → Google** + **Firestore**.
-2. **Set the build config** — put the `VITE_FIREBASE_*` values from the Firebase
-   SDK config (see `.env.example`) into the repo's **Actions → Variables**, and
-   set `VITE_BACKEND=firebase`.
-3. **Deploy rules + functions** (needs the [Firebase CLI](https://firebase.google.com/docs/cli)):
-   ```bash
-   npm --prefix functions install
-   firebase use <your-project-id>          # or edit .firebaserc
-   firebase functions:secrets:set ANTHROPIC_API_KEY   # paste the company key
-   firebase deploy --only firestore:rules,functions
-   ```
-4. **Authorize the domain** — Firebase console → Authentication → Settings →
-   Authorized domains → add wherever the site is hosted (e.g.
-   `arunselvan2506.github.io`, or a custom domain if one is added later).
-
-Hosting stays on GitHub Pages; only the database, auth and functions live in
-Firebase. Until step 2 is done, the site keeps running in local mode unchanged.
-
-## AI assistant
-
-`Chatbot.jsx` posts to an endpoint defined by `VITE_CHAT_ENDPOINT`. The browser must **not**
-hold an API key, so point this at your own backend proxy that forwards to the Claude API and
-returns the response. Without an endpoint configured, the assistant falls back to a friendly
-"can't reach the service" message.
-
-```bash
-# .env.local
-VITE_CHAT_ENDPOINT=https://your-backend.example.com/chat
+VITE_BACKEND=api
+VITE_API_BASE=https://<your-api-url>
+VITE_GOOGLE_CLIENT_ID=<oauth-client-id>   # optional, enables Google SSO
 ```

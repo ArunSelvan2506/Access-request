@@ -1,9 +1,4 @@
 import { useState, useCallback, useEffect } from 'react'
-
-const THEME_KEY = 'acc_theme'
-function loadTheme() {
-  try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light' } catch (e) { return 'light' }
-}
 import TopNav from './components/TopNav'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
@@ -23,12 +18,17 @@ import { ToastProvider } from './components/common/Toast'
 import { useTicketStore } from './hooks/useTicketStore'
 import { useNow } from './hooks/useNow'
 import { useSession } from './hooks/useSession'
-import { displayName, OWNER_EMAIL, OWNERS } from './auth/session'
+import { displayName, OWNERS } from './auth/session'
 import { isApi } from './config'
 import { extractMentions } from './utils/mentions'
 import { notifyMention, notifyAssignment } from './api/notify'
 import { usePresence } from './hooks/usePresence'
 import { isOpen, isBreaching } from './utils/sla'
+
+const THEME_KEY = 'acc_theme'
+function loadTheme() {
+  try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light' } catch (e) { return 'light' }
+}
 
 const isPendingApproval = (t) => t.status === 'Pending Approval'
 

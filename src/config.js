@@ -1,17 +1,16 @@
 // ================= RUNTIME CONFIG =================
 // The app has two backends, chosen at build time by VITE_BACKEND:
-//   - "local"    (default) — tickets live in localStorage, no auth, no server.
+//   - "local" (default) — tickets live in localStorage, no auth, no server.
 //                 This is the current static GitHub Pages build.
-//   - "firebase" — shared tickets in Firestore, Google SSO, and an AI assistant
-//                 grounded in live ticket data via Cloud Functions.
+//   - "api"   — shared tickets, Google SSO, email/Slack/AI via the Node +
+//                 DynamoDB server in server/ (deployed on AWS).
 //
-// Flipping to Firebase is a matter of setting VITE_BACKEND=firebase plus the
-// VITE_FIREBASE_* values below (see .env.example). Until then nothing changes.
-// "local" (default) | "api" (Node + DynamoDB server on AWS) | "firebase"
+// Going live is a matter of setting VITE_BACKEND=api plus VITE_API_BASE and
+// (optionally) VITE_GOOGLE_CLIENT_ID below (see .env.example).
 const _b = import.meta.env.VITE_BACKEND
-export const BACKEND = _b === 'firebase' ? 'firebase' : _b === 'api' ? 'api' : 'local'
+export const BACKEND = _b === 'api' ? 'api' : 'local'
 
-// Base URL of the SQLite-backed API server (api mode). e.g. https://acc-api.example.com
+// Base URL of the API server (api mode). e.g. https://acc-api.example.com
 export const API_BASE = import.meta.env.VITE_API_BASE || ''
 // Optional shared key the API expects (sent as x-api-key).
 export const API_KEY = import.meta.env.VITE_API_KEY || ''
@@ -24,17 +23,4 @@ export const ALLOWED_EMAIL_DOMAIN = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN ||
 // enforces the domain. Empty → fall back to the shared-password gate.
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
-export const FIREBASE_CONFIG = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-}
-
-// Region the Cloud Functions are deployed to.
-export const FUNCTIONS_REGION = import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'us-central1'
-
-export const isFirebase = BACKEND === 'firebase'
 export const isApi = BACKEND === 'api'

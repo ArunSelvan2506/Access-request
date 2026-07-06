@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
 import { listTickets, createTicketApi, saveTicketApi } from '../api/client'
 
-// API-backed store (Node + libSQL/SQLite, e.g. Turso). Same interface as the
-// local store, so the app is unchanged. Tickets are shared across everyone;
-// the list is polled so other people's changes show up.
+// API-backed store (Node + Amazon DynamoDB). Same interface as the local store,
+// so the app is unchanged. Tickets are shared across everyone; the list is
+// polled so other people's changes show up.
 export function useApiTickets() {
   const [tickets, setTickets] = useState([])
   const seqRef = useRef(140)

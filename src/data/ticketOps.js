@@ -1,6 +1,6 @@
-// Pure ticket operations shared by every backend (localStorage, API/SQLite,
-// Firebase). Keeping the business logic here means a ticket behaves identically
-// no matter where it's stored.
+// Pure ticket operations shared by every backend (localStorage and the
+// API/DynamoDB server). Keeping the business logic here means a ticket behaves
+// identically no matter where it's stored.
 import { needsApproval, assigneeFor } from './catalog'
 import { durationDays, slaForUrgency } from './jira'
 

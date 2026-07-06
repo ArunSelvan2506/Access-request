@@ -5,14 +5,15 @@ Legend: ✅ built · 🟡 client-side demo (needs backend to be real) · 🔶 ne
 
 ## Where we are today
 - ✅ Service catalog (26 apps), per-app dynamic forms, validation + auto-reject
-- ✅ SLA timers, board, queues, dashboard, UK-time dates
+- ✅ SLA timers, board, queues, dashboard, reports, UK-time dates
 - ✅ Urgency, pending reasons, app icons
-- 🟡 Roles (owner / admin / requester) and login — enforced in the browser
-- 🔶 AI assistant + auto-grounding (scaffolded, parked)
-- 🔶 Slack notifications (scaffolded, parked)
+- ✅ Line-manager approvals, time-bound access, duplicate detection
+- ✅ Owner audit log, presence & login history
+- 🟡 Roles (owner / admin / requester) and login — browser-enforced in local mode; server-verified Google SSO in api mode
+- 🔶 API server (Express + DynamoDB) with AI triage, SES email and Slack — built; activates when deployed (api mode)
 
 ## 1. Foundation — non-negotiable for 600 people  🔶
-- **Backend** (Firebase): shared data, real **SSO** (Google, locked to the company), server-enforced **RBAC**
+- **Backend** (Express + Amazon DynamoDB on AWS): shared data, real **SSO** (Google, locked to the company), server-enforced **RBAC**
 - **Audit log**: immutable who-did-what-when on every request and approval (compliance)
 - **Email + Slack notifications** on create / approval / status change
 
