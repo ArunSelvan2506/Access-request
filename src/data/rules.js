@@ -10,6 +10,7 @@ export const RULES = [
   { ic: '🧑‍💻', bg: 'var(--blue-bg)', on: true, name: 'Auto-assign by application', desc: 'On create — requests are auto-assigned to the right team by application (e.g. AWS, Hardware, Network each route to their owning team; everything else to the service desk). Routing is editable by the owner in the Owner portal.', log: 'Editable in Owner portal → Ticket routing' },
   { ic: '📸', bg: 'var(--bg)', on: false, name: 'AWS screenshot reminder', desc: 'On create — if an AWS ticket is missing a screenshot, post a comment asking the requester to attach one before auto-rejecting.', log: 'Currently disabled' },
   { ic: '💬', bg: 'var(--blue-bg)', on: true, name: 'Slack notifications', desc: 'Posts a card to your Slack channel when a request is created (Jira-style). Runs server-side via a Slack incoming webhook.', log: 'Set SLACK_WEBHOOK_URL on the server to activate' },
+  { ic: '⚡', bg: 'var(--green-bg)', on: true, name: 'First response within 2 min', desc: 'On create — the handling team posts a personal acknowledgement to the requester within the 2-minute first-response target, so every request gets a fast reply while an agent takes it forward.', log: 'Posts on every new request' },
 ]
 
 // Proactive automations we can switch on (not yet built). Shown to admins as

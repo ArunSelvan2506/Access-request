@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment } from '../data/ticketOps'
+import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment, applyFirstResponse, firstResponseDelayMs, FIRST_RESPONSE } from '../data/ticketOps'
 import { listTickets, createTicketApi, saveTicketApi } from '../api/client'
 
 // API-backed store (Node + Amazon DynamoDB). Same interface as the local store,
@@ -39,6 +39,15 @@ export function useApiTickets() {
     [refresh]
   )
 
+  // Pending first-response timers, cleared on unmount so they never leak.
+  const frTimers = useRef([])
+  useEffect(() => () => frTimers.current.forEach(clearTimeout), [])
+  const scheduleFirstResponse = useCallback((key) => {
+    if (!FIRST_RESPONSE.enabled) return
+    const id = setTimeout(() => mutate(key, applyFirstResponse), firstResponseDelayMs())
+    frTimers.current.push(id)
+  }, [mutate])
+
   const createTicket = useCallback(async (app, summary, data, user = {}, meta = {}) => {
     const num = Math.max(seqRef.current, 140) + 1
     seqRef.current = num
@@ -49,8 +58,9 @@ export function useApiTickets() {
     } catch (e) {
       refresh()
     }
+    scheduleFirstResponse(ticket.key)
     return ticket
-  }, [refresh])
+  }, [refresh, scheduleFirstResponse])
 
   const transitionTicket = useCallback((key, to, opts = {}) => mutate(key, (t) => applyTransition(t, to, opts)), [mutate])
   const decideApproval = useCallback((key, decision, by, note, channel) => mutate(key, (t) => applyApproval(t, decision, by, note, channel)), [mutate])
