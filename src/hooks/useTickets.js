@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { seedTickets } from '../data/seed'
 import { buildTicket, applyTransition, applyApproval, applyAssign, applyComment, applyFirstResponse, firstResponseDelayMs, FIRST_RESPONSE } from '../data/ticketOps'
 
-// Bumped to v10 so returning visitors re-seed (fewer SLA breaches; ~10).
-const STORE = 'acc_sd_tickets_v10'
+// Bumped to v11 so returning visitors re-seed (trimmed demo set to ~30).
+const STORE = 'acc_sd_tickets_v11'
 
 function loadTickets() {
   try {
