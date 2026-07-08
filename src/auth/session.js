@@ -9,10 +9,10 @@
 // token and the email domain on sign-in (see server/).
 
 // Full-access owners (audit log, presence, routing, managing admins) — they
-// can't be removed as admins. Configure the real owner(s) at build time via
-// VITE_OWNER_EMAILS (comma-separated) so no personal address is committed to
-// source; defaults to a generic mailbox for local/demo builds.
-export const OWNERS = (import.meta.env.VITE_OWNER_EMAILS || 'owner@fuseenergy.com')
+// can't be removed as admins. Defaults to the primary owner below; override at
+// build time with VITE_OWNER_EMAILS (comma-separated) to add or change owners
+// without touching the code.
+export const OWNERS = (import.meta.env.VITE_OWNER_EMAILS || 'arun@fuseenergy.com')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
