@@ -62,6 +62,17 @@ export const CATALOG = [
     ],
   },
   {
+    name: 'API Key', group: 'green', ic: ic('AK', '#fff7d6', '#7f5f01'), sla: 8,
+    callout: { t: 'crit', x: '🔴 API keys are sensitive credentials. Scope to least privilege and never for production without line-manager approval. Requests missing the target system or scope are auto-rejected.' },
+    reject: 'Missing target system or scope',
+    fields: [
+      { k: 'system', label: 'Target system / service', req: true, hint: 'Exact name — e.g. Stripe, internal Billing API, DynamoDB' },
+      { k: 'environment', label: 'Environment', req: true, type: 'select', opts: ['Development', 'Staging', 'Production'] },
+      { k: 'scope', label: 'Scope / permissions needed', req: true, type: 'textarea', hint: 'What the key must be able to do — keep it to least privilege (e.g. read-only, specific endpoints)' },
+      { k: 'just', label: 'Business justification', req: true, type: 'textarea', hint: 'Why your role needs this key' },
+    ],
+  },
+  {
     // Mirrored from the Jira "Application name" list (not in the Notion page).
     name: 'GeminiAI', group: 'green', ic: ic('GM', '#f3f0ff', '#5e4db2'), sla: 8,
     callout: { t: 'warn', x: '⚠️ Per-request access. Provide a clear business justification for Gemini AI.' },
@@ -255,7 +266,7 @@ export const findApp = (n) => CATALOG.find((a) => a.name === n)
 // (sensitive / paid / elevated access — ~the subset that needs sign-off).
 export const APP_APPROVAL = new Set([
   'AWS', 'Datadog', 'Claude', 'Cursor', 'Microsoft', 'Bitwarden', 'JetBrains',
-  'Social Media', 'Account Onboarding / Offboarding',
+  'Social Media', 'Account Onboarding / Offboarding', 'API Key',
 ])
 // Hardware items that DON'T need approval — low-cost accessories. Everything
 // else under Hardware / Device requires line-manager sign-off.
@@ -268,7 +279,7 @@ export const needsApproval = (name, fields) => {
 // Applications that grant standing access — eligible for time-bound (expiring) access.
 export const APP_TIMED = new Set([
   'AWS', 'Datadog', 'Metabase', 'GitHub', 'Bitwarden', 'Google Shared Drive',
-  'Google Groups', 'Claude', 'Cursor', 'JetBrains', 'Microsoft',
+  'Google Groups', 'Claude', 'Cursor', 'JetBrains', 'Microsoft', 'API Key',
 ])
 export const isTimed = (name) => APP_TIMED.has(name)
 
@@ -319,6 +330,7 @@ export const APP_EMOJI = {
   Datadog: '🐕',
   Metabase: '📊',
   GitHub: '🐙',
+  'API Key': '🗝️',
   GeminiAI: '✨',
   ChatGPT: '💬',
   Cursor: '⌨️',
