@@ -12,7 +12,7 @@
 // can't be removed as admins. Defaults to the primary owner below; override at
 // build time with VITE_OWNER_EMAILS (comma-separated) to add or change owners
 // without touching the code.
-export const OWNERS = (import.meta.env.VITE_OWNER_EMAILS || 'arun@fuseenergy.com')
+export const OWNERS = (import.meta.env.VITE_OWNER_EMAILS || 'arun@fuseenergy.com,davidnoonan@fuseenergy.com')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
