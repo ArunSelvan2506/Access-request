@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { OWNER_EMAIL, OWNERS, isOwnerEmail, isCompanyEmail, displayName } from '../auth/session'
+import { OWNERS, isOwnerEmail, isCompanyEmail, displayName } from '../auth/session'
 import { useToast } from './common/Toast'
 
 // Owner-only screen to manage administrators — mirrors Jira's project people
-// management. The primary owner is fixed and cannot be removed.
+// management. Primary owners are fixed and cannot be removed.
 export default function AdminSettings({ session }) {
   const { admins, addAdmin, removeAdmin } = session
   const [value, setValue] = useState('')
@@ -59,8 +59,8 @@ export default function AdminSettings({ session }) {
     <section className="view">
       <h1 className="title">Admin settings</h1>
       <p className="sub">
-        Manage who can see and resolve all requests. Administrators can change ticket status; the
-        primary owner can add or remove administrators. Everyone else can only submit and track
+        Manage who can see and resolve all requests. Administrators can change ticket status;
+        primary owners can add or remove administrators. Everyone else can only submit and track
         their own requests.
       </p>
 
@@ -73,7 +73,7 @@ export default function AdminSettings({ session }) {
         People with full access
       </div>
       {OWNERS.map((o) => (
-        <Row key={o} email={o} role={o === OWNER_EMAIL ? 'Primary owner' : 'Owner'} removable={false} />
+        <Row key={o} email={o} role="Primary owner" removable={false} />
       ))}
       {admins.filter((a) => !isOwnerEmail(a)).map((a) => (
         <Row key={a} email={a} role="Administrator" removable />

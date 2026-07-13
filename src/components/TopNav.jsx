@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { displayName, OWNER_EMAIL } from '../auth/session'
+import { displayName } from '../auth/session'
 
 const ROLE_LABEL = { owner: 'Owner', admin: 'Administrator', user: 'Requester' }
 const ROLE_TAG = { owner: 'purple', admin: 'green', user: 'grey' }
@@ -13,7 +13,8 @@ function initials(email) {
 export default function TopNav({ onCreate, email, role, onSignOut, onHelp, search, onToggleSidebar, theme, onToggleTheme }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
-  const roleLabel = role === 'owner' && email === OWNER_EMAIL ? 'Primary owner' : ROLE_LABEL[role]
+  // All owners are equal, full-access "primary owners".
+  const roleLabel = role === 'owner' ? 'Primary owner' : ROLE_LABEL[role]
 
   // Close the account menu on outside click / Escape.
   useEffect(() => {

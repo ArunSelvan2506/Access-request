@@ -8,15 +8,14 @@
 // demo but not real security. In api mode the server verifies the Google ID
 // token and the email domain on sign-in (see server/).
 
-// Full-access owners (audit log, presence, routing, managing admins) — they
-// can't be removed as admins. Defaults to the primary owner below; override at
-// build time with VITE_OWNER_EMAILS (comma-separated) to add or change owners
-// without touching the code.
+// Full-access "primary owners" (audit log, presence, routing, managing admins)
+// — all equal, and none can be removed as admins. Defaults to the owners below;
+// override at build time with VITE_OWNER_EMAILS (comma-separated) to add or
+// change owners without touching the code.
 export const OWNERS = (import.meta.env.VITE_OWNER_EMAILS || 'arun@fuseenergy.com,davidnoonan@fuseenergy.com')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
-export const OWNER_EMAIL = OWNERS[0] // primary owner — shown in the UI
 export const isOwnerEmail = (email) => OWNERS.includes((email || '').toLowerCase())
 export const ALLOWED_DOMAIN = 'fuseenergy.com'
 

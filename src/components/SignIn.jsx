@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { ALLOWED_DOMAIN, OWNER_EMAIL, SITE_PASSWORD, isCompanyEmail } from '../auth/session'
+import { ALLOWED_DOMAIN, SITE_PASSWORD, isCompanyEmail } from '../auth/session'
 import { GOOGLE_CLIENT_ID } from '../config'
 import { verifyGoogle } from '../api/auth'
 
@@ -118,7 +118,7 @@ export default function SignIn({ session }) {
 
         <p style={{ color: 'var(--faint)', marginTop: 16, fontSize: 12, lineHeight: 1.5 }}>
           Staff can submit requests and track their own tickets. Administrators manage and resolve
-          all requests. The primary owner ({OWNER_EMAIL}) manages who is an administrator.
+          all requests. The primary owners manage who is an administrator.
         </p>
       </div>
     </div>
