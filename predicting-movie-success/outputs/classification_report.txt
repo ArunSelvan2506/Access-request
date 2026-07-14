@@ -1,0 +1,12 @@
+Best model: Random Forest
+
+              precision    recall  f1-score   support
+
+        Flop     0.0000    0.0000    0.0000         9
+     Average     0.6237    0.7607    0.6854       305
+         Hit     0.8806    0.8061    0.8417       686
+
+    accuracy                         0.7850      1000
+   macro avg     0.5014    0.5223    0.5090      1000
+weighted avg     0.7943    0.7850    0.7864      1000
+
